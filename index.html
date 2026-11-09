@@ -121,7 +121,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #phone h2{font:700 13px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px;color:#2bd67b}
 #phone .note{margin:10px 0 0;color:var(--dim);font-size:12px;line-height:1.4}
 .btn.call{background:#1f9d4c;border-color:#1f9d4c;color:#fff}
-#cut{position:fixed;inset:0;z-index:9;background:#000;display:flex;align-items:flex-end;justify-content:center;pointer-events:auto;box-shadow:inset 0 0 180px 60px rgba(0,0,0,.85)}#cut[hidden]{display:none}#cutCap{margin:0 16px calc(90px + env(safe-area-inset-bottom,0px));max-width:640px;text-align:center;color:#f2f2f2;font:600 clamp(16px,2.6vw,24px)/1.4 var(--display);letter-spacing:.02em;text-shadow:0 2px 12px #000;transition:opacity .25s}@keyframes cutIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}#cutSkip{position:absolute;right:16px;bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+#cut{position:fixed;inset:0;z-index:9;background:#000;display:flex;align-items:flex-end;justify-content:center;pointer-events:auto;box-shadow:inset 0 0 180px 60px rgba(0,0,0,.85)}#cut[hidden]{display:none}#cut::before,#cut::after{content:'';position:absolute;left:0;right:0;height:9vh;background:#000}#cut::before{top:0}#cut::after{bottom:0}#cutCap{position:relative;z-index:1}#wake{position:fixed;inset:0;z-index:9;pointer-events:none}#wake[hidden]{display:none}#wake::before,#wake::after{content:'';position:absolute;left:0;right:0;height:51%;background:#000}#wake::before{top:0}#wake::after{bottom:0}#wake.go::before{animation:lidT 2.4s ease-in-out forwards}#wake.go::after{animation:lidB 2.4s ease-in-out forwards}@keyframes lidT{0%{transform:translateY(0)}30%{transform:translateY(-70%)}42%{transform:translateY(-12%)}62%{transform:translateY(-62%)}100%{transform:translateY(-101%)}}@keyframes lidB{0%{transform:translateY(0)}30%{transform:translateY(70%)}42%{transform:translateY(12%)}62%{transform:translateY(62%)}100%{transform:translateY(101%)}}#cutCap{margin:0 16px calc(90px + env(safe-area-inset-bottom,0px));max-width:640px;text-align:center;color:#f2f2f2;font:600 clamp(16px,2.6vw,24px)/1.4 var(--display);letter-spacing:.02em;text-shadow:0 2px 12px #000;transition:opacity .25s}@keyframes cutIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}#cutSkip{position:absolute;right:16px;bottom:calc(24px + env(safe-area-inset-bottom,0px))}
 #flash,#fade{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:8}#flash{background:#fff}#fade{background:#000;transition:opacity .7s}
 
 @media (max-width:720px){#dash{bottom:auto;top:calc(150px + env(safe-area-inset-top,0px))}#hud{bottom:calc(178px + env(safe-area-inset-bottom,0px))}}
@@ -253,7 +253,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div id="dash" class="panel" hidden><button class="x" data-close="dash" aria-label="Close">×</button><canvas id="dashCv" width="1024" height="384" aria-label="Instrument cluster"></canvas></div>
   <aside id="emerg" class="panel" hidden aria-label="Emergencies"><button class="x" data-close="emerg" aria-label="Close">×</button><h2>Emergencies</h2><p>Trigger a problem, then fix it the way you would in real life. Or pick “Surprise me” and an emergency will happen at a random time while you drive.</p><div id="emergList"></div><div class="ev-row"><b style="font:600 12px var(--display)">Surprise me:</b><button class="btn" data-evr="0">Off</button><button class="btn" data-evr="1">Rare</button><button class="btn" data-evr="2">Normal</button><button class="btn" data-evr="3">Often</button></div><button class="btn" id="randomFault">One random breakdown now</button></aside>
   <aside id="phone" class="panel" hidden aria-label="Phone"><button class="x" data-close="phone" aria-label="Close">×</button><div class="ph-top"><span id="phTime">12:00</span><span>5G ▮▮▮</span></div><div id="blitzApp" class="fault blitz"><div><b>📸 Blitzer warner</b><small id="blitzTxt">Warns you about speed cameras ahead.</small></div><button class="btn" id="blitzBtn" aria-pressed="false">Turn on</button></div><div id="blitzMore" hidden><button class="btn" id="blitzRep">📍 Report a camera here</button><p class="note" style="margin:6px 0 0">Real life: in Germany, using a speed-camera warner while driving is banned (§23 StVO). In this game it is allowed.</p></div><h2>💼 Jobs <span id="jobMoney" style="float:right;color:#7ee0a0"></span></h2><div id="jobList"></div><h2>Help on the road</h2><div id="phList"></div><p class="note">Services drive to wherever your car is, even on the freeway.</p></aside>
-  <div id="hurt" style="position:fixed;inset:0;pointer-events:none;opacity:0;z-index:7;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(150,0,0,.6) 100%)"></div><div id="flash"></div><div id="fade"></div><div id="cut" hidden><p id="cutCap"></p><button class="btn" id="cutSkip">Skip ⏩</button></div>
+  <div id="hurt" style="position:fixed;inset:0;pointer-events:none;opacity:0;z-index:7;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(150,0,0,.6) 100%)"></div><div id="flash"></div><div id="fade"></div><div id="wake" hidden></div><div id="cut" hidden><p id="cutCap"></p><button class="btn" id="cutSkip">Skip ⏩</button></div>
   <div id="scr" class="panel" hidden><button class="x" data-close="scr" aria-label="Close">×</button><canvas id="scrCv" width="1200" height="500" aria-label="Car touchscreen"></canvas></div>
   <button class="btn" id="photoExit" hidden>Exit photo mode</button>
 <div id="keys" class="panel" aria-label="Keyboard controls"><button class="x" data-close="keys" aria-label="Close">×</button>
@@ -2854,48 +2854,73 @@ function blowStep(dt,kS){if(!BLOW.on)return;const kmh=Math.abs(st.v)*3.6;if(st.f
  const player=kS!==0||dragSteer!=null;if(player&&Math.abs(steer)>.1&&kmh>70&&Math.abs(spinRate)<.05&&BLOW.t>.25){const sg=steer>0?1:-1;spinRate=sg*(2.5+Math.random()*1.1);st.v*=.93;cruise=0;BLOW.on=false;spinOutAt=performance.now();sfx('grind');
   toast('You swerved on the blown tyre and lost control!',3000);}}
 /* --- cutscene --- */
-const CUT={on:false,t:0,dur:11,props:null,pos:null,yaw0:0,ry:0,cap:-1,lights:[],done:false};
+const CUT={on:false,t:0,dur:22,props:null,pos:null,yaw0:0,ry:0,cap:-1,lights:[],done:false,shot:-1};
 function roadPose(x,z,yaw){/* direction and lane of the road you crashed on */
  if(x<-56&&Math.abs(z-ZX)<13){const w=z<ZX,L=w?[ZX-3,ZX-7]:[ZX+3,ZX+7];return{yaw:w?Math.PI/2:-Math.PI/2,x,z:L.reduce((a,b)=>Math.abs(b-z)<Math.abs(a-z)?b:a)};}
  if(x>-53&&x<-27){const s=x>-40,L=s?[-32.95,-37.05]:[-42.95,-47.05];return{yaw:s?0:Math.PI,z,x:L.reduce((a,b)=>Math.abs(b-x)<Math.abs(a-x)?b:a)};}
  if(Math.abs(x)<6)return{yaw:x>0?0:Math.PI,z,x:x>0?2:-2};
  return{yaw:Math.round(yaw/(Math.PI/2))*(Math.PI/2),x,z};}
 function cutCap(text){const c=$('#cutCap');if(c){c.textContent=text;c.style.animation='none';void c.offsetWidth;c.style.animation='cutIn .6s ease-out';}}
-function knockOut(){if(CUT.on||walking||!P)return;initAudio();CUT.on=true;CUT.t=0;CUT.cap=-1;CUT.done=false;st.v=0;cruise=0;spinRate=0;st.engine=false;BLOW.on=false;
+function cutWalker(g,x,z,shirt,ry){const w=new THREE.Group();w.position.set(x,0,z);g.add(w);const p=person(w,0,0,0,shirt);w.rotation.y=ry||0;return w;}
+function knockOut(){if(CUT.on||walking||!P)return;initAudio();CUT.on=true;CUT.t=0;CUT.cap=-1;CUT.done=false;CUT.shot=-1;CUT.hb=0;CUT.sir=0;st.v=0;cruise=0;spinRate=0;st.engine=false;BLOW.on=false;
+ if(typeof EA!=='undefined'&&EA.stage)eaCancel(true);
  CUT.pos={x:posX,z:posZ};CUT.yaw0=yawCar;const rp=roadPose(posX,posZ,yawCar);CUT.rp=rp;CUT.ry=Math.random()*Math.PI*2;
- /* emergency scene behind the car */
- const g=new THREE.Group();scene.add(g);const fx=-Math.sin(rp.yaw),fz=-Math.cos(rp.yaw),rx=-fz,rz=fx;
- const pol=buildService('police');pol.position.set(posX-fx*13,0,posZ-fz*13);pol.rotation.y=rp.yaw;g.add(pol);
- const amb=trafficCar(3,'#f4f4f2');amb.position.set(posX-fx*7+rx*2.6,0,posZ-fz*7+rz*2.6);amb.rotation.y=rp.yaw+Math.PI;g.add(amb);
+ const g=new THREE.Group();scene.add(g);const fx=-Math.sin(rp.yaw),fz=-Math.cos(rp.yaw),rx=-fz,rz=fx;CUT.f={fx,fz,rx,rz};
+ const P2=(along,side)=>({x:posX-fx*along+rx*side,z:posZ-fz*along+rz*side});
+ /* police car already there, ambulance drives in */
+ const pp=P2(14,0),pol=buildService('police');pol.position.set(pp.x,0,pp.z);pol.rotation.y=rp.yaw;g.add(pol);
+ const amb=trafficCar(3,'#f4f4f2');g.add(amb);amb.rotation.y=rp.yaw+Math.PI;
  const stripe=new THREE.Mesh(new THREE.BoxGeometry(1.86,.18,4.6),std(0xd0141a,.5));stripe.position.y=1.15;amb.add(stripe);
- const bar=new THREE.Mesh(new THREE.BoxGeometry(1.1,.12,.3),std(0x2a6bd1,.4));bar.position.set(0,2.05,1.6);amb.add(bar);
- for(let k=0;k<3;k++){const tri=new THREE.Mesh(new THREE.ConeGeometry(.35,.6,3),new THREE.MeshBasicMaterial({color:0xff2a1a,toneMapped:false}));tri.position.set(posX-fx*(24+k*12)+rx*(k===0?0:1.2),.3,posZ-fz*(24+k*12)+rz*(k===0?0:1.2));g.add(tri);}
- CUT.lights=[new THREE.PointLight(0x2a5bff,0,26),new THREE.PointLight(0xff2a2a,0,22)];CUT.lights[0].position.set(pol.position.x,2.6,pol.position.z);CUT.lights[1].position.set(amb.position.x,2.6,amb.position.z);CUT.lights.forEach(l=>g.add(l));
+ const bar=new THREE.Mesh(new THREE.BoxGeometry(1.1,.12,.3),new THREE.MeshBasicMaterial({color:0x2a6bff,toneMapped:false}));bar.position.set(0,2.05,1.6);amb.add(bar);
+ const crossC=mkcv(64,64),cx=crossC.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,64,64);cx.fillStyle='#d0141a';cx.fillRect(24,8,16,48);cx.fillRect(8,24,48,16);
+ for(const sd of[-1,1]){const cr=new THREE.Mesh(new THREE.PlaneGeometry(.6,.6),new THREE.MeshBasicMaterial({map:tex(crossC)}));cr.position.set(sd*.93,1.55,0);cr.rotation.y=sd*Math.PI/2;amb.add(cr);}
+ CUT.amb={g:amb,from:P2(90,2.6),to:P2(7,2.6)};amb.position.set(CUT.amb.from.x,0,CUT.amb.from.z);
+ /* people */
+ const medA=cutWalker(g,0,0,0xd0141a),medB=cutWalker(g,0,0,0xf2f2f2),cop=cutWalker(g,0,0,0x23324a);
+ const ap=P2(6,1.2),dp=P2(.3,-1.6),cp=P2(12,-1.4);
+ CUT.people=[{w:medA,a:ap,b:P2(.6,-1.7),t0:11.2,t1:13.6},{w:medB,a:P2(6.5,2.0),b:P2(-.6,-1.9),t0:11.8,t1:14.2},{w:cop,a:cp,b:P2(34,.6),t0:14.6,t1:17.6}];
+ CUT.people.forEach(p=>{p.w.position.set(p.a.x,0,p.a.z);p.w.visible=false;});
+ /* warning triangles appear as the officer walks back */
+ CUT.tris=[];for(let k=0;k<3;k++){const tri=new THREE.Mesh(new THREE.ConeGeometry(.35,.6,3),new THREE.MeshBasicMaterial({color:0xff2a1a,toneMapped:false}));const q=P2(20+k*7,(k-1)*.9);tri.position.set(q.x,.3,q.z);tri.visible=false;g.add(tri);CUT.tris.push({m:tri,t:15.4+k*.8});}
+ CUT.lights=[new THREE.PointLight(0x2a5bff,0,28),new THREE.PointLight(0xff2a2a,0,22)];CUT.lights[0].position.set(pol.position.x,2.6,pol.position.z);CUT.lights.forEach(l=>g.add(l));
  g.traverse(o=>{o.userData.noHit=true;});CUT.props=g;
- /* overlay + sound */
+ /* overlay, muffled sound */
  const o=$('#cut');o.hidden=false;o.style.background='rgba(0,0,0,1)';$('#flash').style.opacity=1;setTimeout(()=>$('#flash').style.opacity=0,120);
- if(AU.ctx){tone2(3100,2.4,'sine',.05);}cutCap('…');scene.add(camera);}
-function cutStep(dt){if(!CUT.on)return;CUT.t+=dt;const t=CUT.t,o=$('#cut');st.v=0;posX=CUT.pos.x;posZ=CUT.pos.z;
- /* heartbeat + siren */
- CUT.hb=(CUT.hb||0)-dt;if(CUT.hb<=0&&t<9.5){CUT.hb=t<3?1.05:.85;if(AU.ctx){tone2(55,.12,'sine',.22);tone2(48,.12,'sine',.18,null,now()+.18);}}
- if(t>2.4&&t<9.6){CUT.sir=(CUT.sir||0)-dt;if(CUT.sir<=0){CUT.sir=.55;CUT.sirHi=!CUT.sirHi;if(AU.ctx)tone2(CUT.sirHi?960:720,.5,'triangle',.025);}}
- const caps=[[0,'…'],[1.4,'Everything goes quiet.'],[2.6,'You hear sirens…'],[4.4,'Paramedic: “Can you hear me? Stay with us!”'],[6.3,'Police close the lane and set up warning triangles.'],[8.0,'The crew fits your spare tyre and pulls the car straight.']];
+ if(AU.ctx){tone2(3100,3,'sine',.05);if(AU.master){CUT.vol=AU.master.gain.value;AU.master.gain.value=CUT.vol*.55;}}cutCap('…');scene.add(camera);}
+function cutShot(n,text){if(CUT.shot!==n){CUT.shot=n;if(text)cutCap(text);}}
+function cutStep(dt){if(!CUT.on)return;CUT.t+=dt;const t=CUT.t,o=$('#cut'),rp=CUT.rp,F=CUT.f;st.v=0;
+ /* the car: crashed pose until the crew straightens it (18–20.5 s) */
+ const k=clamp((t-18)/2.5,0,1),e=k*k*(3-2*k);posX=CUT.pos.x+(rp.x-CUT.pos.x)*e;posZ=CUT.pos.z+(rp.z-CUT.pos.z)*e;yawCar=lerpAngle(CUT.yaw0,rp.yaw,e);carRig.position.set(posX,0,posZ);carRig.rotation.y=yawCar;
+ if(k>=1&&!CUT.done){CUT.done=true;if(carHitsWalls()){const ax=Math.abs(Math.cos(rp.yaw))>.5;outer:for(const d of[.5,1,1.5,2,3])for(const sg of[1,-1]){posX=rp.x+(ax?sg*d:0);posZ=rp.z+(ax?0:sg*d);if(!carHitsWalls())break outer;}rp.x=posX;rp.z=posZ;}st.faults.tyre=-1;if(P&&P.bag)P.bag.visible=false;renderEmerg();}
+ /* sound: heartbeat slows down, sirens come closer */
+ CUT.hb-=dt;if(CUT.hb<=0&&t<20.5){CUT.hb=t<6?1.15:t<12?.95:.8;if(AU.ctx){tone2(55,.12,'sine',.22);tone2(48,.12,'sine',.18,null,now()+.18);}}
+ if(t>3.2&&t<19){CUT.sir-=dt;if(CUT.sir<=0){CUT.sir=.55;CUT.sirHi=!CUT.sirHi;const near=clamp((t-3.2)/6,0,1);if(AU.ctx)tone2((CUT.sirHi?960:720)*(1+.04*(1-near)),.5,'triangle',.012+.02*near);}}
+ /* flashing lights; ambulance rolls in 6.5–10 s */
+ const blink=Math.floor(t*6)%2===0;CUT.lights[0].intensity=blink?3:0;CUT.lights[1].intensity=blink||t<9?0:2.4;
+ {const A=CUT.amb,q=clamp((t-6.5)/3.5,0,1),qe=1-Math.pow(1-q,3);A.g.position.set(A.from.x+(A.to.x-A.from.x)*qe,0,A.from.z+(A.to.z-A.from.z)*qe);CUT.lights[1].position.set(A.g.position.x,2.6,A.g.position.z);}
+ /* people walk */
+ for(const p of CUT.people){const q=clamp((t-p.t0)/(p.t1-p.t0),0,1);p.w.visible=t>=p.t0-.2;p.w.position.set(p.a.x+(p.b.x-p.a.x)*q,q>0&&q<1?Math.abs(Math.sin(t*9))*.05:0,p.a.z+(p.b.z-p.a.z)*q);const dx=p.b.x-p.a.x,dz=p.b.z-p.a.z;p.w.rotation.y=q<1?Math.atan2(dx,dz):Math.atan2(posX-p.w.position.x,posZ-p.w.position.z);}
+ for(const tr of CUT.tris)tr.m.visible=t>=tr.t;
+ /* captions */
+ const caps=[[0,'…'],[1.6,'Everything goes quiet.'],[3.2,'Your vision is blurry. Blue lights flicker in the mirror…'],[6.6,'An ambulance pulls up behind you.'],[9.4,'Paramedic: “Can you hear me? Stay with us!”'],[11.4,'The paramedics check your pulse and keep you still.'],[14.6,'Police close the lane and set up warning triangles.'],[18,'The crew fits your spare tyre and pulls the car back into the lane.'],[20.6,'…']];
  let ci=-1;caps.forEach(([ts],i)=>{if(t>=ts)ci=i;});if(ci!==CUT.cap){CUT.cap=ci;cutCap(caps[ci][1]);}
- /* fade: black, then a blurry view, then black again */
- let a=1;if(t>2.6)a=Math.max(.18,1-(t-2.6)*.9);if(t>9.2)a=Math.min(1,.18+(t-9.2)*.7);o.style.background=`rgba(0,0,0,${a.toFixed(2)})`;
- canvas.style.filter=t>2.6&&t<9.8?`blur(${Math.max(0,2.6-(t-2.6)*.25).toFixed(1)}px) saturate(.7)`:'';
- /* flashing lights */
- const blink=Math.floor(t*6)%2===0;if(CUT.lights.length){CUT.lights[0].intensity=blink?3:0;CUT.lights[1].intensity=blink?0:2.4;}
- /* cinematic orbit around the crashed car */
- const ang=CUT.ry+t*.22,R=9.5-Math.min(3,t*.2);camera.position.set(posX+Math.sin(ang)*R,2.4+Math.sin(t*.3)*.6,posZ+Math.cos(ang)*R);camera.lookAt(posX,.8,posZ);
- /* recovery while the screen is dim */
- if(t>=8&&!CUT.done){CUT.done=true;const rp=CUT.rp;yawCar=rp.yaw;posX=CUT.pos.x=rp.x;posZ=CUT.pos.z=rp.z;if(carHitsWalls()){for(const d of[.5,1,1.5,2,3]){let ok=false;for(const sg of[1,-1]){const nx=rp.x+(Math.abs(Math.cos(rp.yaw))>.5?sg*d:0),nz=rp.z+(Math.abs(Math.cos(rp.yaw))>.5?0:sg*d);posX=nx;posZ=nz;if(!carHitsWalls()){ok=true;break;}}if(ok)break;}CUT.pos.x=posX;CUT.pos.z=posZ;}
-  carRig.position.set(posX,0,posZ);carRig.rotation.y=yawCar;st.faults.tyre=-1;if(P&&P.bag)P.bag.visible=false;renderEmerg();}
+ /* screen: black → blurry → clearer → black */
+ let a=1;if(t>3.2)a=t<6.5?.55+.3*Math.abs(Math.sin(t*1.7)):Math.max(.12,.55-(t-6.5)*.12);if(t>20.4)a=Math.min(1,.12+(t-20.4)*.7);o.style.background=`rgba(0,0,0,${a.toFixed(2)})`;
+ const blur=t<3.2?0:t<6.5?4:t<11?Math.max(.6,4-(t-6.5)*.8):.6;canvas.style.filter=t>3.2&&t<21.5?`blur(${blur.toFixed(1)}px) saturate(${t<11?.6:.85})`:'';
+ /* camera shots */
+ const cam=(x,y,z,lx,ly,lz)=>{camera.position.set(x,y,z);camera.lookAt(lx,ly,lz);};
+ if(t<6.5){/* your own eyes: slumped in the seat, looking at the dashboard */const hp=new THREE.Vector3();head.getWorldPosition(hp);camera.position.copy(hp);camera.position.y-=.12;const sway=Math.sin(t*.9)*.12,cf=-Math.sin(yawCar),cz=-Math.cos(yawCar);camera.lookAt(hp.x+cf*2-cz*(-.25+sway),hp.y-.55+Math.sin(t*.6)*.08,hp.z+cz*2+cf*(-.25+sway));}
+ else if(t<11){/* wide orbit, ambulance arriving */const ang=CUT.ry+t*.2,R=11-Math.min(3,(t-6.5)*.6);cam(posX+Math.sin(ang)*R,2.6+Math.sin(t*.3)*.5,posZ+Math.cos(ang)*R,posX,.8,posZ);}
+ else if(t<14.5){/* low shot at the driver door */const s=t-11;cam(posX-F.rx*4.2+F.fx*(2.5-s*.6),1.05,posZ-F.rz*4.2+F.fz*(2.5-s*.6),posX-F.rx*.8,1.0,posZ-F.rz*.8);}
+ else if(t<18){/* behind the police car, looking back as the officer walks */const b=CUT.people[2].w.position,s=t-14.5;cam(posX-F.fx*(10+s*1.2)+F.rx*2.8,1.7,posZ-F.fz*(10+s*1.2)+F.rz*2.8,b.x,.9,b.z);}
+ else{/* high crane shot as the car is pulled straight */const s=t-18,ang=CUT.ry+1.3+s*.25;cam(posX+Math.sin(ang)*9,6.5-s*.5,posZ+Math.cos(ang)*9,posX,.6,posZ);}
  if(t>=CUT.dur)endCut();}
-function endCut(){if(!CUT.on)return;if(!CUT.done){CUT.t=8;cutStep(0);}CUT.on=false;canvas.style.filter='';if(CUT.props){scene.remove(CUT.props);disposeGroup(CUT.props);CUT.props=null;}CUT.lights=[];
- hp=60;st.v=0;spinRate=0;st.engine=false;st.hb=true;cruise=0;if(P)P.blk=0;setView(st.view||'driver');
- const o=$('#cut');o.style.background='rgba(0,0,0,1)';setTimeout(()=>{o.style.transition='background 1.2s';o.style.background='rgba(0,0,0,0)';setTimeout(()=>{o.hidden=true;o.style.transition='';},1300);},150);
- STATS.ko=(STATS.ko||0)+1;toast('You wake up in the driver\'s seat. The paramedics checked you over and the crew fitted the spare. Press START and drive on carefully.',6000);}
+function endCut(){if(!CUT.on)return;if(!CUT.done){CUT.t=20.6;cutStep(0);}CUT.on=false;canvas.style.filter='';if(CUT.props){scene.remove(CUT.props);disposeGroup(CUT.props);CUT.props=null;}CUT.lights=[];if(AU.ctx&&AU.master&&CUT.vol!=null){AU.master.gain.value=CUT.vol;CUT.vol=null;}
+ posX=CUT.rp.x;posZ=CUT.rp.z;yawCar=CUT.rp.yaw;hp=60;st.v=0;spinRate=0;st.engine=false;st.hb=true;cruise=0;if(P)P.blk=0;setView(st.view||'driver');
+ const o=$('#cut');o.hidden=true;o.style.background='rgba(0,0,0,1)';
+ /* eyes open: two eyelids slide apart, blinking once */
+ const w=$('#wake');if(w){w.hidden=false;w.classList.remove('go');void w.offsetWidth;w.classList.add('go');setTimeout(()=>{w.hidden=true;w.classList.remove('go');},2600);}
+ STATS.ko=(STATS.ko||0)+1;setTimeout(()=>toast('You wake up in the driver\'s seat. The paramedics checked you over and the crew fitted the spare. Press START and drive on carefully.',6000),900);}
 function blackout(){knockOut();}
 
 function onImpact(sev){if(walking||!P)return;const belt=st.belt;hp=Math.max(0,hp-(belt?sev*10:sev*58));hurtFlash=Math.min(1,hurtFlash+(belt?sev*.25:sev*.9));
