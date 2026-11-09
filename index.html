@@ -2810,7 +2810,7 @@ function beltFrame(dt){if(!P)return;
   if(P.beltLock)P.beltLock=Math.max(0,P.beltLock-dt*1.6);}
  if(P.bag&&P.bag.visible){P.bagT+=dt;const t2=P.bagT,s=t2<.035?t2/.035:t2<.5?1:Math.max(.42,1-(t2-.5)*.9);P.bag.scale.set(s,s*.85,s*.6);P.bag.position.y=.93-(1-s)*.12;}
  /* new impacts are seen as a jump in crashT */
- if(crashT>lastCrashT+.18)onImpact(crashT);lastCrashT=crashT;
+ if(crashT>lastCrashT+.18)onImpact(crashT);lastCrashT=crashT;vPk=Math.max(Math.abs(st.v),vPk*Math.exp(-dt*3));if(koDelay>0){koDelay-=dt;if(koDelay<=0)knockOut();}
  /* hard braking locks the belt */
  beltLockCd=Math.max(0,beltLockCd-dt);const dec=(prevVb-st.v)/Math.max(dt,.001);prevVb=st.v;if(!walking&&st.v>2&&dec>7&&beltLockCd<=0){beltLockCd=2.5;if(st.belt){sfx('beltlock');P.beltLock=1;}else{headKick=Math.max(headKick,.25);headKickS=.6;}}
  headKick=Math.max(0,headKick-dt*1.6);
@@ -2842,7 +2842,7 @@ function eaStep(dt,kS){const input=!walking&&(kS!==0||dragSteer!=null);
  else if(EA.stage===3){st.v=0;EA.t+=dt;EA.honkT-=dt;if(EA.honkT<=0&&EA.t<30){EA.honkT=4;horn(true);setTimeout(()=>horn(false),250);}}}
 function toggleEA(){st.ea=st.ea===false;if(!st.ea)eaCancel(true);sfx('click');const b=$('#eaBtn');if(b)b.setAttribute('aria-pressed',st.ea);toast('Emergency Assist '+(st.ea?'on':'off'));}
 /* ===== high-speed blowouts, spin-outs and the knocked-out cutscene ===== */
-const BLOW={on:false,t:0,side:1,front:true};let spinOutAt=-1e9;
+const BLOW={on:false,t:0,side:1,front:true};let spinOutAt=-1e9,vPk=0,koDelay=0;
 function tooFast(){const k=Math.abs(st.v)*3.6;return limitFree?k>170:k>limit+20;}
 function startBlowout(){const F=st.faults;if(F.tyre<0)return;const kmh=Math.round(Math.abs(st.v)*3.6);if(kmh<80)return;
  BLOW.on=true;BLOW.t=0;BLOW.side=F.tyre%2===0?1:-1;BLOW.front=F.tyre<2;crashT=Math.max(crashT,.12);headKick=.35;headKickS=.3;
@@ -2926,7 +2926,7 @@ function blackout(){knockOut();}
 function onImpact(sev){if(walking||!P)return;const belt=st.belt;hp=Math.max(0,hp-(belt?sev*10:sev*58));hurtFlash=Math.min(1,hurtFlash+(belt?sev*.25:sev*.9));
  if(belt){sfx('beltlock');P.beltLock=1;headKick=sev*.3;headKickS=.35;if(sev>.35)toast('Your seatbelt locked and held you in place',2200);}
  else{headKick=1;headKickS=Math.min(1,.4+sev);if(sev>.3)toast(sev>.6?'Ouch! You flew into the steering wheel. Wear your seatbelt (- key)!':'You were thrown forward. Put your seatbelt on (- key)',3000);}
- if(sev>.55&&!car.retro)deployAirbag();if(sev>.62&&Math.random()<.75)crackWindscreen();if(hp<=0||(performance.now()-spinOutAt<8000&&sev>.4)||(!belt&&sev>.8))knockOut();}
+ if(sev>.55&&!car.retro)deployAirbag();if(sev>.62&&Math.random()<.75)crackWindscreen();if(vPk*3.6>150){toast(`Crash at ${Math.round(vPk*3.6)} km/h!`,2000);koDelay=.45;}else if(hp<=0||(performance.now()-spinOutAt<8000&&sev>.4)||(!belt&&sev>.8))knockOut();}
 function deployAirbag(){if(!P||!P.G)return;if(!P.bag){const m=new THREE.Mesh(new THREE.SphereGeometry(.24,22,16),std(0xf1efe8,.88));m.position.set(-.37,.93,-.1);P.G.add(m);P.bag=m;clickable(m,{label:'Deflated airbag',click:()=>toast('The airbag has deployed. The mechanic in a Werkstatt can repack it.')});}
  else if(P.bag.visible)return;P.bag.visible=true;P.bagT=0;sfx('airbag');setTimeout(()=>{if(hp>0)ach('airbag');},3000);setTimeout(()=>toast('Airbag deployed!',1800),300);}
 function fsActive(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
@@ -3178,7 +3178,7 @@ function frame(t){
  if(!ok&&Math.abs(st.v)>3){const ax=Math.abs(mvz)>Math.abs(mvx);outer:for(const d of[.04,.09,.16,.26])for(const sg of[1,-1]){posX=ax?px0+sg*d:nx;posZ=ax?nz:pz0+sg*d;if(!carHitsWalls()){ok=ax?'z':'x';break outer;}}}
  if(!ok){posX=px0;posZ=pz0;if(hw2==='barrier'&&carHitsWalls()==='barrier')posX+=(posX>-40&&posX<-30?1:posX<-45?1:-1)*.06;}
  const along=ok==='x'?Math.abs(mvx)/ml:ok==='z'?Math.abs(mvz)/ml:0,im=Math.abs(st.v);
- if(im>8&&performance.now()-spinOutAt<8000&&!CUT.on){crashT=1;sfx('crash');setTimeout(()=>knockOut(),350);}
+ if(im>8&&performance.now()-spinOutAt<8000&&!CUT.on){crashT=1;sfx('crash');koDelay=.35;}
  if(along<.6){if(im>4){crashT=Math.min(1,im/14);sfx('crash');toast(hw2==='barrier'?'You hit the barrier!':'You hit a wall!');}else if(im>1.5)sfx('grind');else if(im>1.2)sfx('thunk');st.v*=-.15;cruise=0;}
  else{st.v*=Math.exp(-dt*(.3+(1-along)*3));cruise=0;crashT=Math.max(crashT,.1);const fx=-Math.sin(yawCar)*Math.sign(st.v||1),fz=-Math.cos(yawCar)*Math.sign(st.v||1),ty=ok==='x'?(fx>0?-Math.PI/2:Math.PI/2):(fz<0?0:Math.PI);yawCar=lerpAngle(yawCar,st.v<0?ty+Math.PI:ty,Math.min(1,dt*1.8));P.scrT=(P.scrT||0)+dt;if(P.scrT>.07&&im>1){P.scrT=0;sfx('scrape');}if(!P.scrMsg&&im>5){P.scrMsg=1;toast('Scraping along the barrier!',1600);setTimeout(()=>{if(P)P.scrMsg=0;},4000);}}}
  carRig.position.set(posX,(A.liftH||0)+pathY,posZ);carRig.rotation.y=yawCar;
