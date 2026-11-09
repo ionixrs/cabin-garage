@@ -1441,23 +1441,23 @@ function buildDriver(){if(!P||!P.group||!P.wheel)return;const G=P.group,D=new TH
  const mk=(geo,m)=>{const o=new THREE.Mesh(geo,m);o.userData.noHit=true;o.castShadow=true;D.add(o);return o;};
  const jacket=std(0x26334a,.85),shirt=std(0xe8e6e1,.8),skin=std(0xd6a47c,.7),jeans=std(0x2b3a55,.9),shoe=std(0x151515,.6),hair=std(0x3a2a1c,.9);
  const torso=mk(new THREE.BoxGeometry(.38,.5,.22),jacket);torso.position.set(-.37,.79,.5);torso.rotation.x=.2;
- mk(new THREE.BoxGeometry(.12,.3,.01),shirt).position.set(-.37,.86,.385);
+ const shirtM=mk(new THREE.BoxGeometry(.12,.3,.01),shirt);shirtM.position.set(-.37,.86,.385);
  const neck=mk(new THREE.CylinderGeometry(.045,.05,.08,10),skin);neck.position.set(-.37,1.07,.47);
  const head=mk(new THREE.SphereGeometry(.1,18,14),skin);head.scale.set(.9,1.1,1);head.position.set(-.37,1.17,.47);
  const hr=mk(new THREE.SphereGeometry(.104,18,10,0,Math.PI*2,0,Math.PI*.55),hair);hr.scale.set(.92,1.1,1.04);hr.position.set(-.37,1.185,.485);
  const hips=mk(new THREE.BoxGeometry(.38,.14,.26),jeans);hips.position.set(-.37,.52,.42);
  const seg=(r0,r1,m)=>{const g=new THREE.CylinderGeometry(r1,r0,1,12);g.translate(0,.5,0);return mk(g,m);};
- const arms=[-1,1].map(sd=>({sd,up:seg(.05,.045,jacket),lo:seg(.044,.038,jacket),cuff:mk(new THREE.CylinderGeometry(.03,.03,.03,10),shirt),
+ const arms=[-1,1].map(sd=>({sd,up:seg(.043,.039,jacket),lo:seg(.038,.033,jacket),cuff:mk(new THREE.CylinderGeometry(.03,.03,.03,10),shirt),
   hand:(()=>{const h=new THREE.Mesh(new THREE.SphereGeometry(.042,12,10),skin);h.scale.set(1,1.25,.85);h.userData.noHit=true;P.wheel.add(h);return h;})()}));
- const legs=[-1,1].map(sd=>({sd,th:seg(.07,.06,jeans),sh:seg(.052,.045,jeans),foot:mk(new THREE.BoxGeometry(.1,.08,.26),shoe)}));
- P.drv={D,head,neck,hr,arms,legs};}
+ const legs=[-1,1].map(sd=>({sd,th:seg(.062,.054,jeans),sh:seg(.048,.042,jeans),foot:mk(new THREE.BoxGeometry(.1,.08,.26),shoe)}));
+ P.drv={D,head,neck,hr,arms,legs,body:[torso,shirtM,hips]};}
 const _dv=[new THREE.Vector3(),new THREE.Vector3(),new THREE.Vector3(),new THREE.Vector3()],_up=new THREE.Vector3(0,1,0);
 function placeSeg(m,a,b){const d=_dv[3].subVectors(b,a),L=d.length();m.position.copy(a);m.scale.set(1,Math.max(.01,L),1);m.quaternion.setFromUnitVectors(_up,d.multiplyScalar(1/Math.max(L,1e-4)));}
 function updateDriver(){const d=P&&P.drv;if(!d)return;const out=walking;d.D.visible=!out;d.arms.forEach(a=>a.hand.visible=!out);if(out)return;
- const inHead=st.view==='driver';d.head.visible=d.hr.visible=d.neck.visible=!inHead;
+ const inHead=st.view==='driver';d.head.visible=d.hr.visible=d.neck.visible=!inHead;d.body.forEach(o=>o.visible=!inHead);
  const R=P.wheelR||.18,G=P.group;G.updateMatrixWorld();
  for(const a of d.arms){const sd=a.sd;a.hand.position.set(sd*(R+.005),-.012,.012);a.hand.rotation.z=sd*.3;
-  const hw=a.hand.getWorldPosition(_dv[0]);const h=G.worldToLocal(hw);const sh=_dv[1].set(-.37+sd*.19,1.0,.42);
+  const hw=a.hand.getWorldPosition(_dv[0]);const h=G.worldToLocal(hw);const sh=_dv[1].set(-.37+sd*.19,inHead?.94:1.0,inHead?.5:.42);
   const el=_dv[2].lerpVectors(sh,h,.5);el.x+=sd*.09;el.y-=.12;el.z+=.04;placeSeg(a.up,sh,el);placeSeg(a.lo,el,h);a.cuff.position.copy(h).lerp(el,.12);a.cuff.quaternion.copy(a.lo.quaternion);}
  const brk=(A.brk||0)>.05||keys.brake;for(const l of d.legs){const sd=l.sd,hip=_dv[0].set(-.37+sd*.1,.53,.36);
   const ft=sd>0?_dv[1].set(brk?-.42:-.27,.36+(sd>0?(brk?A.brk:A.thr||0)*-.02:0),-.86+(brk?(A.brk||0):(A.thr||0))*.03):_dv[1].set(-.6,.3,-.82);
