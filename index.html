@@ -138,6 +138,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #mmCv{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(var(--topH,120px) + 12px);width:150px;height:150px;border-radius:50%;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none;z-index:3}#ui.immersive #mmCv{display:block}
 #paintPanel{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--topH,120px) + 20px);width:min(360px,calc(100% - 32px));padding:14px 16px;z-index:12;pointer-events:auto}#paintPanel h2{margin:0 0 6px;font:700 15px/1.2 var(--display)}#paintPanel h3{font:700 11px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:12px 0 6px}.sws{display:flex;flex-wrap:wrap;gap:8px}.sw{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.5);cursor:pointer}.sw:hover{transform:scale(1.1)}
 @media (max-width:720px){#mmCv{width:110px;height:110px}}
+#eaPill{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--topH,120px) + 112px);padding:10px 18px;z-index:7;pointer-events:none!important;font:700 15px/1.2 var(--display);letter-spacing:.03em;color:#fff}#eaPill[hidden]{display:none}#eaPill.s1{background:#c77700;border-color:#c77700;animation:eaPulse .9s infinite}#eaPill.s2,#eaPill.s3{background:#c8102e;border-color:#c8102e}#eaPill.s2{animation:eaPulse .6s infinite}@keyframes eaPulse{50%{opacity:.55}}
 #blitzPill{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--topH,120px) + 64px);display:flex;align-items:center;gap:10px;padding:8px 16px;z-index:6;pointer-events:none!important;border-color:#f2c200}#blitzPill[hidden]{display:none}#blitzPill b{font:800 18px/1 var(--display)}#blitzPill small{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;border:4px solid #d0141a;background:#fff;color:#111;font:800 12px/1 var(--display)}#blitzPill.over{background:rgba(200,16,46,.85);border-color:#ff5a6e}
 .fault.blitz{border-color:#f2c200}#blitzBtn[aria-pressed="true"]{background:#f2c200;border-color:#f2c200;color:#111}
 #trainPrompt{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:7;background:#c8102e;border-color:#c8102e;color:#fff;font-size:14px;padding:12px 18px;box-shadow:0 10px 30px rgba(0,0,0,.35)}#trainPrompt[hidden],#skipRide[hidden]{display:none}#skipRide{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:7}#trainPrompt:disabled{background:#555;border-color:#555;opacity:.9}
@@ -183,7 +184,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <button class="btn" id="moreBtn" aria-expanded="false">☰ More</button>
       <div id="moreMenu" class="panel" hidden>
         <div class="mm-sec"><h3>World</h3><button class="btn" id="timeBtn">Day</button><button class="btn" id="rainBtn">Clear</button><button class="btn" id="trafficBtn" aria-pressed="true">Traffic</button><button class="btn" id="dynTimeBtn" aria-pressed="false">Auto day/night</button><button class="btn" id="dynWeatherBtn" aria-pressed="false">Changing weather</button><button class="btn" id="camsBtn" aria-pressed="true">Speed cameras: on</button></div>
-        <div class="mm-sec"><h3>Car</h3><button class="btn" id="dashBtn" aria-pressed="false">Gauges</button><button class="btn" id="scrBtn" aria-expanded="false">Screen</button><button class="btn" id="lkaBtn" aria-pressed="true" title="Lane assist (' key)">Lane assist</button><button class="btn" id="evadeBtn" aria-pressed="true" title="Swerves into a free lane during emergency braking">Evade assist</button><button class="btn" id="absBtn" aria-pressed="true">ABS</button><button class="btn" id="escBtn" aria-pressed="true">ESC</button><button class="btn" id="tcsBtn" aria-pressed="true">TCS</button><button class="btn" id="soundBtn" aria-pressed="true">Sound</button></div>
+        <div class="mm-sec"><h3>Car</h3><button class="btn" id="dashBtn" aria-pressed="false">Gauges</button><button class="btn" id="scrBtn" aria-expanded="false">Screen</button><button class="btn" id="lkaBtn" aria-pressed="true" title="Lane assist (' key)">Lane assist</button><button class="btn" id="eaBtn" aria-pressed="true" title="Emergency Assist: stops the car if you stop steering">Emergency Assist</button><button class="btn" id="evadeBtn" aria-pressed="true" title="Swerves into a free lane during emergency braking">Evade assist</button><button class="btn" id="absBtn" aria-pressed="true">ABS</button><button class="btn" id="escBtn" aria-pressed="true">ESC</button><button class="btn" id="tcsBtn" aria-pressed="true">TCS</button><button class="btn" id="soundBtn" aria-pressed="true">Sound</button></div>
         <div class="mm-sec"><h3>Surprise emergencies</h3><button class="btn" id="surpriseBtn" aria-pressed="false">Off</button><small class="mm-note" id="surpriseNote">Turn on and something goes wrong at a random moment while you drive.</small></div>
         <div class="mm-sec"><h3>Extras</h3><button class="btn" id="paintBtn">🎨 Paint shop</button><button class="btn" id="mmBtn" aria-pressed="true">Minimap</button><button class="btn" id="photoBtn">Photo</button><button class="btn" id="trophyBtn" aria-expanded="false">Trophies</button><button class="btn" id="helpBtn" aria-expanded="false">Controls</button></div>
         <div class="mm-sec"><h3>Settings</h3><button class="btn" id="fsBtn" aria-pressed="false" title="Fullscreen (8 key)">⛶ Fullscreen</button><button class="btn" id="gfxBtn">Graphics: Auto</button><button class="btn" id="resetBtn" title="Reset the car, the drive and every setting">↻ Reset</button></div>
@@ -214,7 +215,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <p>Drag anywhere to look around, scroll to zoom. Everything that lights up under the pointer can be clicked: door handles, window switches, glovebox, sun visors, cup holders, armrest, vents, stalks, knobs, seats and the touchscreen. Scroll over a knob to turn it.</p>
   </aside>
   <button class="btn" id="trainPrompt" hidden>🚆</button><button class="btn" id="skipRide" hidden>⏩ Skip to the next stop</button><aside id="trainPanel" class="panel" hidden aria-label="Train"><button class="x" data-close="trainPanel" aria-label="Close">×</button><h2>🚆 Where to?</h2><p class="note">Waypoint Express. Free tickets. With the Autozug your car rides along.</p><div id="trainList"></div></aside>
-  <div id="blitzPill" class="panel" hidden><span id="blitzIco">📸</span><b id="blitzDist">500 m</b><small id="blitzLim">100</small></div>
+  <div id="eaPill" class="panel" hidden></div><div id="blitzPill" class="panel" hidden><span id="blitzIco">📸</span><b id="blitzDist">500 m</b><small id="blitzLim">100</small></div>
   <canvas id="mmCv" width="150" height="150" aria-label="Minimap"></canvas><aside id="borderPanel" class="panel" hidden aria-label="Border control"><h2 id="bdTitle">Customs</h2><p id="bdText" class="note"></p><div id="bdBtns"></div></aside><aside id="paintPanel" class="panel" hidden aria-label="Paint shop"><button class="x" data-close="paintPanel" aria-label="Close">×</button><h2>🎨 Paint shop <span id="paintMoney" style="float:right;color:#7ee0a0"></span></h2><p class="note">Park on a gas station forecourt. Paint and rims are free.</p><h3>Body paint</h3><div id="paintSw" class="sws"></div><h3>Rims</h3><div id="rimSw" class="sws"></div></aside>
   <div id="welcome" hidden><div class="wc panel"><h1>Cabin Garage</h1><p class="sub">An open-road driving sandbox: Autobahn, city, trains and jobs.</p>
  <div class="wgrid"><div><b>🚗 Drive</b><span>Enter starts the engine · E for Drive · W/S gas &amp; brake · A/D steer</span></div><div><b>💼 Earn</b><span>Phone → Jobs: taxi rides, parcel deliveries, Autobahn sprints</span></div>
@@ -722,7 +723,7 @@ function buildCar(c){
  const L={head:std(0xeef2f6,.15,.4),tail:std(0x4a0606,.3),rev:std(0xcfcfcf,.3),ind:[std(0x7a4c00,.3),std(0x7a4c00,.3)],bar:std(0x222222,.3)};P.L=L;
  const ptxt='CBN '+c.id.slice(0,2).toUpperCase()+' 26';
  if(c.retro)add(rbox(1.66,.32,.3,.12,M.chrome),0,.44,zFront+.1);else add(rbox(c.carbonRoof?1.6:1.3,.05,c.carbonRoof?.2:.14,.02,c.carbonRoof?std(0xffffff,.2,.3,{map:TX.carbon}):std(0x0d0d0f,.6)),0,.215,zFront+(c.carbonRoof?-.01:.02));
- add(box(1.42,.26,.04,M.black),0,.72,zFront+.07);
+ add(box(1.42,.2,.04,M.black),0,.71,zFront+.07);
  add(rbox(.9,.07,.03,.01,M.grille),0,.53,zFront-.055);
  {const gb=c.retro?'retro':c.brand,chr=M.chrome,gr=M.grille,fz=zFront+.04;
   if(gb==='retro')add(rbox(.42,.13,.04,.02,chr),0,.72,fz);
@@ -741,9 +742,9 @@ function buildCar(c){
  else{const eb=add(rbox(.64,.3,.5,.05,std(0x2b2d31,.45,.6)),0,.6,bz+.05),ec=add(rbox(.52,.05,.4,.02,std(c.ui.accent,.35,.3)),0,.78,bz+.05);
   const eng={i6:'3.0 L turbo inline-six, 380 hp',v12:'6.6 L twin-turbo V12, 563 hp',diesel:'3.0 L turbo diesel, 250 hp, 600 Nm',i4:'1.6 L twin-cam four, 110 hp'}[c.sound];const engTxt=c.engine||eng;
   const eg=new THREE.Group();G.add(eg);eg.add(eb);eg.add(ec);clickable(eg,{label:'Engine',click:()=>toast(`${engTxt} · ${st.engine?Math.round(st.rpm)+' rpm, '+Math.round(engTemp)+' °C':'engine off, '+Math.round(engTemp)+' °C'}`,3000)});
-  const bt=add(rbox(.2,.16,.22,.02,M.black),.47,.55,bz-hl*.2);add(cyl(.015,.015,.03,std(0xb3201e,.5),10),.42,.645,bz-hl*.2);add(cyl(.015,.015,.03,M.black,10),.52,.645,bz-hl*.2);clickable(bt,{label:()=>st.faults.batt?'Battery · jump-start':'Battery',click:()=>fixBattery()});
-  const ds=add(new THREE.Mesh(new THREE.TorusGeometry(.025,.007,8,16),std(0xf2c200,.5)),-.24,.81,bz-.18);ds.rotation.x=Math.PI/2;clickable(ds,{label:()=>st.faults.oil?'Oil dipstick · top up oil':'Oil dipstick',click:()=>fixOil()});
-  const wc=add(cyl(.035,.035,.03,std(0x2a6bd1,.5),16),-.48,.62,bz-hl*.25);clickable(wc,{label:'Washer fluid',click:()=>toast('Washer fluid topped up')});
+  const bt=add(rbox(.2,.16,.22,.02,M.black),.47,.55,bz-hl*.1);add(cyl(.015,.015,.03,std(0xb3201e,.5),10),.42,.645,bz-hl*.1);add(cyl(.015,.015,.03,M.black,10),.52,.645,bz-hl*.1);clickable(bt,{label:()=>st.faults.batt?'Battery · jump-start':'Battery',click:()=>fixBattery()});
+  const ds=add(new THREE.Mesh(new THREE.TorusGeometry(.025,.007,8,16),std(0xf2c200,.5)),-.24,.83,Math.max(bz-.18,zFront+.33));ds.rotation.x=Math.PI/2;clickable(ds,{label:()=>st.faults.oil?'Oil dipstick · top up oil':'Oil dipstick',click:()=>fixOil()});
+  const wc=add(cyl(.035,.035,.03,std(0x2a6bd1,.5),16),-.48,.62,bz-hl*.12);clickable(wc,{label:'Washer fluid',click:()=>toast('Washer fluid topped up')});
   const cc2=add(cyl(.03,.03,.03,std(0xe9e4d8,.5),16),.42,.62,bz+hl*.25);clickable(cc2,{label:()=>st.faults.heat?`Coolant cap · ${Math.round(engTemp)} °C`:'Coolant cap',click:()=>fixCoolant()});}
  add(box(1.6,.05,zRear-zFront-.3,M.black),0,.17,(zRear+zFront)/2);
  
@@ -772,7 +773,7 @@ function buildCar(c){
   const nm=['Front left','Front right','Rear left','Rear right'][i];clickable(W,{label:()=>st.faults.tyre===i?nm+' tyre is flat · fit the spare':nm+' tyre',click:()=>tyreClick(i,nm)});});
 
  /* shaped body shell: flanks with wheel arches, rounded fascias */
- {const ra=wr+.075,cy=wr-c.lift,sill=.25,AX=[zFa,zRa],zF0=zFront+.3,zR0=zRear-.3,zW=-1.15,bev=.022;
+ {const ra=wr+.075,cy=wr-c.lift,sill=.25,AX=[zFa,zRa],zF0=zFront+.25,zR0=zRear-.3,zW=-1.15,bev=.022;
   const topY=z=>{let y=.95;if(z<zW){const t=clamp((z-zF0)/(zW-zF0),0,1);y=.8+.13*Math.sin(t*Math.PI/2);}if(z>zRear-.6)y-=.035*clamp((z-(zRear-.6))/.3,0,1);return y;};
   const botY=z=>{let y=sill;for(const a of AX){const d=Math.abs(z-a);if(d<ra)y=Math.max(y,cy+Math.sqrt(ra*ra-d*d));}return Math.min(y,topY(z)-.08);};
   const flank=(z0,z1,zo)=>{const zs=[];const N=Math.max(4,Math.ceil((z1-z0)/.035));for(let i=0;i<=N;i++)zs.push(z0+(z1-z0)*i/N);for(const a of AX)for(const e of[-ra-.001,-ra+.001,ra-.001,ra+.001])if(a+e>z0&&a+e<z1)zs.push(a+e);zs.sort((a,b)=>a-b);
@@ -785,8 +786,8 @@ function buildCar(c){
    const dr=s<0?P.doorL:P.doorR;if(dr){const m=skin(flank(DZ+.008,DZ+DL-.03,DZ),X-s*.74,dr.D);clickable(m,{label:()=>(st[s<0?'doorL':'doorR']?'Close':'Open')+' door',click:()=>toggleDoor(s)});}}
   const nose=(w,L,r,yTop,yBot,zFace,dir,mat)=>{const h=w/2-bev,sh=new THREE.Shape();sh.moveTo(-h,L);sh.lineTo(-h,bev+r);sh.quadraticCurveTo(-h,bev,-h+r,bev);sh.lineTo(h-r,bev);sh.quadraticCurveTo(h,bev,h,bev+r);sh.lineTo(h,L);sh.closePath();
    const g=new THREE.ExtrudeGeometry(sh,{depth:yTop-yBot-2*bev,bevelEnabled:true,bevelThickness:bev*1.6,bevelSize:bev,bevelSegments:3,curveSegments:10});const m=new THREE.Mesh(g,mat);m.rotation.x=Math.PI/2;m.position.set(0,yTop-bev*1.6,zFace);if(dir>0)m.scale.y=-1;m.castShadow=true;G.add(m);return m;};
-  if(!c.retro){nose(1.87,.44,.3,.845,.6,zFront+.06,-1,M.paint);nose(1.87,.42,.36,.6,.22,zFront-.04,-1,M.paint);}
-  else nose(1.8,.42,.36,.84,.62,zFront+.06,-1,M.paint);
+  if(!c.retro){nose(1.87,.22,.18,.845,.6,zFront+.06,-1,M.paint);nose(1.87,.34,.3,.6,.22,zFront-.04,-1,M.paint);}
+  else nose(1.8,.22,.18,.84,.62,zFront+.06,-1,M.paint);
   nose(1.87,.44,.32,.93,.3,zRear-.01,1,M.paint);}
  if(c.id==='ridgeback'){const lb=add(rbox(1.1,.07,.09,.02,M.black),0,wsT.y+.08,wsT.z+.2);add(rbox(1.0,.04,.01,.008,L.bar),0,wsT.y+.08,wsT.z+.153);clickable(lb,{label:()=>st.lightbar?'Light bar off':'Light bar on',click:()=>{st.lightbar=!st.lightbar;sfx('click');}});}
  if(!conv){const bsA=bodyStyle(c,wsT.y+.01);add(rbox(.05,.06,.16,.02,M.paint),0,wsT.y+.05,bsA?bsA.sS-.15:1.6);}
@@ -1690,7 +1691,7 @@ $('#timeBtn').onclick=()=>{st.time={day:'dusk',dusk:'night',night:'day'}[st.time
 $('#rainBtn').onclick=()=>cycleWeather();
 $('#soundBtn').onclick=()=>{st.sound=!st.sound;initAudio();if(AU.master)AU.master.gain.setTargetAtTime(st.sound?.8:0,now(),.05);$('#soundBtn').setAttribute('aria-pressed',st.sound);$('#soundBtn').textContent=st.sound?'Sound':'Muted';};
 $('#helpBtn').onclick=()=>{const h=$('#help');h.hidden=!h.hidden;$('#helpBtn').setAttribute('aria-expanded',!h.hidden);};
-function resetAll(){if(CUT.on)endCut();BLOW.on=false;if(walking)setWalking(false);services.slice().forEach(despawn);HZ.slice().forEach(hzRemove);endA7Jam();evd=null;lastPZ=0;onPath=null;pathY=0;pathPitch=0;mGear=0;clearJam(false);spinRate=0;noz={state:'none',pump:null};pumping=false;seatPos=null;$('#phone').hidden=true;for(const k in trunkStore)delete trunkStore[k];setTimeout(applyTraffic,0);$('#shop').hidden=true;flashT=0;const snd=st.sound;Object.assign(st,JSON.parse(JSON.stringify(ST0)));st.sound=snd;
+function resetAll(){if(CUT.on)endCut();eaCancel(true);BLOW.on=false;if(walking)setWalking(false);services.slice().forEach(despawn);HZ.slice().forEach(hzRemove);endA7Jam();evd=null;lastPZ=0;onPath=null;pathY=0;pathPitch=0;mGear=0;clearJam(false);spinRate=0;noz={state:'none',pump:null};pumping=false;seatPos=null;$('#phone').hidden=true;for(const k in trunkStore)delete trunkStore[k];setTimeout(applyTraffic,0);$('#shop').hidden=true;flashT=0;const snd=st.sound;Object.assign(st,JSON.parse(JSON.stringify(ST0)));st.sound=snd;
  posX=2;posZ=0;yawCar=0;steer=0;dragSteer=null;yawRate=0;slip=0;cruise=0;crashT=0;sweepT=0;shiftJolt=0;lastGear=1;indSteerPeak=0;limit=100;engTemp=40;fuel=.45;headLag.set(0,0);wiperPhase=0;wiperActive=false;blinkT=0;blinkOn=false;gearNum=1;
  fov=72;camera.fov=fov;camera.updateProjectionMatrix();
  for(const k in keys)keys[k]=false;horn(false);document.querySelectorAll('.hold').forEach(b=>b.classList.remove('on'));
@@ -2700,7 +2701,7 @@ function navVoice(pr){if(!pr||!pr.instr){VOICE.instr=null;return;}const d=pr.idi
 /* ===== Bergtunnel and Baustelle (roadworks) on the A1 ===== */
 const TUN_HALF=150;function tunZ(z){const n=Math.max(0,Math.round((-6135-z)/8000));return -6135-8000*n;}
 function inTunnel(x,z){return x>-52.4&&x<-27.6&&Math.abs(z-tunZ(z))<TUN_HALF;}
-function bauZc(z){const n=Math.max(0,Math.round((-10135-z)/8000));return -10135-8000*n;}
+function bauZc(z){const a=-10135-8000*Math.max(0,Math.round((-10135-z)/8000)),b=-5135-8000*Math.max(0,Math.round((-5135-z)/8000));let c=Math.abs(a-z)<Math.abs(b-z)?a:b;if(Math.abs(z+2135)<Math.abs(c-z))c=-2135;return c;}
 function bauZ(z){return Math.abs(z-bauZc(z))<152;}
 let tunK=0,tunBase=null;const TUNFOG=new THREE.Color(0x2a2620);
 const TUN=new THREE.Group(),BAU=new THREE.Group();scene.add(TUN,BAU);
@@ -2814,6 +2815,32 @@ function beltFrame(dt){if(!P)return;
  beltLockCd=Math.max(0,beltLockCd-dt);const dec=(prevVb-st.v)/Math.max(dt,.001);prevVb=st.v;if(!walking&&st.v>2&&dec>7&&beltLockCd<=0){beltLockCd=2.5;if(st.belt){sfx('beltlock');P.beltLock=1;}else{headKick=Math.max(headKick,.25);headKickS=.6;}}
  headKick=Math.max(0,headKick-dt*1.6);
  hp=Math.min(100,hp+dt*1.1);P.hudT=(P.hudT||0)+dt;if(P.hudT>.25){P.hudT=0;const hb=document.getElementById('hudBelt');if(hb){const on=st.belt&&!walking;hb.textContent=on?'On':'Off';hb.style.color=on?'#5ad17a':'#ff6b5e';}const hr=document.getElementById('hudHpRow');if(hr){hr.hidden=hp>99.5;document.getElementById('hudHp').textContent=Math.round(hp)+'%';}}hurtFlash=Math.max(0,hurtFlash-dt*1.5);const hu=document.getElementById('hurt');if(hu){const o=Math.min(1,(1-hp/100)*.85+hurtFlash);if(Math.abs((+hu.style.opacity||0)-o)>.01)hu.style.opacity=o.toFixed(2);}}
+/* ===== Emergency Assist: stops the car if the driver stops steering ===== */
+const EA={stage:0,idle:0,t:0,haz:false,hb:false,honkT:0,beep:0,tgt:null,axisX:true};
+function eaPill(stage){const p=$('#eaPill');if(!p)return;p.hidden=!stage;p.className='panel s'+stage;p.textContent=['','🖐 Take the wheel!','🚨 Emergency stop · steer to cancel','🚨 Stopped · help called · steer to drive on'][stage]||'';}
+function eaTarget(){const sY=Math.sin(yawCar),cY=Math.cos(yawCar);EA.tgt=null;
+ if(posX<-56&&Math.abs(posZ-ZX)<12&&Math.abs(sY)>.7){EA.axisX=false;EA.tgt=sY>0?ZX-9.3:ZX+9.3;}
+ else if(posX>-53&&posX<-27&&Math.abs(cY)>.7){EA.axisX=true;EA.tgt=cY>0?-30.15:-49.85;}
+ else if(Math.abs(posX)<6&&Math.abs(cY)>.7){EA.axisX=true;EA.tgt=cY>0?3.9:-3.9;}}
+function eaSteer(dt){if(EA.stage!==2||EA.tgt==null)return false;const sY=Math.sin(yawCar),cY=Math.cos(yawCar);let off,ye;
+ if(EA.axisX){off=cY>0?posX-EA.tgt:EA.tgt-posX;const y0=cY>0?yawCar:yawCar-Math.PI;ye=Math.atan2(Math.sin(y0),Math.cos(y0));}
+ else{off=sY>0?(EA.tgt-posZ):-(EA.tgt-posZ);const y0=yawCar-(sY>0?Math.PI/2:-Math.PI/2);ye=Math.atan2(Math.sin(y0),Math.cos(y0));}
+ const v=Math.abs(st.v),am=.02+1.5/(v+18),yd=clamp(off*.04,-am,am),tg=clamp((yd-ye)*(1.6/(1+v*.025))-yawRate*.85,-.2,.2);steer+=(tg-steer)*Math.min(1,dt*4);lkaHold=0;return true;}
+function eaCancel(quiet){const was=EA.stage;EA.stage=0;EA.idle=0;EA.t=0;if(EA.haz)st.hazard=false;EA.haz=false;if(EA.hb){st.hb=false;EA.hb=false;}horn(false);eaPill(0);if(was&&!quiet){sfx('ready');toast('Emergency Assist off. You have control again.',2600);}}
+function eaStep(dt,kS){const input=!walking&&(kS!==0||dragSteer!=null);
+ if(input){if(EA.stage)eaCancel();EA.idle=0;return;}
+ const active=!walking&&st.engine&&Math.abs(st.v)>6&&!onPath&&!(typeof CUT!=='undefined'&&CUT.on)&&st.ea!==false&&st.gear!=='R';
+ if(EA.stage<2&&!active){EA.idle=0;if(EA.stage)eaCancel(true);return;}
+ if(walking||st.ea===false){if(EA.stage)eaCancel(true);return;}
+ EA.idle+=dt;
+ if(EA.stage===0&&EA.idle>10){EA.stage=1;EA.t=0;EA.beep=0;cruise=0;toast('⚠ Emergency Assist: you have not steered for 10 seconds. Take the wheel, or the car will stop by itself.',4200);eaPill(1);}
+ if(EA.stage===1){EA.t+=dt;if(EA.t<.7)st.v-=Math.sign(st.v)*4.5*dt;EA.beep-=dt;if(EA.beep<=0){EA.beep=.9;sfx('fcw');}
+  if(EA.t>4){EA.stage=2;EA.t=0;EA.haz=!st.hazard;st.hazard=true;EA.honkT=.4;eaTarget();toast(EA.tgt!=null?'🚨 Emergency Assist is pulling over onto the hard shoulder and stopping. Steer to take back control.':'🚨 Emergency Assist is stopping the car. Steer to take back control.',4600);eaPill(2);}}
+ else if(EA.stage===2){EA.t+=dt;const v=Math.abs(st.v),off=EA.tgt==null?0:Math.abs((EA.axisX?posX:posZ)-EA.tgt),dec=off>1.2&&v>14?2.2:3.4;st.v=Math.sign(st.v)*Math.max(0,v-dec*dt);
+  EA.honkT-=dt;if(EA.honkT<=0){EA.honkT=2.4;horn(true);setTimeout(()=>horn(false),300);}
+  if(Math.abs(st.v)<.25){st.v=0;EA.stage=3;EA.t=0;if(!st.hb){st.hb=true;EA.hb=true;}toast('Emergency Assist stopped the car with the hazard lights on and called for help. Steer to take back control and drive on.',5200);eaPill(3);}}
+ else if(EA.stage===3){st.v=0;EA.t+=dt;EA.honkT-=dt;if(EA.honkT<=0&&EA.t<30){EA.honkT=4;horn(true);setTimeout(()=>horn(false),250);}}}
+function toggleEA(){st.ea=st.ea===false;if(!st.ea)eaCancel(true);sfx('click');const b=$('#eaBtn');if(b)b.setAttribute('aria-pressed',st.ea);toast('Emergency Assist '+(st.ea?'on':'off'));}
 /* ===== high-speed blowouts, spin-outs and the knocked-out cutscene ===== */
 const BLOW={on:false,t:0,side:1,front:true};let spinOutAt=-1e9;
 function tooFast(){const k=Math.abs(st.v)*3.6;return limitFree?k>170:k>limit+20;}
@@ -3063,7 +3090,7 @@ function frame(t){
  if(st.cranking>0){st.cranking-=dt;st.rpm=250+Math.sin(t/40)*80;if(st.cranking<=0){st.cranking=0;st.engine=true;st.rpm=1500;sweepT=1.2;toast('Engine running. Shift to D and press GAS.');}}
  /* physics */
  const modeK={Eco:.6,Comfort:1,Sport:1.35,'4×4 Low':1.5}[st.mode],vmax=c.vmax/3.6*(st.mode==='4×4 Low'?.35:st.mode==='Eco'?.85:1);
- const aebOn=aebStep(dt),brk=(keys.brake&&!walking)||aebOn?1:0,v0=st.v;let thr=keys.gas&&!walking&&!aebOn?1:0,a=0;
+ const aebOn=aebStep(dt),brk=(keys.brake&&!walking)||aebOn?1:0,v0=st.v;let thr=keys.gas&&!walking&&!aebOn&&EA.stage<2?1:0,a=0;
  offroad=!onPath&&!onSurface(posX,posZ);
  if(cruise&&(brk||st.gear!=='D'||!st.engine||st.hb)){cruise=0;toast('Cruise control off');}
  if(c.feat==='autopilot'&&st.feat&&st.engine&&st.gear==='D')cruise=Math.min(limit,130)/3.6*.97;
@@ -3109,11 +3136,12 @@ function frame(t){
  if(c.feat==='autopilot'&&st.feat&&(kS||dragSteer!=null||keys.brake)){st.feat=false;cruise=0;toast('Lane pilot off. You have control.');}
  if(dragSteer!=null){lkaHold=.9;steer+=(dragSteer-steer)*Math.min(1,dt*6);}
  else if(kS){lkaHold=.9;const maxS=1/(1+Math.abs(st.v)*.045),tg=kS*maxS;steer+=(tg-steer)*Math.min(1,dt*(Math.sign(tg)!==Math.sign(steer)&&Math.abs(steer)>.05?6:3.2));}
+ else if(eaSteer(dt)){}
  else if(evadeStep(dt)){}
  else if(c.feat==='autopilot'&&st.feat){const lanes=[2,-32.95,-37.05],lx=lanes.reduce((p,q)=>Math.abs(q-posX)<Math.abs(p-posX)?q:p),ye=Math.atan2(Math.sin(yawCar),Math.cos(yawCar)),tg=clamp(-(lx-posX)*.09-ye*2.2,-.35,.35);steer+=(tg-steer)*Math.min(1,dt*3);}
  else if(lkaStep(dt)){}
  else steer+=(0-steer)*Math.min(1,dt*(2.6+Math.abs(st.v)*.06));
- blowStep(dt,kS);
+ blowStep(dt,kS);eaStep(dt,kS);
  const spd=Math.abs(st.v),wa=steer*.55/(1+spd*spd*.0032);
  const grip=(st.snow?(c.awd?6:4.2):st.rain?(c.awd?8.5:6):(c.awd?9.6:9))*(keys.hbk&&!walking&&spd>4?.42:1)*(c.feat==='drift'&&st.feat&&spd>5?.5:1)*(offroad?.6:1)*(slipEvT>0?.25:1);
  let yrT=st.v*Math.tan(wa)/(c.wb||2.9);if(wheelLock)yrT*=.1;if(c.feat==='drift'&&st.feat)yrT*=1.3;if(keys.hbk&&!walking&&spd>4)yrT*=1.45;if(c.feat==='4ws'&&st.feat&&spd<14)yrT*=1.8;if(st.faults.tyre>=0)yrT+=(st.faults.tyre%2===0?1:-1)*.06*Math.min(1,spd/12)*Math.sign(st.v);const yrMax=grip/Math.max(spd,1);
@@ -3301,7 +3329,7 @@ requestAnimationFrame(t=>{last=t;frame(t);});
 setTimeout(hideHint,14000);
 $('#cutSkip').onclick=e=>{e.stopPropagation();if(CUT.on)endCut();};
 {const topEl=document.querySelector('.top');const placeTop=()=>{if(!topEl)return;const b=Math.round(topEl.getBoundingClientRect().bottom);if(b>0&&b!==placeTop.l){placeTop.l=b;document.documentElement.style.setProperty('--topH',(b-2)+'px');}};placeTop();addEventListener('resize',placeTop);if(window.ResizeObserver)new ResizeObserver(placeTop).observe(topEl);}
-$('#lkaBtn').addEventListener('click',e=>{e.stopPropagation();toggleLka();});$('#fsBtn').addEventListener('click',e=>{e.stopPropagation();toggleFullscreen();});$('#evadeBtn').addEventListener('click',e=>{e.stopPropagation();st.evade=st.evade===false;$('#evadeBtn').setAttribute('aria-pressed',st.evade);sfx('click');toast('Evade assist '+(st.evade?'on: during emergency braking the car swerves into a free lane':'off'),2600);});$('#absBtn').addEventListener('click',e=>{e.stopPropagation();toggleSysAid('abs','ABS','wheels lock under hard braking, you cannot steer and the tyres squeal');});$('#escBtn').addEventListener('click',e=>{e.stopPropagation();toggleSysAid('esc','Stability control (ESC)','the car can slide and spin');});$('#tcsBtn').addEventListener('click',e=>{e.stopPropagation();toggleSysAid('tcs','Traction control (TCS)','wheels spin on slippery roads');});$('#trainPrompt').addEventListener('click',e=>{e.stopPropagation();initAudio();openTrainPanel();});$('#skipRide').addEventListener('click',e=>{e.stopPropagation();if(TRN.ride){TRN.ride.skip=true;sfx('click');}});$('#blitzBtn').addEventListener('click',e=>{e.stopPropagation();toggleBlitzer();});$('#blitzRep').addEventListener('click',e=>{e.stopPropagation();sfx('chime');toast('Thanks! Your report helps other drivers. (+1 community point)',2600);});try{if(localStorage.getItem('cabin-blitz')==='1')toggleBlitzer();}catch(e){}$('#camsBtn').addEventListener('click',e=>{e.stopPropagation();toggleCams();});$('#jobList').addEventListener('click',e=>{e.stopPropagation();const a=e.target.closest('[data-job]'),c=e.target.closest('[data-jobcancel]'),n=e.target.closest('[data-jobnew]');if(a)acceptJob(+a.dataset.job);if(c)cancelJob();if(n){makeOffers();renderJobs();sfx('click');}});
+$('#lkaBtn').addEventListener('click',e=>{e.stopPropagation();toggleLka();});$('#eaBtn').addEventListener('click',e=>{e.stopPropagation();toggleEA();});$('#fsBtn').addEventListener('click',e=>{e.stopPropagation();toggleFullscreen();});$('#evadeBtn').addEventListener('click',e=>{e.stopPropagation();st.evade=st.evade===false;$('#evadeBtn').setAttribute('aria-pressed',st.evade);sfx('click');toast('Evade assist '+(st.evade?'on: during emergency braking the car swerves into a free lane':'off'),2600);});$('#absBtn').addEventListener('click',e=>{e.stopPropagation();toggleSysAid('abs','ABS','wheels lock under hard braking, you cannot steer and the tyres squeal');});$('#escBtn').addEventListener('click',e=>{e.stopPropagation();toggleSysAid('esc','Stability control (ESC)','the car can slide and spin');});$('#tcsBtn').addEventListener('click',e=>{e.stopPropagation();toggleSysAid('tcs','Traction control (TCS)','wheels spin on slippery roads');});$('#trainPrompt').addEventListener('click',e=>{e.stopPropagation();initAudio();openTrainPanel();});$('#skipRide').addEventListener('click',e=>{e.stopPropagation();if(TRN.ride){TRN.ride.skip=true;sfx('click');}});$('#blitzBtn').addEventListener('click',e=>{e.stopPropagation();toggleBlitzer();});$('#blitzRep').addEventListener('click',e=>{e.stopPropagation();sfx('chime');toast('Thanks! Your report helps other drivers. (+1 community point)',2600);});try{if(localStorage.getItem('cabin-blitz')==='1')toggleBlitzer();}catch(e){}$('#camsBtn').addEventListener('click',e=>{e.stopPropagation();toggleCams();});$('#jobList').addEventListener('click',e=>{e.stopPropagation();const a=e.target.closest('[data-job]'),c=e.target.closest('[data-jobcancel]'),n=e.target.closest('[data-jobnew]');if(a)acceptJob(+a.dataset.job);if(c)cancelJob();if(n){makeOffers();renderJobs();sfx('click');}});
 $('#paintBtn').addEventListener('click',e=>{e.stopPropagation();$('#moreMenu').hidden=true;openPaint();});$('#paintPanel').addEventListener('click',e=>{const p=e.target.closest('[data-paint]'),r=e.target.closest('[data-rim]');if(p)buyCustom('paint',p.dataset.paint);if(r)buyCustom('rim',r.dataset.rim);});
 $('#mmBtn').addEventListener('click',e=>{e.stopPropagation();const c=$('#mmCv'),on=c.style.display==='none';c.style.display=on?'':'none';$('#mmBtn').setAttribute('aria-pressed',on);sfx('click');});addMoney(0);
 $('#dynTimeBtn').addEventListener('click',e=>{e.stopPropagation();toggleDyn('dynTime');});$('#dynWeatherBtn').addEventListener('click',e=>{e.stopPropagation();toggleDyn('dynWeather');});try{if(!localStorage.getItem('cabin-welcome'))$('#welcome').hidden=false;}catch(e){}$('#wcGo').addEventListener('click',e=>{e.stopPropagation();initAudio();$('#welcome').hidden=true;try{localStorage.setItem('cabin-welcome','1');}catch(e){}sfx('ready');});$('#voiceBtn').addEventListener('click',e=>{e.stopPropagation();toggleVoice();});if(!VOICE.on){$('#voiceBtn').textContent='Voice: off';$('#voiceBtn').setAttribute('aria-pressed',false);}$('#surpriseBtn').addEventListener('click',e=>{e.stopPropagation();toggleAutoEv();});document.querySelectorAll('[data-evr]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();setEvRate(+b.dataset.evr);}));{let r0=0;try{r0=+(localStorage.getItem('cabin-ev')||0)||0;}catch(e){}setEvRate(r0,true);}
