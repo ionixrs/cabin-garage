@@ -842,6 +842,41 @@ function buildCar(c){
    const sp=new THREE.Mesh(new THREE.PlaneGeometry(.85,.07),new THREE.MeshBasicMaterial({map:tex(sc),toneMapped:false}));sp.rotation.set(-Math.PI/2,0,Math.PI/2);sp.position.set(s*.672,.232,-.15);sp.userData.noHit=true;G.add(sp);
    if(!conv)add(rbox(.035,.03,.24,.012,M.soft),s*.66,wsT.y-.09,.2);}
   P.headrests.forEach(hr=>{const b2=badge(c,.03);b2.position.set(0,0,.052);hr.add(b2);});}
+ /* ===== extra interior detail ===== */
+ {const rY=wsT.y+.01,zF=wsT.z,led=col=>new THREE.MeshBasicMaterial({color:col,toneMapped:false}),acc=c.ui.accent;
+  /* wireless charging tray with your phone on it */
+  if(!c.retro){add(rbox(.17,.012,.12,.02,M.gloss),0,.548,-.6);add(new THREE.Mesh(new THREE.TorusGeometry(.03,.002,6,28),led(0x2bd65a)),0,.556,-.6).rotation.x=Math.PI/2;
+   const pc=mkcv(128,256),px=pc.getContext('2d'),pg=px.createLinearGradient(0,0,0,256);pg.addColorStop(0,'#1b2f5a');pg.addColorStop(1,'#5a2a6b');px.fillStyle=pg;px.fillRect(0,0,128,256);px.fillStyle='#fff';px.font='700 34px "Chakra Petch", Arial';px.textAlign='center';px.fillText(new Date().toTimeString().slice(0,5),64,70);px.font='600 13px Arial';px.fillText('Charging · 82%',64,96);px.fillStyle='rgba(255,255,255,.85)';for(let i=0;i<4;i++)px.fillRect(18+i*26,200,18,18);
+   const ph=new THREE.Group();ph.position.set(0,.559,-.6);ph.rotation.y=.12;G.add(ph);add(rbox(.072,.008,.15,.01,std(0x101114,.3,.4)),0,0,0,ph);const scr=new THREE.Mesh(new THREE.PlaneGeometry(.064,.14),new THREE.MeshBasicMaterial({map:tex(pc),toneMapped:false}));scr.rotation.x=-Math.PI/2;scr.position.y=.0045;ph.add(scr);
+   clickable(ph,{label:'Your phone · charging · open it',click:()=>{initAudio();togglePhone();}});
+   for(const x of[-.05,.05]){add(rbox(.022,.008,.01,.003,M.black),x,.44,-.682);add(box(.006,.002,.002,led(0x3d8bff)),x,.452,-.684);}}
+  /* rotary controller and shortcut keys */
+  if(!c.retro&&!c.minimal){const rc=new THREE.Group();rc.position.set(0,.556,.065);G.add(rc);add(cyl(.03,.032,.018,M.metal,32),0,0,0,rc);add(cyl(.026,.026,.006,M.gloss,32),0,.011,0,rc);add(new THREE.Mesh(new THREE.TorusGeometry(.031,.0015,6,32),led(lin(acc))),0,.002,0,rc).rotation.x=Math.PI/2;
+   clickable(rc,{label:'Controller · click for the next station, scroll for volume',click:()=>{initAudio();setStation(st.station+1);sfx('click');},wheel:d=>{initAudio();setVol(st.vol+(d>0?-1:1));}});
+   ['MEDIA','NAV','TEL','BACK'].forEach((t,i)=>{const b=add(rbox(.03,.008,.016,.004,M.black),-.06+(i%2)*.12,.551,.035+Math.floor(i/2)*.06);});}
+  /* rear air vents and climate panel at the back of the console */
+  if(c.seats===4){for(const x of[-.05,.05]){add(rbox(.07,.035,.012,.006,M.metal),x,.48,.325);for(let k=0;k<3;k++)add(box(.06,.003,.006,M.grille),x,.47+k*.01,.332);}
+   const rcp=mkcv(128,32),rx=rcp.getContext('2d');rx.fillStyle='#07080a';rx.fillRect(0,0,128,32);rx.fillStyle=acc;rx.font='700 16px Arial';rx.textAlign='center';rx.fillText('21.5°   ✱   21.5°',64,22);const rp=new THREE.Mesh(new THREE.PlaneGeometry(.12,.03),new THREE.MeshBasicMaterial({map:tex(rcp),toneMapped:false}));rp.position.set(0,.43,.327);G.add(rp);
+   /* screens on the back of the front seats */
+   const sc=mkcv(256,160),sq=sc.getContext('2d'),sg=sq.createLinearGradient(0,0,256,160);sg.addColorStop(0,'#0e2a44');sg.addColorStop(1,'#123d2e');sq.fillStyle=sg;sq.fillRect(0,0,256,160);sq.strokeStyle='rgba(255,255,255,.5)';sq.lineWidth=3;sq.beginPath();sq.moveTo(20,130);sq.bezierCurveTo(90,60,150,140,236,40);sq.stroke();sq.fillStyle='#fff';sq.font='700 18px Arial';sq.fillText('ROUTE · '+(c.brand||'').toUpperCase(),14,26);sq.font='600 14px Arial';sq.fillText('Zürich 96 km · 58 min',14,150);
+   for(const x of[-.37,.37]){const fr=add(rbox(.22,.14,.012,.01,M.gloss),x,.865,.83);fr.rotation.x=.22;const sm=new THREE.Mesh(new THREE.PlaneGeometry(.2,.12),new THREE.MeshBasicMaterial({map:tex(sc),toneMapped:false}));sm.position.set(x,.866,.838);sm.rotation.x=.22;G.add(sm);clickable(fr,{label:'Rear-seat screen',click:()=>toast('Rear-seat entertainment: route to Zürich, 96 km. The kids are happy.',2800)});}}
+  /* footrest for the left foot */
+  add(rbox(.09,.2,.02,.008,M.metal),-.6,.33,-.86).rotation.x=-.75;
+  /* tweeters on the dashboard corners */
+  for(const sd of[-1,1]){const tw=add(new THREE.Mesh(new THREE.SphereGeometry(.03,16,8,0,Math.PI*2,0,Math.PI/2),M.grille),sd*.66,.955,-.78);add(new THREE.Mesh(new THREE.TorusGeometry(.031,.004,6,24),c.retro?M.chrome:M.metal),sd*.66,.955,-.78).rotation.x=Math.PI/2;}
+  /* parking disc on the dash */
+  {const pd=mkcv(128,128),dx=pd.getContext('2d');dx.fillStyle='#1d4fa0';dx.fillRect(0,0,128,128);dx.fillStyle='#fff';dx.fillRect(8,8,112,112);dx.fillStyle='#1d4fa0';dx.font='800 54px Arial';dx.textAlign='center';dx.fillText('P',64,62);dx.font='700 14px Arial';dx.fillText('ANKUNFT',64,86);dx.fillText('10:30',64,106);
+   const pm=new THREE.Mesh(new THREE.PlaneGeometry(.11,.11),new THREE.MeshBasicMaterial({map:tex(pd)}));pm.position.set(-.68,.962,-.9);pm.rotation.x=-Math.PI/2+.25;pm.rotation.z=.2;G.add(pm);clickable(pm,{label:'Parking disc',click:()=>toast('Parkscheibe set to 10:30. Two hours free parking in blue zones.',2600)});}
+  /* dashcam behind the mirror + SOS button in the roof console */
+  if(!conv){const dc=new THREE.Group();dc.position.set(.09,rY-.06,zF+.05);G.add(dc);add(rbox(.06,.035,.03,.008,M.black),0,0,0,dc);add(cyl(.009,.009,.012,std(0x0a0a0a,.1,.4),16),0,0,-.018,dc).rotation.x=Math.PI/2;const dl=add(box(.004,.004,.002,led(0xff2020)),.022,.012,.016,dc);P.dashLed=dl;
+   clickable(dc,{label:'Dashcam · recording',click:()=>toast('Dashcam: recording in a loop. Crashes are saved automatically.',2600)});
+   const sos=add(rbox(.03,.012,.022,.005,std(0xc8102e,.4)),0,rY-.05,zF+.26);clickable(sos,{label:'SOS · call emergency services',click:()=>{initAudio();if(!services.some(q=>q.type==='police'&&q.state!=='leaving'))dispatch('police');toast('SOS call connected. Help is on the way.',3000);}});
+   for(const sd of[-1,1])add(rbox(.03,.02,.05,.008,M.metal),sd*.62,rY-.05,1.05);}
+  /* water bottle in each door pocket, seat controls on the seat sides */
+  for(const[d,sd]of[[P.doorL,-1],[P.doorR,1]]){if(!d||!d.D)continue;const inn=-sd;add(rbox(.05,.11,DL*.42,.015,M.dash),inn*.055,.3,DL*.55,d.D);
+   const bt=new THREE.Group();bt.position.set(inn*.055,.38,DL*.4);d.D.add(bt);add(cyl(.026,.026,.17,std(0xbfe3ff,.08,.1),14),0,0,0,bt);add(cyl(.016,.018,.03,std(sd<0?0x1d6bd1:0x2bd65a,.5),12),0,.1,0,bt);clickable(bt,{label:'Water bottle · have a drink',click:()=>{sfx('click');toast('Ahh, refreshing.',1600);}});
+   const mem=new THREE.Group();mem.position.set(inn*.075,.7,DL*.42);d.D.add(mem);for(let k=0;k<3;k++)add(rbox(.012,.016,.022,.005,M.metal),0,0,(k-1)*.028,mem);clickable(mem,{label:'Seat memory · 1 · 2 · M',click:()=>{sfx('motor');toast('Seat position 1 restored.',1600);}});}
+  for(const sd of[-1,1]){const sx=sd*(.37+.27);add(rbox(.012,.03,.1,.008,M.metal),sx,.42,.42);add(rbox(.012,.04,.03,.008,M.metal),sx,.47,.52);}}
  /* lights inside */
  P.dome=new THREE.PointLight(0xffe8c4,0,2.6,1.6);P.dome.position.set(0,(conv?1.3:wsT.y-.08),.3);G.add(P.dome);
  P.ambLight=new THREE.PointLight(lin(ambCol||'#000'),0,2.2,1.5);P.ambLight.position.set(0,.65,-.15);G.add(P.ambLight);
@@ -1479,7 +1514,7 @@ function selectCar(id,cfg){car=cfg||CARS.find(c=>c.id===id)||CARS[0];disposeCar(
  try{localStorage.setItem('cabin-car',car.id);}catch(e){}
  toast(car.name+' · '+car.kind+(car.feat?' · Special: '+FEATS[car.feat].n+' (Z)':''),3400);
 }
-function setView(v){st.view=v;document.querySelectorAll('#views .btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v));camYaw=v==='rear'||v==='outside'?0:v==='passenger'?.2:-.15;camPitch=v==='rear'?-.05:v==='outside'?-.2:-.14;
+function setView(v){st.view=v;document.querySelectorAll('#views .btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v));camYaw=v==='rear'?.12:v==='outside'?0:v==='passenger'?.2:-.15;camPitch=v==='rear'?-.05:v==='outside'?-.2:-.14;
  if(!walking){if(v==='outside')scene.add(camera);else{head.add(camera);camera.position.set(0,0,0);}}}
 
 /* ================= CLUSTER ================= */
@@ -3260,7 +3295,7 @@ function frame(t){
  applyAmbientFrame();
  /* camera */
  const V=st.view,lift=c.lift;let hp;
- if(V==='driver')hp=[-.37,1.12+A.seatY*.02+lift,.44-A.seatZ*.03];else if(V==='passenger')hp=[.37,1.12+lift,.44];else hp=[-.34,1.1+lift,1.5*(P.zScale||1)];
+ if(V==='driver')hp=[-.37,1.12+A.seatY*.02+lift,.44-A.seatZ*.03];else if(V==='passenger')hp=[.37,1.12+lift,.44];else hp=[.36,1.1+lift,1.5*(P.zScale||1)];
  headPos.x+=(hp[0]-headPos.x)*Math.min(1,dt*5);headPos.y+=(hp[1]-headPos.y)*Math.min(1,dt*5);headPos.z+=(hp[2]-headPos.z)*Math.min(1,dt*5);
  head.position.copy(headPos);head.position.x+=headLag.x;head.position.z+=headLag.y;
  if(c.feat==='massage'&&st.feat&&!reduceMotion){head.position.y+=Math.sin(t*.011)*.004;head.position.x+=Math.sin(t*.0067)*.0025;P.massT=(P.massT||0)+dt;if(P.massT>.55){P.massT=0;sfx('massage');}}
