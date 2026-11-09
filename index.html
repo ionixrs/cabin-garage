@@ -140,6 +140,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #blitzPill{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--topH,120px) + 64px);display:flex;align-items:center;gap:10px;padding:8px 16px;z-index:6;pointer-events:none!important;border-color:#f2c200}#blitzPill[hidden]{display:none}#blitzPill b{font:800 18px/1 var(--display)}#blitzPill small{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;border:4px solid #d0141a;background:#fff;color:#111;font:800 12px/1 var(--display)}#blitzPill.over{background:rgba(200,16,46,.85);border-color:#ff5a6e}
 .fault.blitz{border-color:#f2c200}#blitzBtn[aria-pressed="true"]{background:#f2c200;border-color:#f2c200;color:#111}
 #trainPrompt{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:7;background:#c8102e;border-color:#c8102e;color:#fff;font-size:14px;padding:12px 18px;box-shadow:0 10px 30px rgba(0,0,0,.35)}#trainPrompt[hidden],#skipRide[hidden]{display:none}#skipRide{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:7}#trainPrompt:disabled{background:#555;border-color:#555;opacity:.9}
+#borderPanel{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);width:min(420px,calc(100% - 32px));padding:14px 16px;z-index:12;pointer-events:auto}#borderPanel h2{margin:0 0 6px;font:700 15px/1.2 var(--display)}#borderPanel .note{margin:0 0 10px;line-height:1.45}#bdBtns{display:flex;gap:8px;flex-wrap:wrap}
 #trainPanel{position:absolute;left:50%;top:calc(var(--topH,120px) + 20px);transform:translateX(-50%);width:min(380px,calc(100% - 32px));padding:14px 16px;z-index:12;pointer-events:auto}#trainPanel h2{margin:0 0 6px;font:700 15px/1.2 var(--display)}#trainPanel .dest{display:block;width:100%;text-align:left;margin:6px 0;text-transform:none;letter-spacing:0;padding:10px 12px}#trainPanel .dest b{display:block;font-size:13px}#trainPanel .dest small{color:var(--dim);font-size:11.5px}
 #ui.immersive .top,#ui.immersive #hud,#ui.immersive #keys,#ui.immersive #hint,#ui.immersive #navBanner:empty{display:none!important}
 #toolsBar{position:relative;align-items:center}
@@ -213,7 +214,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   </aside>
   <button class="btn" id="trainPrompt" hidden>🚆</button><button class="btn" id="skipRide" hidden>⏩ Skip to the next stop</button><aside id="trainPanel" class="panel" hidden aria-label="Train"><button class="x" data-close="trainPanel" aria-label="Close">×</button><h2>🚆 Where to?</h2><p class="note">Waypoint Express. Free tickets. With the Autozug your car rides along.</p><div id="trainList"></div></aside>
   <div id="blitzPill" class="panel" hidden><span id="blitzIco">📸</span><b id="blitzDist">500 m</b><small id="blitzLim">100</small></div>
-  <canvas id="mmCv" width="150" height="150" aria-label="Minimap"></canvas><aside id="paintPanel" class="panel" hidden aria-label="Paint shop"><button class="x" data-close="paintPanel" aria-label="Close">×</button><h2>🎨 Paint shop <span id="paintMoney" style="float:right;color:#7ee0a0"></span></h2><p class="note">Park on a gas station forecourt. Paint and rims are free.</p><h3>Body paint</h3><div id="paintSw" class="sws"></div><h3>Rims</h3><div id="rimSw" class="sws"></div></aside>
+  <canvas id="mmCv" width="150" height="150" aria-label="Minimap"></canvas><aside id="borderPanel" class="panel" hidden aria-label="Border control"><h2 id="bdTitle">Customs</h2><p id="bdText" class="note"></p><div id="bdBtns"></div></aside><aside id="paintPanel" class="panel" hidden aria-label="Paint shop"><button class="x" data-close="paintPanel" aria-label="Close">×</button><h2>🎨 Paint shop <span id="paintMoney" style="float:right;color:#7ee0a0"></span></h2><p class="note">Park on a gas station forecourt. Paint and rims are free.</p><h3>Body paint</h3><div id="paintSw" class="sws"></div><h3>Rims</h3><div id="rimSw" class="sws"></div></aside>
   <div id="welcome" hidden><div class="wc panel"><h1>Cabin Garage</h1><p class="sub">An open-road driving sandbox: Autobahn, city, trains and jobs.</p>
  <div class="wgrid"><div><b>🚗 Drive</b><span>Enter starts the engine · E for Drive · W/S gas &amp; brake · A/D steer</span></div><div><b>💼 Earn</b><span>Phone → Jobs: taxi rides, parcel deliveries, Autobahn sprints</span></div>
  <div><b>🗺 Explore</b><span>Press &lt; for the map · A1, A7 Kreuz, Nordstadt, Bergtunnel, rest stops</span></div><div><b>🚆 Travel</b><span>Trains and the Autozug stop at every gas station</span></div>
@@ -671,7 +672,7 @@ function buildCar(c){
    const BS=bodyStyle(c,wsT.y+.01);
    if(c.seats===4&&BS){const zQ=BS.sS+(BS.zT-BS.sS)*(BS.b==='hatch'?.32:.5),yQ=BS.y(zQ),tw=Math.min(topW,BS.rY);
     const q=new THREE.Shape();q.moveTo(.645,.95);q.lineTo(.645,tw);q.lineTo(Math.min(BS.sS,zQ-.05),tw);q.lineTo(zQ,Math.min(tw,yQ));q.lineTo(zQ,.95);q.closePath();
-    if(!M.priv){M.priv=M.glass.clone();M.priv.opacity=.58;M.priv.color.multiplyScalar(.7);}const g=new THREE.Mesh(new THREE.ShapeGeometry(q),M.priv);g.rotation.y=-Math.PI/2;g.userData.noHit=true;add(g,s*.745,0,0);
+    if(!M.priv){M.priv=M.glass.clone();M.priv.opacity=.86;M.priv.color.setHex(0x05080a);M.priv.metalness=.15;M.priv.envMapIntensity=.55;}const g=new THREE.Mesh(new THREE.ShapeGeometry(q),M.priv);g.rotation.y=-Math.PI/2;g.userData.noHit=true;add(g,s*.745,0,0);
     const cp=new THREE.Shape();cp.moveTo(zQ-.02,.93);cp.lineTo(zQ-.02,yQ+.03);cp.lineTo(BS.zT+.04,BS.yT+.015);cp.lineTo(BS.zT+.04,.93);cp.closePath();
     const cg=new THREE.ExtrudeGeometry(cp,{depth:.04,bevelEnabled:true,bevelThickness:.012,bevelSize:.012,bevelSegments:2,curveSegments:2});cg.translate(0,0,-.02);const cm=new THREE.Mesh(cg,M.paint);cm.rotation.y=-Math.PI/2;add(cm,s*.775,0,0);
     const ci=new THREE.Mesh(new THREE.ExtrudeGeometry(cp,{depth:.03,bevelEnabled:false}),M.headliner);ci.rotation.y=-Math.PI/2;add(ci,s*.72,0,0);
@@ -741,10 +742,10 @@ function buildCar(c){
  add(box(1.6,.05,zRear-zFront-.3,M.black),0,.17,(zRear+zFront)/2);
  
  add(rbox(1.5,.03,.02,.01,std(0x0b0b0c,.3,.5)),0,.9,zRear+.004);
- add(rbox(1.8,.2,.2,.06,c.retro?M.chrome:M.black),0,.36,zRear-.02);
+ if(c.retro)add(rbox(1.8,.2,.2,.06,M.chrome),0,.36,zRear-.02);else{const df=std(0x111214,.5,.3);add(rbox(1.36,.11,.12,.03,df),0,.27,zRear-.05);for(let k=-2;k<=2;k++)add(box(.012,.07,.1,df),k*.13,.26,zRear-.02);add(box(1.5,.012,.02,std(0x0b0b0c,.3,.5)),0,.335,zRear-.005);add(rbox(1.62,.035,.03,.012,M.paint),0,.7,zRear+.012);for(const s of[-1,1])add(rbox(.12,.025,.02,.008,std(0x5a0a0a,.4)),s*.7,.42,zRear+.002);}
  add(box(1.3,.02,zRear-zS-.1,M.carpet),0,.4,(zS+zRear)/2-.05);
  clickable(add(new THREE.Mesh(new THREE.BoxGeometry(1.3,.52,zRear-lidZ-.16),new THREE.MeshStandardMaterial({color:lin(0x18181a),roughness:1,side:THREE.BackSide})),0,.68,(lidZ+zRear)/2-.05),{label:()=>st.hands.length?`Store ${st.hands.length} carried item${st.hands.length>1?'s':''}`:'Trunk',click:()=>storeHands()});
- for(const s of[-1,1]){add(rbox(.36,.1,.04,.03,L.tail),s*.56,.83,zRear);add(rbox(.13,.035,.03,.01,L.ind[s<0?0:1]),s*.56,.75,zRear);add(rbox(.1,.035,.03,.01,L.rev),s*.3,.75,zRear);}
+ for(const s of[-1,1]){add(rbox(.42,.075,.04,.02,L.tail),s*.62,.85,zRear);add(rbox(.07,.12,.04,.02,L.tail),s*.8,.79,zRear-.004);add(rbox(.14,.028,.03,.01,L.ind[s<0?0:1]),s*.58,.795,zRear);add(rbox(.1,.028,.03,.01,L.rev),s*.41,.795,zRear);}
  add(plate(ptxt),0,.58,zRear+.003);
  const TP=new THREE.Group();TP.position.set(0,.965,lidZ);G.add(TP);add(rbox(1.6,.05,zRear-lidZ+.02,.02,M.paint),0,0,(zRear-lidZ)/2,TP);P.trunk=TP;
  clickable(TP,{label:()=>st.trunk?'Close trunk':'Open trunk',click:()=>toggleTrunk()});
@@ -780,7 +781,7 @@ function buildCar(c){
    const g=new THREE.ExtrudeGeometry(sh,{depth:yTop-yBot-2*bev,bevelEnabled:true,bevelThickness:bev*1.6,bevelSize:bev,bevelSegments:3,curveSegments:10});const m=new THREE.Mesh(g,mat);m.rotation.x=Math.PI/2;m.position.set(0,yTop-bev*1.6,zFace);if(dir>0)m.scale.y=-1;m.castShadow=true;G.add(m);return m;};
   if(!c.retro){nose(1.87,.44,.3,.845,.6,zFront+.06,-1,M.paint);nose(1.87,.42,.36,.6,.22,zFront-.04,-1,M.paint);}
   else nose(1.8,.42,.36,.84,.62,zFront+.06,-1,M.paint);
-  nose(1.87,.44,.32,.93,.43,zRear-.01,1,M.paint);}
+  nose(1.87,.44,.32,.93,.3,zRear-.01,1,M.paint);}
  if(c.id==='ridgeback'){const lb=add(rbox(1.1,.07,.09,.02,M.black),0,wsT.y+.08,wsT.z+.2);add(rbox(1.0,.04,.01,.008,L.bar),0,wsT.y+.08,wsT.z+.153);clickable(lb,{label:()=>st.lightbar?'Light bar off':'Light bar on',click:()=>{st.lightbar=!st.lightbar;sfx('click');}});}
  if(!conv){const bsA=bodyStyle(c,wsT.y+.01);add(rbox(.05,.06,.16,.02,M.paint),0,wsT.y+.05,bsA?bsA.sS-.15:1.6);}
 
@@ -804,7 +805,7 @@ function buildCar(c){
   }
  add(badge(c,.045),0,.8,zFront+.003).rotation.y=Math.PI;
  add(badge(c,.045),0,.86,zRear+.006);
- if(c.sound!=='ev'){const n=c.exhausts||2,xs=n===4?[-.52,-.4,.4,.52]:c.retro?[.45]:[-.45,.45];P.flames=[];xs.forEach(ex=>{add(cyl(.04,.046,.14,M.chrome,16),ex,.32,zRear+.04).rotation.x=Math.PI/2;const fl=add(new THREE.Mesh(new THREE.ConeGeometry(.05,.3,10),new THREE.MeshBasicMaterial({color:0xff7a1a,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false})),ex,.32,zRear+.25);fl.rotation.x=Math.PI/2;fl.visible=false;fl.userData.noHit=true;P.flames.push(fl);});}
+ if(c.sound!=='ev'){const n=c.exhausts||2,xs=n===4?[-.52,-.4,.4,.52]:c.retro?[.45]:[-.45,.45];P.flames=[];xs.forEach(ex=>{add(cyl(.045,.05,.14,M.chrome,16),ex,.28,zRear-.01).rotation.x=Math.PI/2;add(cyl(.036,.036,.02,std(0x050505,1),16),ex,.28,zRear+.062).rotation.x=Math.PI/2;const fl=add(new THREE.Mesh(new THREE.ConeGeometry(.05,.3,10),new THREE.MeshBasicMaterial({color:0xff7a1a,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false})),ex,.28,zRear+.22);fl.rotation.x=Math.PI/2;fl.visible=false;fl.userData.noHit=true;P.flames.push(fl);});}
  if(c.spoiler||c.id==='strada')add(rbox(1.0,.06,.12,.02,blk),0,.3,zRear+.03);
  if(c.spoiler==='lip')add(rbox(1.3,.025,.1,.01,M.paint),0,.035,zRear-lidZ-.06,TP);
  if(c.spoiler==='wing'){add(rbox(1.4,.03,.22,.012,TX?std(0xffffff,.22,.25,{map:TX.carbon}):blk),0,.2,zRear-lidZ-.15,TP);for(const s of[-1,1])add(rbox(.03,.17,.06,.01,blk),s*.45,.09,zRear-lidZ-.15,TP);}
@@ -1140,7 +1141,7 @@ function updateRails(){const base=Math.round(posZ/4)*4;if(base===RAIL.base)retur
 function updateAutobahn(dt,t){updateRails();const kg=Math.max(0,Math.floor((-posZ-750)/1000));gantries.forEach((G,i)=>{const k=kg+i,z=-750-1000*k;G.g.position.z=z;G.g.visible=Math.abs(z-posZ)<700;const lim=gantryLimit(z),jd=jamAhead(z),key=k+'|'+lim+'|'+(jd<0?-1:Math.round(jd/100));if(key!==G.key){G.key=key;drawGantry(G,k,z,lim,jd);}});
  const kb=Math.max(0,Math.floor((-posZ-1100)/2000));bridges.forEach((B,i)=>{const z=-1100-2000*(kb+i);B.g.position.z=z;B.g.visible=Math.abs(z-posZ)<700;B.cars.forEach((c2,j)=>{c2.position.x+=(j?-1:1)*15*dt;if(c2.position.x>16)c2.position.x=-60;if(c2.position.x<-60)c2.position.x=16;});});
  const ke=Math.max(0,Math.floor((-posZ-400)/500));sosPosts.forEach((S,i)=>{S.position.z=-400-500*(ke+i);});}
-function extraWalls(){const out=[];if(cityZone(posX,posZ)||Math.abs(posZ-CITY.cz)<700)for(const w of CITY.walls)if(Math.abs((w[2]+w[3])/2-posZ)<50&&Math.abs((w[0]+w[1])/2-posX)<60)out.push(w);for(const b of bridges){const bz=b.g.position.z;if(Math.abs(bz-posZ)>40)continue;for(const x of[-53,-40,-27.6,-6.8,7.2])out.push([x-.6,x+.6,bz-1.2,bz+1.2]);}for(const S of sosPosts){if(Math.abs(S.position.z-posZ)<20)out.push([-28.9,-28.5,S.position.z-.2,S.position.z+.2]);}restWalls(out);trainWalls(out);mobWalls(out);return out;}
+function extraWalls(){const out=[];if(cityZone(posX,posZ)||Math.abs(posZ-CITY.cz)<700)for(const w of CITY.walls)if(Math.abs((w[2]+w[3])/2-posZ)<50&&Math.abs((w[0]+w[1])/2-posX)<60)out.push(w);for(const b of bridges){const bz=b.g.position.z;if(Math.abs(bz-posZ)>40)continue;for(const x of[-53,-40,-27.6,-6.8,7.2])out.push([x-.6,x+.6,bz-1.2,bz+1.2]);}for(const S of sosPosts){if(Math.abs(S.position.z-posZ)<20)out.push([-28.9,-28.5,S.position.z-.2,S.position.z+.2]);}restWalls(out);trainWalls(out);mobWalls(out);borderWalls(out);return out;}
 /* ===== Nordstadt city ===== */
 function cityZone(x,z){return z<-3680&&z>-5020&&x>-8&&x<222;}
 const CITY={z0:-3700,z1:-5000,x1:208,cx:100,cz:-4350,streets:[],walls:[],heads:[],peds:[],state:''};
@@ -1236,7 +1237,7 @@ function updateA7(dt){const near=Math.abs(posZ-ZX)<900||(walking&&Math.abs(walke
  const M=new THREE.Matrix4(),Z=new THREE.Matrix4().makeScale(0,0,0),base=Math.floor(cx/40)*40-600;for(let i=0;i<32;i++){const c=base+i*40+20;if(!medBlock(c))A7.med.setMatrixAt(i,Z);else{M.makeTranslation(c,.43,ZX);A7.med.setMatrixAt(i,M);}}A7.med.instanceMatrix.needsUpdate=true;
  for(const c of A7.cars){if(!c.g.visible)continue;let want=c.v;if(!walking&&pathY<1.5&&Math.abs(posZ-c.z)<1.9){const d=(posX-c.x)*c.dir;if(d>0&&d<40)want=Math.min(want,d<9?0:c.v*(d-9)/31);}
   for(const q of A7.cars){if(q===c||q.z!==c.z)continue;const d=(q.x-c.x)*c.dir;if(d>0&&d<32)want=Math.min(want,d<8?0:Math.min(c.v,(d-8)*1.3+q.cv*.9));}
-  c.cv+=(want-c.cv)*Math.min(1,dt*(want<c.cv?2.5:.8));c.x+=c.dir*c.cv*dt;
+  want=borderAI(c,want,dt);c.cv+=(want-c.cv)*Math.min(1,dt*(want<c.cv?2.5:.8));c.x+=c.dir*c.cv*dt;
   if(!walking&&pathY<1.5&&Math.abs(posZ-c.z)<1.9){const d=(posX-c.x)*c.dir;if(d>0&&d<4.8){c.x=posX-c.dir*4.8;c.cv=0;}if(Math.abs(posX-c.x)<4.6&&!c.cool){const im=Math.abs(st.v);if(im>.5){st.v*=-.2;crashT=Math.min(1,im/12);sfx(im>3?'crash':'thunk');}c.cool=1.2;}}if(c.cool)c.cool=Math.max(0,c.cool-dt);
   const rel=(c.x-posX)*c.dir;if(rel>700||c.x>-150&&c.dir>0)c.x=Math.min(posX,-300)-500-Math.random()*200;else if(rel<-700)c.x=Math.min(-160,posX+c.dir*600);if(c.dir<0&&c.x>-150)c.x=-160-Math.random()*40;
   c.g.position.set(c.x,0,c.z);}}
@@ -1716,7 +1717,7 @@ const PANEL_BTN={help:'#helpBtn',emerg:'#emergBtn',phone:'#phoneBtn',scr:'#scrBt
 function closePanel(id){const el=$('#'+id);if(!el)return;el.hidden=true;if(id==='dash'){st.dash=false;st.dashOff=true;$('#dashBtn').setAttribute('aria-pressed',false);}if(PANEL_BTN[id])$(PANEL_BTN[id]).setAttribute('aria-expanded',false);}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-close]');if(b){e.stopPropagation();closePanel(b.dataset.close);}});
 $('#toast').addEventListener('click',()=>{const t=$('#toast');t.style.opacity=0;t.style.pointerEvents='none';});
-addEventListener('keydown',e=>{if(e.code==='Escape'){['shop','help','emerg','phone','bigmap','trophies','paintPanel','trainPanel'].forEach(closePanel);if($('#ui').classList.contains('photo'))togglePhoto();}});
+addEventListener('keydown',e=>{if(e.code==='Escape'){['shop','help','emerg','phone','bigmap','trophies','paintPanel','trainPanel','borderPanel'].forEach(closePanel);if($('#ui').classList.contains('photo'))togglePhoto();}});
 
 /* ===== emergencies ===== */
 const FAULTS=[
@@ -2214,7 +2215,7 @@ const A7JI=(()=>{const N=200,body=new THREE.InstancedMesh(new THREE.BoxGeometry(
  for(const m of[body,cab]){m.frustumCulled=false;m.castShadow=true;m.userData.noHit=true;scene.add(m);}const col=new THREE.Color();for(let i=0;i<N;i++){col.set(TCOLS[i%TCOLS.length]);body.setColorAt(i,col);}body.count=cab.count=0;return{body,cab,N};})();
 function spawnA7Jam(){if(A7J||!A7JAM_ON)return false;const onA7=!walking&&Math.abs(posZ-ZX)<12&&posX<-56&&Math.abs(Math.sin(yawCar))>.8;const d=onA7?(Math.sin(yawCar)>0?-1:1):-1;
  const L=500+Math.random()*700,xf=onA7?posX+d*(650+L):-1400-L,lanes=d<0?[ZX-3,ZX-7]:[ZX+3,ZX+7];const cars=[];for(const[li,lz]of lanes.entries())for(let s=10+li*4;s<L;s+=8+Math.random()*2.5)cars.push({lz,s,v:0,x:0,z:lz});
- const g=new THREE.Group();scene.add(g);const c1=trafficCar(1,'#d0d4d8');c1.position.set(xf,0,lanes[0]);c1.rotation.y=.4;g.add(c1);const c2=trafficCar(3,'#24324a');c2.position.set(xf-d*3,0,lanes[1]);c2.rotation.y=2.2;g.add(c2);const pol=buildService('police');pol.position.set(xf+d*14,0,(lanes[0]+lanes[1])/2);pol.rotation.y=d<0?-Math.PI/2:Math.PI/2;g.add(pol);
+ if(Math.min(xf,xf-d*L)-200<BX&&Math.max(xf,xf-d*L)+200>BX)return false;const g=new THREE.Group();scene.add(g);const c1=trafficCar(1,'#d0d4d8');c1.position.set(xf,0,lanes[0]);c1.rotation.y=.4;g.add(c1);const c2=trafficCar(3,'#24324a');c2.position.set(xf-d*3,0,lanes[1]);c2.rotation.y=2.2;g.add(c2);const pol=buildService('police');pol.position.set(xf+d*14,0,(lanes[0]+lanes[1])/2);pol.rotation.y=d<0?-Math.PI/2:Math.PI/2;g.add(pol);
  A7J={d,L,xf,cars,t:0,dur:90+Math.random()*80,clearing:false,g,lanes};A7.cars.forEach(c=>{if(c.dir===d)c.g.visible=false;});
  radio(`A7 Richtung ${d<0?'Westfeld':'Kreuz Westfeld'}: Unfall, ${(L/1000).toFixed(1).replace('.',',')} Kilometer Stau.`);toast(`Accident on the A7 ${d<0?'westbound':'eastbound'}: ${(L/1000).toFixed(1)} km jam ahead.`,3600);renderEmerg();return true;}
 function endA7Jam(){if(!A7J)return;scene.remove(A7J.g);disposeGroup(A7J.g);A7J=null;A7JI.body.count=A7JI.cab.count=0;renderEmerg();}
@@ -2361,7 +2362,7 @@ function updateBlitzer(dt){blitzT-=dt;if(blitzT>0)return;blitzT=.2;const pill=$(
 function toggleBlitzer(){st.blitzer=!st.blitzer;try{localStorage.setItem('cabin-blitz',st.blitzer?'1':'0');}catch(e){}const b=$('#blitzBtn');b.setAttribute('aria-pressed',st.blitzer);b.textContent=st.blitzer?'Turn off':'Turn on';$('#blitzMore').hidden=!st.blitzer;if(!st.blitzer)$('#blitzTxt').textContent='Warns you about speed cameras ahead.';sfx('click');toast(st.blitzer?'Blitzer warner on. It beeps when a speed camera is ahead.':'Blitzer warner off',2600);blitzT=0;}
 /* ===== A7 speed limits ===== */
 const A7LIM=[80,120,130,0,100,120,0,130,120,0];
-function a7Limit(x){const k=Math.max(0,Math.floor((-60-x)/1000));return A7LIM[k%A7LIM.length];}
+function a7Limit(x){{const b=borderLimit(x);if(b!=null)return b;}const k=Math.max(0,Math.floor((-60-x)/1000));return A7LIM[k%A7LIM.length];}
 const A7SIGN={g:[],mats:{}};
 {const mk=v=>{if(A7SIGN.mats[v])return A7SIGN.mats[v];const c=mkcv(128,128),x=c.getContext('2d');x.fillStyle='#fff';x.beginPath();x.arc(64,64,62,0,7);x.fill();
   if(v===0){x.strokeStyle='#111';x.lineWidth=4;x.beginPath();x.arc(64,64,58,0,7);x.stroke();x.lineWidth=7;for(const o of[-16,-6,4,14]){x.beginPath();x.moveTo(30+o,98+o*.0);x.lineTo(98+o,30);x.stroke();}}
@@ -2371,8 +2372,147 @@ const A7SIGN={g:[],mats:{}};
  for(let i=0;i<4;i++){const g=new THREE.Group();const p=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,2.6,8),std(0x9aa0a6,.5,.6));p.position.y=1.3;g.add(p);const d=new THREE.Mesh(new THREE.CircleGeometry(.55,28),mk(120));d.position.y=2.9;g.add(d);const bk=new THREE.Mesh(new THREE.CircleGeometry(.55,28),std(0x9aa0a6,.5,.6));bk.position.y=2.9;bk.rotation.y=Math.PI;bk.position.z=-.01;g.add(bk);g.userData.d=d;g.traverse(o=>{o.userData.noHit=true;if(o.isMesh)o.castShadow=true;});scene.add(g);g.visible=false;A7SIGN.g.push(g);}}
 function updateA7Signs(){const near=Math.abs((walking?walker.z:posZ)-ZX)<900;const px=walking?walker.x:posX;const k0=Math.max(0,Math.floor((-60-px)/1000));
  A7SIGN.g.forEach((g,i)=>{const k=k0+(i>>1),west=(i&1)===0;g.visible=near;if(!near)return;const xs=-60-1000*k-(west?20:-20+1000);
-  if(west){g.position.set(-60-1000*k-25,0,ZX-12.6);g.rotation.y=Math.PI/2;g.userData.d.material=A7SIGN.mats[A7LIM[k%A7LIM.length]];}
-  else{g.position.set(-60-1000*(k+1)+25,0,ZX+12.6);g.rotation.y=-Math.PI/2;g.userData.d.material=A7SIGN.mats[A7LIM[k%A7LIM.length]];}});}
+  if(west){g.position.set(-60-1000*k-25,0,ZX-12.6);g.rotation.y=Math.PI/2;g.userData.d.material=A7SIGN.mats[g.position.x<BX-300?120:A7LIM[k%A7LIM.length]];}
+  else{g.position.set(-60-1000*(k+1)+25,0,ZX+12.6);g.rotation.y=-Math.PI/2;g.userData.d.material=A7SIGN.mats[g.position.x<BX-300?120:A7LIM[k%A7LIM.length]];}});}
+/* ===== Swiss border crossing on the A7 (Grenzübergang) ===== */
+const BX=-2700;
+const BORDER={g:new THREE.Group(),booms:{},pl:{key:null,status:'none',side:null,lastD:null,inspT:0},vig:false,chaseCD:0};
+try{BORDER.vig=localStorage.getItem('cabin-vignette')==='1';}catch(e){}
+scene.add(BORDER.g);BORDER.g.visible=false;
+function borderLimit(x){const ad=Math.abs(x-BX);if(ad<160)return 30;if(ad<450)return 60;if(x<BX)return 120;return null;}
+function flagTex(kind){const c=mkcv(192,128),x=c.getContext('2d');
+ if(kind==='ch'){x.fillStyle='#d52b1e';x.fillRect(0,0,192,128);x.fillStyle='#fff';x.fillRect(84,24,24,80);x.fillRect(56,52,80,24);}
+ else{['#111111','#dd0000','#ffce00'].forEach((col,i)=>{x.fillStyle=col;x.fillRect(0,i*128/3,192,128/3+1);});}
+ return tex(c);}
+function limitMat(v){const c=mkcv(128,128),x=c.getContext('2d');x.fillStyle='#fff';x.beginPath();x.arc(64,64,62,0,7);x.fill();x.lineWidth=14;x.strokeStyle='#d0141a';x.beginPath();x.arc(64,64,54,0,7);x.stroke();x.fillStyle='#111';x.font='700 52px Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(v,64,68);return new THREE.MeshStandardMaterial({map:tex(c),roughness:.6});}
+{const g=BORDER.g,concrete=std(0xb9b7b1,.9),white=std(0xf2f2f0,.6),dark=std(0x2a2d33,.6),steel=std(0x9aa0a6,.45,.6),glassM=new THREE.MeshStandardMaterial({color:lin(0x9fc3d6),roughness:.05,metalness:.3,transparent:true,opacity:.45}),red=std(0xc8102e,.5),lamp=new THREE.MeshBasicMaterial({color:0xfff4dc,toneMapped:false});
+ const nohit=o=>{o.traverse(m=>m.userData.noHit=true);return o;};
+ /* canopy */
+ SB(g,14,.55,24,white,BX,6.1,ZX);SB(g,14.2,.12,24.2,dark,BX,5.8,ZX);
+ for(const dz of[-9,-5,-1,3,7])for(const dx of[-4,0,4])nohit(SB(g,2.2,.03,.5,lamp,BX+dx,5.73,ZX+dz+.5));
+ for(const[dx,dz]of[[-5,-5],[5,-5],[-5,5],[5,5],[-5,-11.6],[5,-11.6],[-5,11.6],[5,11.6]])SB(g,.45,5.8,.45,steel,BX+dx,2.9,ZX+dz);
+ const fascia=(face,lines,bg,fg,flag)=>{const c=mkcv(1024,64),x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,1024,64);x.fillStyle=fg;x.font='700 27px "Chakra Petch", Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(lines,512,34);
+  if(flag==='ch'){for(const fx of[40,984]){x.fillStyle='#d52b1e';x.fillRect(fx-22,10,44,44);x.fillStyle='#fff';x.fillRect(fx-5,18,10,28);x.fillRect(fx-14,27,28,10);}}
+  else{for(const fx of[40,984])['#111','#d00','#ffce00'].forEach((col,i)=>{x.fillStyle=col;x.fillRect(fx-26,12+i*13.3,52,13.4);});}
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(24,1.5),new THREE.MeshBasicMaterial({map:tex(c),toneMapped:false}));m.position.set(BX+face*7.02,6.1,ZX);m.rotation.y=face*Math.PI/2;g.add(nohit(m));};
+ fascia(1,'ZOLL · DOUANE · DOGANA   —   SCHWEIZ · SUISSE · SVIZZERA','#d52b1e','#ffffff','ch');
+ fascia(-1,'ZOLL   —   BUNDESREPUBLIK DEUTSCHLAND','#1d2b4a','#ffffff','de');
+ /* islands, booths, stop lines */
+ const lineM=new THREE.MeshBasicMaterial({color:0xf4f4f4});
+ for(const sd of[-1,1]){const iz=ZX+sd*5;SB(g,14,.2,.9,concrete,BX,.1,iz);
+  for(const ex of[-7,7]){const nose=SB(g,.9,.22,.9,std(0xf2c200,.6),BX+ex,.11,iz);nose.rotation.y=Math.PI/4;}
+  const bxp=BX-sd*2;SB(g,2.8,.12,.75,white,bxp,2.75,iz);SB(g,2.6,.35,.7,white,bxp,.37,iz);
+  for(const zz of[-.32,.32])for(const xx of[-1.25,1.25])SB(g,.08,2.2,.08,white,bxp+xx,1.65,iz+zz);
+  for(const zz of[-.34,.34]){const gl=SB(g,2.5,2.1,.03,glassM,bxp,1.6,iz+zz);gl.castShadow=false;}
+  SB(g,2.5,.2,.66,red,bxp,2.55,iz);
+  const sl=new THREE.Mesh(new THREE.PlaneGeometry(.4,8),lineM);sl.rotation.x=-Math.PI/2;sl.position.set(BX+sd*5.5,.03,ZX+sd*5);g.add(nohit(sl));
+  const txc=mkcv(256,64),tx=txc.getContext('2d');tx.fillStyle='#fff';tx.font='800 46px Arial';tx.textAlign='center';tx.textBaseline='middle';tx.fillText('HALT',128,34);
+  for(const lz of[3,7]){const t=new THREE.Mesh(new THREE.PlaneGeometry(2.4,.9),new THREE.MeshBasicMaterial({map:tex(txc),transparent:true,depthWrite:false}));t.rotation.x=-Math.PI/2;t.rotation.z=sd>0?-Math.PI/2:Math.PI/2;t.position.set(BX+sd*8,.031,ZX+sd*lz);g.add(nohit(t));}}
+ /* barrier booms */
+ const bc=mkcv(256,16),bx2=bc.getContext('2d');for(let i=0;i<8;i++){bx2.fillStyle=i%2?'#ffffff':'#d0141a';bx2.fillRect(i*32,0,32,16);}const boomM=std(0xffffff,.45,0,{map:tex(bc)});
+ for(const[key,lz,side]of[['W1',ZX-3,-1],['W2',ZX-7,-1],['E1',ZX+3,1],['E2',ZX+7,1]]){const iz=ZX+side*5,sg=Math.sign(lz-iz),bxp=BX-side*1;
+  SB(g,.35,1.1,.35,std(0xd0d4d8,.5,.4),bxp,.55,iz+sg*.2);
+  const pv=new THREE.Group();pv.position.set(bxp,1.0,iz+sg*.45);g.add(pv);const bar=new THREE.Mesh(new THREE.BoxGeometry(.09,.09,3.35),boomM);bar.position.z=sg*1.7;bar.castShadow=true;pv.add(bar);
+  const tip=new THREE.Mesh(new THREE.SphereGeometry(.06,8,6),new THREE.MeshBasicMaterial({color:0xff2a1a,toneMapped:false}));tip.position.z=sg*3.35;pv.add(tip);
+  BORDER.booms[key]={pv,bar,sg,open:0,target:0,broken:0,lz,side};}
+ /* officers */
+ const officer=(x,z,ry,label,fn)=>{const og=new THREE.Group();og.position.set(x,0,z);g.add(og);const p=person(og,0,0,ry,0x23324a);
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(.14,.15,.08,14),std(0x1b2538,.6));cap.position.set(0,1.85,0);p.add(cap);const vz=new THREE.Mesh(new THREE.BoxGeometry(.22,.02,.12),std(0x111111,.4));vz.position.set(0,1.81,.13);p.add(vz);
+  const vest=new THREE.Mesh(new THREE.BoxGeometry(.5,.36,.28),std(0xd8ff3a,.6));vest.position.set(0,1.22,0);p.add(vest);
+  permClick(og,{label,click:fn});return og;};
+ officer(BX+3.2,ZX-5,Math.PI/2,'Swiss customs officer · talk',()=>borderTalk('W'));
+ officer(BX-3.2,ZX+5,-Math.PI/2,'German customs officer · talk',()=>borderTalk('E'));
+ officer(BX-36,ZX-11.2,0,'Swiss border police · inspection',()=>toast(BORDER.pl.status==='inspect'?'Officer: "Park here on the shoulder and wait, please."':'Officer: "Random checks happen here. Gute Fahrt!"',3000));
+ /* police car + inspection bay */
+ {const pc=buildService('police');pc.position.set(BX-46,0,ZX-9.8);pc.rotation.y=Math.PI/2;g.add(pc);
+  const bm=new THREE.MeshBasicMaterial({color:0xf2c200});for(const[w,d,x,z]of[[12,.2,BX-35,ZX-8.7],[12,.2,BX-35,ZX-10.9],[.2,2.4,BX-29,ZX-9.8],[.2,2.4,BX-41,ZX-9.8]]){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),bm);m.rotation.x=-Math.PI/2;m.position.set(x,.032,z);g.add(nohit(m));}
+  const kc=mkcv(256,64),kx=kc.getContext('2d');kx.fillStyle='#f2c200';kx.font='800 40px Arial';kx.textAlign='center';kx.textBaseline='middle';kx.fillText('KONTROLLE',128,34);const km=new THREE.Mesh(new THREE.PlaneGeometry(5,1.2),new THREE.MeshBasicMaterial({map:tex(kc),transparent:true,depthWrite:false}));km.rotation.x=-Math.PI/2;km.rotation.z=Math.PI/2;km.position.set(BX-35,.033,ZX-9.8);g.add(nohit(km));}
+ /* flags */
+ const flag=(x,z,kind)=>{SB(g,.1,7,.1,steel,x,3.5,z);const f=new THREE.Mesh(new THREE.PlaneGeometry(1.8,1.2),new THREE.MeshStandardMaterial({map:flagTex(kind),roughness:.8,side:THREE.DoubleSide}));f.position.set(x,6.3,z+.92*(z<ZX?-1:1));f.rotation.y=Math.PI/2;g.add(nohit(f));};
+ for(const dx of[-14,-18,-22])flag(BX+dx,ZX-14,'ch');for(const dx of[14,18,22])flag(BX+dx,ZX+14,'de');
+ flag(BX+14,ZX-14,'de');flag(BX-14,ZX+14,'ch');
+ /* signs */
+ const sb=(lines,x,z,ry,bg)=>{const s2=signBoard(lines,x,z,3.2,1.6,bg);s2.rotation.y=ry;g.add(nohit(s2));};
+ const W=Math.PI/2,E=-Math.PI/2,blue='#1d4fa0',green='#1f6b3a';
+ sb([['Grenzübergang',40,30,'#fff'],['Schweiz 1000 m',92,28,'#fff']],BX+1000,ZX-12.6,W,blue);
+ sb([['ZOLL · DOUANE',40,30,'#fff'],['Vignette CH  ·  500 m',92,24,'#fff']],BX+500,ZX-12.6,W,blue);
+ sb([['Willkommen in der',40,24,'#fff'],['Schweiz',92,34,'#fff']],BX-60,ZX-12.6,W,'#c8102e');
+ sb([['Basel 18 km',40,30,'#fff'],['Zürich 96 km',92,28,'#fff']],BX-220,ZX-12.6,W,green);
+ sb([['Grenze Deutschland',40,26,'#fff'],['1000 m',92,30,'#fff']],BX-1000,ZX+12.6,E,green);
+ sb([['ZOLL · DOGANA',40,30,'#fff'],['Douane  ·  500 m',92,26,'#fff']],BX-500,ZX+12.6,E,green);
+ sb([['Willkommen in',40,26,'#fff'],['Deutschland',92,32,'#fff']],BX+60,ZX+12.6,E,blue);
+ sb([['A1 Kreuz Westfeld',40,24,'#fff'],['2 km',92,30,'#fff']],BX+220,ZX+12.6,E,blue);
+ const lim=(v,x,z,ry)=>{const s=new THREE.Group();s.position.set(x,0,z);s.rotation.y=ry;g.add(s);SB(s,.12,2.6,.12,steel,0,1.3,0);const d=new THREE.Mesh(new THREE.CircleGeometry(.55,28),limitMat(v));d.position.set(0,2.9,.07);s.add(d);nohit(s);};
+ lim(60,BX+450,ZX-12.6,W);lim(30,BX+160,ZX-12.6,W);lim(120,BX-450,ZX-12.6,W);
+ lim(60,BX-450,ZX+12.6,E);lim(30,BX-160,ZX+12.6,E);
+ g.traverse(o=>{if(o.isMesh&&o.material&&o.material.userData)o.material.userData.border=true;});}
+function borderWalls(out){if(Math.abs(posX-BX)>70||Math.abs(posZ-ZX)>14)return;for(const sd of[-1,1])out.push([BX-7.4,BX+7.4,ZX+sd*5-.45,ZX+sd*5+.45]);out.push([BX-48.4,BX-43.6,ZX-10.8,ZX-8.8]);}
+/* --- traffic waits at the booths --- */
+function borderAI(c,want,dt){const d=(BX-c.x)*c.dir;if(d>160||d<-60){c.bd=false;c.bwT=0;return want;}
+ if(c.bd)return Math.min(want,d>-25?7:want);
+ if(d<-2){c.bd=true;return want;}
+ want=Math.min(want,Math.max(0,d-7)*.45);
+ if(d<10&&c.cv<.7){c.bwT=(c.bwT||0)+dt;if(c.bwT>2.4){c.bd=true;c.bwT=0;}}
+ return want;}
+function boomKey(side,z){return side==='W'?(Math.abs(z-(ZX-3))<Math.abs(z-(ZX-7))?'W1':'W2'):(Math.abs(z-(ZX+3))<Math.abs(z-(ZX+7))?'E1':'E2');}
+/* --- dialog --- */
+function borderPanel(title,text,btns){const p=$('#borderPanel');p.hidden=false;$('#bdTitle').textContent=title;$('#bdText').textContent=text;const b=$('#bdBtns');b.innerHTML='';
+ btns.forEach(([lab,fn],i)=>{const e=document.createElement('button');e.className='btn'+(i===0?' call':'');e.textContent=lab;e.onclick=()=>{sfx('click');fn();};b.appendChild(e);});}
+function borderClose(){$('#borderPanel').hidden=true;}
+function borderClear(msg){const pl=BORDER.pl;pl.status='cleared';borderPanel(pl.side==='W'?'🇨🇭 Swiss customs':'🇩🇪 German customs',msg,[['Drive on',()=>borderClose()]]);sfx('ready');}
+function trunkCount(){try{return (typeof trunkList==='function'?trunkList().length:0)+(st.hands||[]).length;}catch(e){return 0;}}
+function borderRefuse(){const pl=BORDER.pl;pl.status='refused';borderPanel(pl.side==='W'?'🇨🇭 Swiss customs':'🇩🇪 German customs','The officer checks your plates. "This car is reported stolen! Stay where you are." The police are coming. Entry refused.',[['OK',()=>borderClose()]]);
+ st.tickets+=1;if(!services.some(q=>q.type==='police'&&q.state!=='leaving'))dispatch('police',{pursuit:true,stolen:true,kmh:0,lim:30});sfx('fcw');}
+function borderTalk(side){const pl=BORDER.pl;
+ if(walking){toast(side==='W'?'Officer: "Grüezi! Drive up to the booth with your car for the check."':'Officer: "Guten Tag! Drive up to the booth with your car, please."',3200);return;}
+ if(pl.side!==side||!['waiting','talk'].includes(pl.status)){toast('Stop at the HALT line next to the booth first.',2400);return;}
+ borderStart();}
+function borderStart(){const pl=BORDER.pl;pl.status='talk';st.ind=0;
+ if(pl.side==='E'){borderPanel('🇩🇪 German customs','Officer: "Guten Tag. German customs. Your passport, please."',[['🛂 Show passport',()=>{if(car.stolen)return borderRefuse();borderClear('Officer: "Danke schön. Anything from Switzerland to declare? No? Gute Fahrt!" The barrier opens.');}]]);return;}
+ borderPanel('🇨🇭 Swiss customs','Officer: "Grüezi! Swiss customs. Your passport, please."',[['🛂 Show passport',()=>{if(car.stolen)return borderRefuse();borderDeclare();}]]);}
+function borderDeclare(){const n=trunkCount();borderPanel('🇨🇭 Swiss customs','Officer: "Merci. Do you have anything to declare? Goods, cash over 10,000 francs, animals?"',[
+ ['Nothing to declare',()=>{BORDER.pl.lied=n>0;borderVignette();}],
+ [n?`Declare ${n} item${n>1?'s':''} from the shop`:'Declare goods',()=>{BORDER.pl.lied=false;toast('Officer: "That is within the duty-free allowance. Thank you for declaring."',3000);borderVignette();}]]);}
+function borderVignette(){if(BORDER.vig)return borderRandom();
+ const can=money>=40;borderPanel('🇨🇭 Swiss customs','Officer: "Your car has no motorway vignette. You need one to drive on Swiss motorways. It costs 40 francs (€40)."',[
+  [can?'Buy vignette (€40)':`Buy vignette (you have €${money})`,()=>{if(money>=40){addMoney(-40,'gift');toast('Vignette bought (−€40) and stuck on the windscreen.',2600);}else toast('Officer: "No money? This time it is on us. Earn some with jobs on your phone."',3400);
+   BORDER.vig=true;try{localStorage.setItem('cabin-vignette','1');}catch(e){}borderRandom();}]]);}
+function borderRandom(){const pl=BORDER.pl,check=pl.lied?Math.random()<.6:Math.random()<.22;
+ if(check){pl.status='inspect';pl.inspT=0;borderPanel('🇨🇭 Swiss customs','Officer: "Random check. Please drive through and park in the yellow KONTROLLE box on the hard shoulder, behind the police car."',[['OK',()=>borderClose()]]);sfx('fcw');return;}
+ borderClear('Officer: "Alles in Ordnung. Willkommen in der Schweiz, gute Fahrt!" The barrier opens.');}
+/* --- per-frame --- */
+function updateBorder(dt){const px=walking?walker.x:posX,pz=walking?walker.z:posZ,near=Math.abs(px-BX)<1700&&Math.abs(pz-ZX)<900;BORDER.g.visible=near;if(!near){if(!$('#borderPanel').hidden)borderClose();return;}
+ BORDER.chaseCD=Math.max(0,BORDER.chaseCD-dt);const pl=BORDER.pl;
+ /* which booth is the player at */
+ let side=null,d=null;if(!walking&&posX<-56&&Math.abs(posZ-ZX)<11.6){const sY=Math.sin(yawCar);if(posZ<ZX&&sY>.5){side='W';d=posX-BX;}else if(posZ>ZX&&sY<-.5){side='E';d=BX-posX;}}
+ if(side&&(d>220||d<-120)){side=null;}
+ if(!side){if(pl.status==='inspect'&&pl.side==='W'&&!walking&&(posX<BX-120||posZ>ZX)){skipCheck();}if(pl.status!=='inspect'){if(pl.status!=='none'&&!$('#borderPanel').hidden)borderClose();pl.status='none';pl.side=null;pl.key=null;}pl.lastD=null;}
+ else{if(pl.side!==side){if(pl.status==='inspect'&&pl.side==='W')skipCheck();pl.side=side;pl.status='none';pl.lastD=null;if(!$('#borderPanel').hidden)borderClose();}const key=boomKey(side,posZ);if(pl.status==='none'||pl.status==='waiting')pl.key=key;
+  const v=Math.abs(st.v);
+  if(pl.status==='none'&&d>3&&d<220){pl.status='waiting';if(d>40)toast(side==='W'?'Swiss border ahead. Slow down and stop at the HALT line by the booth.':'German border ahead. Slow down and stop at the booth.',3200);}
+  if(pl.status==='talk'&&(d>34||d<2)){pl.status='waiting';if(!$('#borderPanel').hidden)borderClose();}
+  if((pl.status==='waiting'||pl.status==='talk')&&d>3&&d<26&&v<.8&&$('#borderPanel').hidden){borderStart();}
+  /* barrier contact */
+  const B=BORDER.booms[key],openNow=B&&(B.open>.75||B.broken>0);
+  if(pl.lastD!=null&&pl.lastD>3.1&&d<=3.1&&!openNow){const kmh=v*3.6;
+   if(kmh>25){B.broken=40;crashT=Math.max(crashT,.5);sfx('crash');st.v*=.8;hp=Math.max(0,hp-4);if(!$('#borderPanel').hidden)borderClose();pl.status='ran';
+    toast(side==='W'?'You smashed through the Swiss border barrier! Police are after you!':'You smashed through the German border barrier! Police are after you!',3800);
+    if(BORDER.chaseCD<=0&&!services.some(q=>q.type==='police'&&q.state!=='leaving')){BORDER.chaseCD=60;const k=Math.round(kmh);setTimeout(()=>dispatch('police',{pursuit:true,kmh:k,lim:30,stolen:!!car.stolen}),900);}}
+   else{posX=side==='W'?BX+3.12:BX-3.12;st.v=0;cruise=0;sfx('thunk');toast('The barrier is down. Wait at the HALT line for the officer.',2400);d=3.12;}}
+  if(d<-12&&pl.status==='cleared'){pl.status='passed';if(side==='W'){ach('swiss');toast('🇨🇭 Willkommen in der Schweiz! Motorway limit 120 km/h. Your vignette is valid.',4200);say('Welcome to Switzerland. The speed limit is one hundred and twenty.');STATS.ch=(STATS.ch||0)+1;}else toast('🇩🇪 Willkommen in Deutschland! Back on the A7.',3600);}
+  pl.lastD=d;}
+ /* inspection on the hard shoulder */
+ if(pl.status==='inspect'&&!walking){const inBox=Math.abs(posX-(BX-35))<6.5&&Math.abs(posZ-(ZX-9.8))<1.7;
+  if(inBox&&Math.abs(st.v)<.5){pl.inspT+=dt;if(pl.inspT<.05)toast('Officers check your car, papers and trunk…',3000);
+   if(pl.inspT>5){pl.status='passed';const n=trunkCount();toast(pl.lied&&n?`Officer: "You forgot to declare ${n} item${n>1?'s':''}. A small fine this time. Next time, declare them!" Ticket added.`:'Officer: "Everything is in order. Thank you, gute Fahrt!"',4400);if(pl.lied&&n)st.tickets++;ach('swiss');sfx('ready');}}else if(pl.inspT>0&&pl.inspT<5&&!inBox)pl.inspT=0;}
+ /* booms animate */
+ for(const k in BORDER.booms){const B=BORDER.booms[k];let want=0;
+  if(pl.key===k&&['cleared','passed','inspect'].includes(pl.status))want=1;
+  for(const c of A7.cars){if(!c.g.visible||!c.bd)continue;const dd=(BX-c.x)*c.dir;if(dd>-10&&dd<14&&Math.abs(c.z-B.lz)<1)want=1;}
+  if(B.broken>0){B.broken-=dt;B.pv.rotation.x=0;B.pv.rotation.y=B.sg*.9;B.bar.position.y=-.5;if(B.broken<=0){B.pv.rotation.y=0;B.bar.position.y=0;}continue;}
+  B.open+=(want-B.open)*Math.min(1,dt*(want?2.2:1.6));B.pv.rotation.x=-B.sg*B.open*1.45;}}
+function skipCheck(){const pl=BORDER.pl;pl.status='none';toast('You skipped the customs inspection! The Swiss police are coming after you.',3800);if(BORDER.chaseCD<=0&&!services.some(q=>q.type==='police'&&q.state!=='leaving')){BORDER.chaseCD=60;dispatch('police',{pursuit:true,kmh:Math.round(Math.abs(st.v)*3.6),lim:120});}}
+
 /* ===== jobs, money, paint shop, minimap, save ===== */
 let money=0;try{money=+(localStorage.getItem('cabin-money')||0)||0;}catch(e){}
 function addMoney(v,why){money=Math.max(0,Math.round(money+v));if(v>0&&typeof STATS!=='undefined'){STATS.earned=(STATS.earned||0)+Math.round(v);if(why!=='gift')STATS.jobs=(STATS.jobs||0)+1;}try{localStorage.setItem('cabin-money',String(money));}catch(e){}const el=$('#hudMoney');if(el)el.textContent='€ '+money.toLocaleString('de-DE');if(v>0){sfx('ready');}}
@@ -2534,7 +2674,7 @@ const ACHS=[
  ['km1','First kilometre','Drive 1 km'],['ton','Ton up','Reach 100 km/h'],['v200','Double ton','Reach 200 km/h'],['v250','Autobahn rocket','Reach 250 km/h'],
  ['km50','Road trip','Drive 50 km in one session'],['belt','Click it','Fasten your seatbelt'],['clean20','Smooth operator','Drive 20 km without crashing'],
  ['skip','Stau dodger','Skip a traffic jam through an exit'],['corridor','Rettungsgasse','Let an ambulance through'],['deer','Oh deer','Avoid a deer on the road'],
- ['kreuz','Interchange','Take the Kreuz onto the A7'],['uturn','Wenden','Use a turnaround loop'],['city','City lights','Drive into Nordstadt'],
+ ['kreuz','Interchange','Take the Kreuz onto the A7'],['swiss','Grüezi','Cross the border into Switzerland'],['uturn','Wenden','Use a turnaround loop'],['city','City lights','Drive into Nordstadt'],
  ['stall','Learner driver','Stall a manual car'],['refuel','Fill her up','Refuel or recharge at a station'],['wash','Sparkling','Wash your car'],
  ['airbag','Survivor','Survive a crash that fires the airbag'],['ticket','Smile!','Get caught by a speed camera'],['snow','Winter driver','Drive 1 km in the snow'],
  ['night','Night owl','Drive at 100 km/h at night with your lights on'],['taxi','Taxi driver','Finish a taxi job'],['parcel','Parcel service','Deliver a parcel'],['sprint','Autobahn sprinter','Beat an Autobahn sprint time'],['paint','Fresh look','Respray your car at the paint shop'],['train','All aboard','Travel by train or Autozug'],['tunnel','Into the dark','Drive through the Bergtunnel'],['work','Roadworks','Drive through a Baustelle at the limit'],
@@ -2964,7 +3104,7 @@ function frame(t){
  {const kk=Math.max(0,Math.floor((-posZ-300)/1000));rampSets.forEach((g,i)=>{const zA=-300-1000*(kk+i);g.position.z=zA;g.visible=!rampSuppressed(zA);drawExitBoards(g,kk+i);});fwyG.position.z=Math.round(posZ/18)*18;
   const kr=Math.max(0,Math.floor((-posZ-350)/700)),kf=Math.max(0,Math.floor((-posZ-650)/900));roadCams.forEach((g,i)=>{g.position.set(6.4,0,-350-700*(kr+i));g.userData.ck=['r',kr+i];g.visible=camOn('r',kr+i);});fwCams.forEach((g,i)=>{g.position.set(-29.2,0,-650-900*(kf+i));g.userData.ck=['f',kf+i];g.visible=camOn('f',kf+i);});
   camFlashT=Math.max(0,camFlashT-dt);[...roadCams,...fwCams].forEach(g=>g.userData.flash.emissiveIntensity=camFlashT>0?8:0);
-  limitFree=false;if(posX<-24&&posX>-52){const gl=gantryLimit(posZ+5);limitFree=gl===0;limit=limitFree?250:gl;}if(!walking&&Math.abs(posZ-ZX)<12&&posX<-56){const al=a7Limit(posX);limitFree=al===0;limit=limitFree?250:al;}if(cityZone(posX,posZ))limit=50;checkCams();lastPZ=posZ;updateServices(dt,t);updateFleeing(dt);updateParked(dt);updateDirtWash(dt,t);beltFrame(dt);{const need=st.engine&&!st.belt&&!walking&&Math.abs(st.v)*3.6>8;if(need){P.beltDur=(P.beltDur||0)+dt;P.beltT=(P.beltT||0)+dt;if(P.beltT>(P.beltDur>20?.6:1.3)){P.beltT=0;sfx('belt');if(P.beltDur<1.5)toast('Fasten your seatbelt! Press - or click the belt or the red buckle.',3000);}}else{P.beltDur=0;P.beltT=1.3;}}updateJam(dt,t);updateAutobahn(dt,t);updateNav(dt);updateCity(dt,t);updateA7(dt);updateHazards(dt,t);updateJamDetour(dt);updateSnow(dt,t);updateAutoEv(dt);updateAch(dt);updateTunBau(dt,t);updateRest(dt);updateA7Jam(dt,t);updateSlipEv(dt);updatePdc(dt);updateLkaBadge(dt);updateBlis(dt);updateSys(dt);updateSkids(dt);updateTrains(dt);updateJobs(dt);drawMinimap(dt);updateDyn(dt);updateMobile(dt);updateA7Signs();updateBlitzer(dt);if(aebHazAuto&&!aebAct){aebHazT+=dt;if(st.v>4&&aebHazT>3){st.hazard=false;aebHazAuto=false;}}else aebHazT=0;phoneT+=dt;if(phoneT>.5){phoneT=0;renderPhone();}}
+  limitFree=false;if(posX<-24&&posX>-52){const gl=gantryLimit(posZ+5);limitFree=gl===0;limit=limitFree?250:gl;}if(!walking&&Math.abs(posZ-ZX)<12&&posX<-56){const al=a7Limit(posX);limitFree=al===0;limit=limitFree?250:al;}if(cityZone(posX,posZ))limit=50;checkCams();lastPZ=posZ;updateServices(dt,t);updateFleeing(dt);updateParked(dt);updateDirtWash(dt,t);beltFrame(dt);{const need=st.engine&&!st.belt&&!walking&&Math.abs(st.v)*3.6>8;if(need){P.beltDur=(P.beltDur||0)+dt;P.beltT=(P.beltT||0)+dt;if(P.beltT>(P.beltDur>20?.6:1.3)){P.beltT=0;sfx('belt');if(P.beltDur<1.5)toast('Fasten your seatbelt! Press - or click the belt or the red buckle.',3000);}}else{P.beltDur=0;P.beltT=1.3;}}updateJam(dt,t);updateAutobahn(dt,t);updateNav(dt);updateCity(dt,t);updateA7(dt);updateHazards(dt,t);updateJamDetour(dt);updateSnow(dt,t);updateAutoEv(dt);updateAch(dt);updateTunBau(dt,t);updateRest(dt);updateA7Jam(dt,t);updateSlipEv(dt);updatePdc(dt);updateLkaBadge(dt);updateBlis(dt);updateSys(dt);updateSkids(dt);updateTrains(dt);updateJobs(dt);drawMinimap(dt);updateDyn(dt);updateMobile(dt);updateA7Signs();updateBorder(dt);updateBlitzer(dt);if(aebHazAuto&&!aebAct){aebHazT+=dt;if(st.v>4&&aebHazT>3){st.hazard=false;aebHazAuto=false;}}else aebHazT=0;phoneT+=dt;if(phoneT>.5){phoneT=0;renderPhone();}}
  if(st.rain){const p=rainGeo.attributes.position.array;for(let i=0;i<NR;i++){p[i*3+1]-=dt*20;if(p[i*3+1]<0)p[i*3+1]+=20;}rainGeo.attributes.position.needsUpdate=true;rain.position.set(posX,0,posZ);}
  const sd=sun.userData.dir||new THREE.Vector3(0,1,0);sun.target.position.set(posX,1,posZ);sun.position.set(posX+sd.x*120,1+sd.y*120,posZ+sd.z*120);
  /* audio */
