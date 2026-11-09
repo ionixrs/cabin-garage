@@ -2847,13 +2847,13 @@ function toggleEA(){st.ea=st.ea===false;if(!st.ea)eaCancel(true);sfx('click');co
 const BLOW={on:false,t:0,side:1,front:true};let spinOutAt=-1e9,vPk=0,koDelay=0;
 function tooFast(){const k=Math.abs(st.v)*3.6;return limitFree?k>170:k>limit+20;}
 function startBlowout(){const F=st.faults;if(F.tyre<0)return;const kmh=Math.round(Math.abs(st.v)*3.6);if(kmh<80)return;
- BLOW.on=true;BLOW.t=0;BLOW.side=F.tyre%2===0?1:-1;BLOW.front=F.tyre<2;crashT=Math.max(crashT,.12);headKick=.35;headKickS=.3;
- toast(`BANG! Blowout at ${kmh} km/h! Hold the wheel straight and let the car slow down. Don't swerve!`,4200);}
+ BLOW.on=true;BLOW.t=0;BLOW.sw=0;BLOW.side=F.tyre%2===0?1:-1;BLOW.front=F.tyre<2;crashT=Math.max(crashT,.12);headKick=.35;headKickS=.3;
+ toast(`BANG! Blowout at ${kmh} km/h! Small corrections are fine, but don't swerve! Let the car slow down.`,4200);}
 function blowStep(dt,kS){if(!BLOW.on)return;const kmh=Math.abs(st.v)*3.6;if(st.faults.tyre<0||walking||kmh<55){BLOW.on=false;if(kmh<55&&st.faults.tyre>=0&&!walking)toast('You kept it straight. Pull over and fit the spare tyre.',3200);return;}
  BLOW.t+=dt;/* the car pulls towards the flat tyre */
  yawCar+=BLOW.side*Math.min(.09,Math.abs(st.v)*.0017)*(BLOW.front?1:.6)*dt*Math.sign(st.v||1);
  /* driver input that is more than a small correction makes the car snap round */
- const player=kS!==0||dragSteer!=null;if(player&&Math.abs(steer)>.1&&kmh>70&&Math.abs(spinRate)<.05&&BLOW.t>.25){const sg=steer>0?1:-1;spinRate=sg*(2.5+Math.random()*1.1);st.v*=.93;cruise=0;BLOW.on=false;spinOutAt=performance.now();sfx('grind');
+ const player=kS!==0||dragSteer!=null,maxS=1/(1+Math.abs(st.v)*.045),hard=player&&Math.abs(steer)>Math.max(.17,maxS*.6);BLOW.sw=hard?(BLOW.sw||0)+dt:Math.max(0,(BLOW.sw||0)-dt*2);if(BLOW.sw>.3&&kmh>70&&Math.abs(spinRate)<.05&&BLOW.t>.25){BLOW.sw=0;const sg=steer>0?1:-1;spinRate=sg*(2.5+Math.random()*1.1);st.v*=.93;cruise=0;BLOW.on=false;spinOutAt=performance.now();sfx('grind');
   toast('You swerved on the blown tyre and lost control!',3000);}}
 /* --- cutscene --- */
 const CUT={on:false,t:0,dur:22,props:null,pos:null,yaw0:0,ry:0,cap:-1,lights:[],done:false,shot:-1};
