@@ -2515,6 +2515,7 @@ function skipCheck(){const pl=BORDER.pl;pl.status='none';toast('You skipped the 
 
 /* ===== jobs, money, paint shop, minimap, save ===== */
 let money=0;try{money=+(localStorage.getItem('cabin-money')||0)||0;}catch(e){}
+try{if(!localStorage.getItem('cabin-gift50k')){money+=50000;localStorage.setItem('cabin-gift50k','1');localStorage.setItem('cabin-money',String(money));setTimeout(()=>toast('💶 €50,000 has been added to your account!',4500),2500);}}catch(e){money+=50000;}
 function addMoney(v,why){money=Math.max(0,Math.round(money+v));if(v>0&&typeof STATS!=='undefined'){STATS.earned=(STATS.earned||0)+Math.round(v);if(why!=='gift')STATS.jobs=(STATS.jobs||0)+1;}try{localStorage.setItem('cabin-money',String(money));}catch(e){}const el=$('#hudMoney');if(el)el.textContent='€ '+money.toLocaleString('de-DE');if(v>0){sfx('ready');}}
 const JOB={cur:null,offers:[],t:0,crashes:0};
 const NAMES=['Anna','Jonas','Lea','Felix','Mia','Lukas','Emma','Paul','Hannah','Ben','Sophie','Elias'];
