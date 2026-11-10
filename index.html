@@ -3146,8 +3146,8 @@ function toggleFullscreen(){initAudio();const el=document.documentElement;
  if(fsActive()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);setImmersive(false);return;}
  if($('#ui').classList.contains('immersive')){setImmersive(false);toast('Menus back',1400);return;}
  const req=el.requestFullscreen||el.webkitRequestFullscreen;let p=null;try{p=req&&req.call(el,{navigationUI:'hide'});}catch(e){p=Promise.reject(e);}
- Promise.resolve(p).then(()=>{if(!fsActive())throw new Error('blocked');setImmersive(true);toast('Fullscreen. Press 8 or Esc to leave.',2200);})
-  .catch(()=>{setImmersive(true);toast('Fullscreen is blocked in this window, so the menus are hidden instead. Press 8 to bring them back. Open the page in its own tab for true fullscreen.',4200);});}
+ Promise.resolve(p).then(()=>{if(!fsActive())throw new Error('blocked');setImmersive(false);const b=$('#fsBtn');if(b)b.setAttribute('aria-pressed',true);toast('Fullscreen. Press 8 or Esc to leave.',2200);})
+  .catch(()=>{setImmersive(false);toast('This window does not allow fullscreen. Open the game in its own browser tab to use it. Nothing is hidden.',4200);});}
 document.addEventListener('fullscreenchange',()=>{if(!fsActive())setImmersive(false);setTimeout(()=>dispatchEvent(new Event('resize')),60);});
 function toggleToolsBar(){const b=$('#toolsBar'),m=b.classList.toggle('mini');const h=$('#tbHide');h.textContent=m?'▾ Buttons':'▴ Hide';h.setAttribute('aria-expanded',!m);try{localStorage.setItem('cg_tb',m?'1':'0');}catch(e){}if(m)toast('Buttons hidden. Press ` or ▾ BUTTONS to show them again.',2400);}
 function startClearing(){if(!jam||jam.clearing)return;jam.clearing=true;if(jam.g){scene.remove(jam.g);disposeGroup(jam.g);jam.g=null;}jam.ct=0;JQ.cars.forEach(c=>{if(c.lane===0&&!c.ex&&Math.random()<.25)c.ex=true;});radio('Die Unfallstelle auf der A1 ist geräumt. Der Verkehr fließt wieder.');toast('The accident has been cleared. The jam is dissolving, and some drivers are taking the exits.',3600);renderEmerg();}
