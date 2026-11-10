@@ -1375,6 +1375,56 @@ function initAudio(){
  AU.next=ctx.currentTime;AU.step=0;setInterval(radioTick,30);
 }
 const now=()=>AU.ctx.currentTime;
+/* ===== engine sound synth: one voice per engine layout ===== */
+/* h: harmonic amplitudes of the firing tone, sh: sub-order (half firing rate) harmonics, am: uneven-firing lope, res: exhaust resonance [Hz, gain dB, Q], lp: load filter [base Hz, Hz per rpm], nz: intake/exhaust noise [amount, centre as multiple of firing f, Q], drive: saturation, pops: overrun crackle */
+const ENG={
+ i4:{cyl:4,h:[1,.7,.42,.55,.22,.3,.12,.16,.08],sh:[.35,.1,.12],am:.06,res:[210,5,1.6],lp:[650,.42],nz:[.9,3.2,1.4],drive:1.1,pops:0,vol:1},
+ i6:{cyl:6,h:[1,.55,.62,.3,.4,.18,.22,.1,.12,.06],sh:[.18,.08,.1],am:.03,res:[160,5,1.3],lp:[520,.36],nz:[.7,3.5,1.2],drive:1.25,pops:.5,vol:1},
+ f6:{cyl:6,h:[1,.42,.66,.5,.48,.4,.36,.3,.26,.2,.16,.12],sh:[.26,.16,.18],am:.08,res:[320,7,2.2],lp:[900,.55],nz:[1.2,4.5,2.4],drive:1.6,pops:.9,vol:1.05},
+ v8:{cyl:8,h:[1,.62,.4,.34,.2,.16,.1,.07],sh:[.9,.55,.35,.22],am:.34,res:[115,8,1.2],lp:[380,.3],nz:[.8,2.4,1],drive:1.7,pops:1,vol:1.1},
+ v10:{cyl:10,h:[1,.5,.55,.42,.36,.3,.22,.18,.14,.1],sh:[.3,.2,.12],am:.07,res:[260,6,1.8],lp:[720,.5],nz:[1,4,2],drive:1.45,pops:.8,vol:1},
+ v12:{cyl:12,h:[1,.45,.38,.3,.26,.2,.16,.12,.1,.08,.06],sh:[.14,.06],am:.015,res:[200,4,1],lp:[560,.42],nz:[.55,3.6,1],drive:.9,pops:.25,vol:.85},
+ diesel:{cyl:4,h:[1,.85,.5,.62,.3,.4,.2,.25],sh:[.5,.3,.25],am:.12,res:[140,6,1.4],lp:[300,.28],nz:[1.1,2.2,1.1],drive:1.9,pops:0,vol:1}};
+function engWave(ctx,amps){const n=amps.length+1,re=new Float32Array(n),im=new Float32Array(n);amps.forEach((a,i)=>{im[i+1]=a*(i%2?.92:1);});return ctx.createPeriodicWave(re,im);}
+function engCurve(k){const n=1024,c=new Float32Array(n);for(let i=0;i<n;i++){const x=i/511.5-1;c[i]=Math.tanh(x*k)/Math.tanh(k);}return c;}
+function engEnsure(c){const ctx=AU.ctx;if(!ctx)return null;const key=c.sound==='ev'?'ev':c.sound+'|'+(/turbo|kompressor/i.test(c.engine||'')||c.sound==='diesel'?'t':'n');if(AU.E&&AU.E.key===key)return AU.E;
+ if(AU.E){try{AU.E.stop();}catch(e){}}
+ const E={key,boost:0,lastThr:0,popT:0,stopList:[]},osc=(type,f)=>{const o=ctx.createOscillator();if(typeof type==='string')o.type=type;else o.setPeriodicWave(type);o.frequency.value=f;o.start();E.stopList.push(o);return o;},G=v=>{const g=ctx.createGain();g.gain.value=v;return g;},F=(type,f,q)=>{const b=ctx.createBiquadFilter();b.type=type;b.frequency.value=f;b.Q.value=q;return b;};
+ const out=G(0);out.connect(AU.master);E.out=out;
+ if(c.sound==='ev'){E.ev=true;const m=osc('sine',200),m2=osc('triangle',500),hum=osc('sine',50),gm=G(0),gm2=G(0),gh=G(0);m.connect(gm);m2.connect(gm2);hum.connect(gh);const hp=F('highpass',120,.7);gm.connect(hp);gm2.connect(hp);gh.connect(out);hp.connect(out);Object.assign(E,{m,m2,hum,gm,gm2,gh});}
+ else{const P=ENG[c.sound]||ENG.i6;E.p=P;E.turbo=key.endsWith('|t');
+  const o1=osc(engWave(ctx,P.h),40),o2=osc(engWave(ctx,P.sh),20),g1=G(.55),g2=G(.45);o1.connect(g1);o2.connect(g2);
+  const am=G(1),lfo=osc('sine',5),lg=G(0);lfo.connect(lg);lg.connect(am.gain);g1.connect(am);g2.connect(am);
+  const pre=G(1),sh=ctx.createWaveShaper();sh.curve=engCurve(P.drive*2.2);sh.oversample='2x';const post=G(.5);am.connect(pre);pre.connect(sh);sh.connect(post);
+  const res=F('peaking',P.res[0],P.res[2]);res.gain.value=P.res[1];const lp=F('lowpass',800,.9),body=F('lowshelf',120,.7);body.gain.value=3;post.connect(res);res.connect(body);body.connect(lp);lp.connect(out);
+  const ns=ctx.createBufferSource();ns.buffer=AU.nb;ns.loop=true;ns.start();E.stopList.push(ns);const nb=F('bandpass',400,P.nz[2]),ng=G(0);ns.connect(nb);nb.connect(ng);ng.connect(out);
+  const tw=osc('sine',2000),tg=G(0);tw.connect(tg);tg.connect(AU.master);
+  Object.assign(E,{o1,o2,lfo,lg,pre,post,res,lp,nb,ng,tw,tg});}
+ E.stop=()=>{E.stopList.forEach(o=>{try{o.stop();}catch(e){}});E.out.disconnect();if(E.tg)E.tg.disconnect();};AU.E=E;return E;}
+function engAudio(c,T,dt,sp,openK){const E=engEnsure(c);if(!E)return;const on=st.engine||st.cranking>0,outV=st.view==='outside'||walking,tc=.04;
+ if(E.ev){const g=st.engine?1:0;E.m.frequency.setTargetAtTime(160+sp*44,T,.05);E.m2.frequency.setTargetAtTime(420+sp*118,T,.05);E.hum.frequency.setTargetAtTime(48+sp*1.5,T,.1);
+  E.gm.gain.setTargetAtTime(g*Math.min(.05,.006+sp*.0011+A.thr*.022),T,tc);E.gm2.gain.setTargetAtTime(g*Math.min(.018,sp*.0004+A.thr*.008),T,tc);E.gh.gain.setTargetAtTime(g*.012,T,.2);E.out.gain.setTargetAtTime(outV?.7:1,T,.1);return;}
+ const P=E.p,rpm=Math.max(st.cranking>0?220:0,st.rpm),f=rpm/60*P.cyl/2,load=Math.max(A.thr,boostT>0?1:0),red=c.redline||6500,rr=rpm/red;
+ E.o1.frequency.setTargetAtTime(Math.max(8,f),T,.02);E.o2.frequency.setTargetAtTime(Math.max(4,f/2),T,.02);
+ /* uneven firing: strong lope at idle, smoothing out with revs */
+ E.lfo.frequency.setTargetAtTime(Math.max(1,rpm/120),T,.03);E.lg.gain.setTargetAtTime(P.am*(1-Math.min(.85,rr))*(1+(1-load)*.5),T,.05);
+ /* load: more drive and brighter when you are on the gas */
+ E.pre.gain.setTargetAtTime(.55+load*1.5+rr*.5,T,.05);E.post.gain.setTargetAtTime(.5/(1+load*.6),T,.05);
+ E.lp.frequency.setTargetAtTime(Math.min(9000,(P.lp[0]+rpm*P.lp[1]*(.55+.45*load))*(outV?1.7:1)*(1+openK*.25)*(st.mode==='Sport'?1.15:1)),T,.05);
+ E.res.frequency.setTargetAtTime(P.res[0]*(.85+rr*.4),T,.1);
+ E.nb.frequency.setTargetAtTime(Math.min(7000,f*P.nz[1]+200),T,.05);E.ng.gain.setTargetAtTime(on&&st.engine?P.nz[0]*(.012+load*.055)*(.5+rr):0,T,.05);
+ /* overall volume */
+ const loud=(st.mode==='Sport'?1.3:1)*(c.feat==='loud'&&st.feat?1.8:1)*(boostT>0?1.25:1)*(1+openK*.25)*(outV?1.25:1)*P.vol;
+ E.out.gain.setTargetAtTime(on&&(st.engine||st.cranking>0)?(.16+load*.16+rr*.12)*loud:0,T,tc);
+ /* turbo: spools with load and revs, whistles, blows off when you lift */
+ if(E.turbo&&st.engine){const tgt=load*Math.min(1,Math.max(0,(rpm-1700)/2600));E.boost+=(tgt-E.boost)*Math.min(1,dt*(tgt>E.boost?1.4:4));
+  E.tw.frequency.setTargetAtTime(1500+E.boost*5200+rpm*.15,T,.05);E.tg.gain.setTargetAtTime(E.boost*(c.sound==='diesel'?.012:.016)*(outV?.6:1),T,.05);
+  if(E.lastThr>.6&&A.thr<.2&&E.boost>.45&&c.sound!=='diesel'){nburst(.45,'highpass',2400,.22*E.boost);nburst(.25,'bandpass',900,.1*E.boost);E.boost*=.3;}}
+ else if(E.tg)E.tg.gain.setTargetAtTime(0,T,.05);
+ /* overrun pops and crackles on sporty engines */
+ E.popT-=dt;if(P.pops&&st.engine&&A.thr<.05&&rr>.45&&sp>4&&E.popT<=0){E.popT=.05+Math.random()*.22;if(Math.random()<P.pops*(st.mode==='Sport'?.9:.45)*(c.feat==='loud'&&st.feat?1.6:1)){const v=(.15+Math.random()*.25)*(outV?1.3:.8);nburst(.035,'bandpass',500+Math.random()*900,v);if(Math.random()<.4)nburst(.02,'highpass',2500,v*.6,null,now()+.03);}}
+ E.lastThr=A.thr;}
+
 function env(g,t,a,peak,dec){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+dec);}
 function tone2(f,dur,type='sine',vol=.1,dest,t){if(!AU.ctx)return;t=t??now();const o=AU.ctx.createOscillator(),g=AU.ctx.createGain();o.type=type;o.frequency.value=f;o.connect(g);g.connect(dest||AU.master);env(g,t,.008,vol,dur);o.start(t);o.stop(t+dur+.05);return o;}
 function nburst(dur,type,f,vol,dest,t){if(!AU.ctx)return;t=t??now();const s=AU.ctx.createBufferSource();s.buffer=AU.nb;const fl=AU.ctx.createBiquadFilter();fl.type=type;fl.frequency.value=f;const g=AU.ctx.createGain();s.connect(fl);fl.connect(g);g.connect(dest||AU.master);env(g,t,.003,vol,dur);s.start(t,Math.random());s.stop(t+dur+.05);}
@@ -3504,12 +3554,7 @@ function frame(t){
  /* audio */
  if(AU.ctx){const T=now(),tc=.06,s=c.sound,sp=Math.abs(st.v),openK=(A.winL+A.winR)*.5+A.doorL+A.doorR+A.sun*.6+(c.convertible?1.6:0);
   const on=st.engine||st.cranking>0;const f=st.rpm/60*({i6:3,v12:6,diesel:2,i4:2,v8:4,f6:3,v10:5}[s]||3);
-  if(s!=='ev'){AU.osc[0].o.frequency.setTargetAtTime(Math.max(10,f),T,.03);AU.osc[1].o.frequency.setTargetAtTime(Math.max(5,f*.5),T,.03);AU.osc[2].o.frequency.setTargetAtTime(Math.max(5,f*.25),T,.03);
-   const mix={i6:[.3,.22,.25],v12:[.12,.06,.3],diesel:[.22,.3,.3],i4:[.38,.26,.15],v8:[.34,.36,.32],f6:[.38,.3,.16],v10:[.3,.2,.22]}[s];AU.osc.forEach((o,i)=>o.g.gain.setTargetAtTime(mix[i],T,.05));
-   AU.engF.frequency.setTargetAtTime(({v12:180,diesel:220,i4:420,i6:300,v8:200,f6:380,v10:280}[s])+st.rpm*({v12:.16,diesel:.25,i4:.38,i6:.26,v8:.22,f6:.32,v10:.25}[s])+A.thr*700,T,.05);
-   const g=on&&st.engine?(.09+A.thr*.11+st.rpm/c.redline*.08)*(st.mode==='Sport'?1.35:1)*(c.feat==='loud'&&st.feat?1.9:1)*(boostT>0?1.3:1)*(s==='v12'?.6:1)*(1+openK*.25):0;AU.eng.gain.setTargetAtTime(g,T,tc);
-   AU.clatter.g.gain.setTargetAtTime(s==='diesel'&&st.engine?.05+A.thr*.04:0,T,tc);AU.clatter.f.frequency.setTargetAtTime(1200+st.rpm*.3,T,tc);AU.ev.g.gain.setTargetAtTime(0,T,tc);}
-  else{AU.eng.gain.setTargetAtTime(0,T,tc);AU.clatter.g.gain.setTargetAtTime(0,T,tc);AU.ev.o.frequency.setTargetAtTime(240+sp*42,T,.05);AU.ev.g.gain.setTargetAtTime(st.engine?Math.min(.045,.004+sp*.0012+A.thr*.02):0,T,tc);}
+  AU.eng.gain.setTargetAtTime(0,T,tc);AU.ev.g.gain.setTargetAtTime(0,T,tc);engAudio(c,T,dt,sp,openK);AU.clatter.g.gain.setTargetAtTime(s==='diesel'&&st.engine?.035+A.thr*.03:0,T,tc);AU.clatter.f.frequency.setTargetAtTime(1200+st.rpm*.3,T,tc);
   AU.squeal.g.gain.setTargetAtTime(slip*Math.min(1,sp/8)*.5,T,.05);AU.gravel.g.gain.setTargetAtTime(offroad?Math.min(.5,sp*.03):0,T,.05);
   AU.road.g.gain.setTargetAtTime(Math.min(.3,sp*.0065)*(c.id==='aurelia'?.5:1),T,tc);AU.wind.g.gain.setTargetAtTime(Math.min(.25,sp*sp*.00009*(1+openK*1.5)),T,tc);
   AU.rain.g.gain.setTargetAtTime(st.rain?.035+openK*.03+(c.roof==='glass'?.02:0):0,T,.2);AU.fan.g.gain.setTargetAtTime((st.engine?st.fan:0)*.012,T,.1);
