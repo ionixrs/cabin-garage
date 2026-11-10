@@ -3028,7 +3028,7 @@ function eaStep(dt,kS){const input=!walking&&(kS!==0||dragSteer!=null);
  else if(EA.stage===3){st.v=0;EA.t+=dt;EA.honkT-=dt;if(EA.honkT<=0&&EA.t<30){EA.honkT=4;horn(true);setTimeout(()=>horn(false),250);}}}
 function toggleEA(){st.ea=st.ea===false;if(!st.ea)eaCancel(true);sfx('click');const b=$('#eaBtn');if(b)b.setAttribute('aria-pressed',st.ea);toast('Emergency Assist '+(st.ea?'on':'off'));}
 /* ===== high-speed blowouts, spin-outs and the knocked-out cutscene ===== */
-const BLOW={on:false,t:0,side:1,front:true};let spinOutAt=-1e9,vPk=0,koDelay=0;
+const BLOW={on:false,t:0,side:1,front:true};let spinOutAt=-1e9,vPk=0,koDelay=0,koKmh=0;
 function tooFast(){const k=Math.abs(st.v)*3.6;return limitFree?k>170:k>limit+20;}
 function startBlowout(){const F=st.faults;if(F.tyre<0)return;const kmh=Math.round(Math.abs(st.v)*3.6);sfx('blowout');flashT=Math.max(flashT||0,.06);if(kmh<80)return;
  BLOW.on=true;BLOW.t=0;BLOW.sw=0;BLOW.side=F.tyre%2===0?1:-1;BLOW.front=F.tyre<2;crashT=Math.max(crashT,.12);headKick=.55;headKickS=.3;
@@ -3065,7 +3065,7 @@ function ambModel(){const g=new THREE.Group(),wh=std(0xf4f4f2,.45,.2),rd=std(0xd
  return g;}
 function knockOut(){if(CUT.on||walking||!P)return;initAudio();CUT.on=true;CUT.t=0;CUT.cap=-1;CUT.done=false;CUT.shot=-1;CUT.hb=0;CUT.sir=0;st.v=0;cruise=0;spinRate=0;st.engine=false;BLOW.on=false;
  if(typeof EA!=='undefined'&&EA.stage)eaCancel(true);
- CUT.pos={x:posX,z:posZ};CUT.yaw0=yawCar;const rp=roadPose(posX,posZ,yawCar);CUT.rp=rp;CUT.ry=Math.random()*Math.PI*2;
+ CUT.pos={x:posX,z:posZ};CUT.flat=st.faults.tyre>=0;CUT.kmh=koKmh;koKmh=0;CUT.yaw0=yawCar;const rp=roadPose(posX,posZ,yawCar);CUT.rp=rp;CUT.ry=Math.random()*Math.PI*2;
  const g=new THREE.Group();scene.add(g);const fx=-Math.sin(rp.yaw),fz=-Math.cos(rp.yaw),rx=-fz,rz=fx;CUT.f={fx,fz,rx,rz};
  const P2=(along,side)=>({x:posX-fx*along+rx*side,z:posZ-fz*along+rz*side});
  /* police car already there, ambulance drives in */
@@ -3112,7 +3112,7 @@ function cutStep(dt){if(!CUT.on)return;CUT.t+=dt;const t=CUT.t,o=$('#cut'),rp=CU
  if(CUT.flare){const on=t>=CUT.flare.t;CUT.flare.m.visible=on;CUT.flare.l.intensity=on?1.6+Math.random()*1.4:0;}
  CUT.rad=(CUT.rad||0)-dt;if(t>8&&t<19&&CUT.rad<=0){CUT.rad=2.8+Math.random()*1.5;if(AU.ctx){nburst(.22,'bandpass',1900,.09);tone2(1250,.06,'square',.025,null,now()+.24);}}
  /* captions */
- const caps=[[0,'…'],[1.6,'Everything goes quiet. Steam hisses from the engine.'],[3.2,'Your vision is blurry. Blue lights flicker in the mirror…'],[6.6,'An ambulance pulls up. Doors open, a stretcher comes out.'],[9.4,'Paramedic: “Can you hear me? Stay with us!”'],[11.4,'The paramedics check your pulse and keep you still.'],[14.6,'Police close the lane, light a flare and set up warning triangles.'],[18,'The crew fits your spare tyre and pulls the car back into the lane.'],[20.6,'…']];
+ const caps=[[0,'…'],[1.6,'Everything goes quiet. Steam hisses from the engine.'],[3.2,'Your vision is blurry. Blue lights flicker in the mirror…'],[6.6,'An ambulance pulls up. Doors open, a stretcher comes out.'],[9.4,'Paramedic: “Can you hear me? Stay with us!”'],[11.4,'The paramedics check your pulse and keep you still.'],[14.6,'Police close the lane, light a flare and set up warning triangles.'],[18,CUT.flat?'The crew fits your spare tyre and pulls the car back into the lane.':'The tow crew pulls your damaged car back into the lane.'],[20.6,'…']];
  let ci=-1;caps.forEach(([ts],i)=>{if(t>=ts)ci=i;});if(ci!==CUT.cap){CUT.cap=ci;cutCap(caps[ci][1]);}
  /* screen: black → blurry → clearer → black */
  let a=1;if(t>3.2)a=t<6.5?.55+.3*Math.abs(Math.sin(t*1.7)):Math.max(.12,.55-(t-6.5)*.12);if(t>20.4)a=Math.min(1,.12+(t-20.4)*.7);o.style.background=`rgba(0,0,0,${a.toFixed(2)})`;
@@ -3131,13 +3131,13 @@ function endCut(){if(!CUT.on)return;if(!CUT.done){CUT.t=20.6;cutStep(0);}CUT.on=
  const o=$('#cut');o.hidden=true;o.style.background='rgba(0,0,0,1)';
  /* eyes open: two eyelids slide apart, blinking once */
  const w=$('#wake');if(w){w.hidden=false;w.classList.remove('go');void w.offsetWidth;w.classList.add('go');setTimeout(()=>{w.hidden=true;w.classList.remove('go');},2600);}
- STATS.ko=(STATS.ko||0)+1;setTimeout(()=>toast('You wake up in the driver\'s seat. The paramedics checked you over and the crew fitted the spare. Press START and drive on carefully.',6000),900);}
+ STATS.ko=(STATS.ko||0)+1;setTimeout(()=>toast(CUT.flat?'You wake up in the driver\'s seat. The paramedics checked you over and the crew fitted the spare tyre. Press START and drive on carefully.':`You wake up in the driver's seat${CUT.kmh>40?' after the crash at '+CUT.kmh+' km/h':' after the crash'}. The paramedics checked you over and the crew pulled your car back into the lane. Press START and drive on carefully.`,6000),900);}
 function blackout(){knockOut();}
 
 function onImpact(sev){if(walking||!P)return;const belt=st.belt;hp=Math.max(0,hp-(belt?sev*10:sev*58));hurtFlash=Math.min(1,hurtFlash+(belt?sev*.25:sev*.9));
  if(belt){sfx('beltlock');P.beltLock=1;headKick=sev*.3;headKickS=.35;if(sev>.35)toast('Your seatbelt locked and held you in place',2200);}
  else{headKick=1;headKickS=Math.min(1,.4+sev);if(sev>.3)toast(sev>.6?'Ouch! You flew into the steering wheel. Wear your seatbelt (- key)!':'You were thrown forward. Put your seatbelt on (- key)',3000);}
- if(sev>.55&&!car.retro)deployAirbag();if(sev>.62&&Math.random()<.75)crackWindscreen();if(vPk*3.6>150){toast(`Crash at ${Math.round(vPk*3.6)} km/h!`,2000);koDelay=.45;}else if(hp<=0||(performance.now()-spinOutAt<8000&&sev>.4)||(!belt&&sev>.8))knockOut();}
+ if(sev>.55&&!car.retro)deployAirbag();if(sev>.62&&Math.random()<.75)crackWindscreen();if(vPk*3.6>150){toast(`Crash at ${Math.round(vPk*3.6)} km/h!`,2000);koKmh=Math.round(vPk*3.6);koDelay=.45;}else if(hp<=0||(performance.now()-spinOutAt<8000&&sev>.4)||(!belt&&sev>.8))knockOut();}
 function deployAirbag(){if(!P||!P.G)return;if(!P.bag){const m=new THREE.Mesh(new THREE.SphereGeometry(.24,22,16),std(0xf1efe8,.88));m.position.set(-.37,.93,-.1);P.G.add(m);P.bag=m;clickable(m,{label:'Deflated airbag',click:()=>toast('The airbag has deployed. The mechanic in a Werkstatt can repack it.')});}
  else if(P.bag.visible)return;P.bag.visible=true;P.bagT=0;sfx('airbag');setTimeout(()=>{if(hp>0)ach('airbag');},3000);setTimeout(()=>toast('Airbag deployed!',1800),300);}
 function fsActive(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
@@ -3424,7 +3424,7 @@ function frame(t){
  if(!ok&&Math.abs(st.v)>3){const ax=Math.abs(mvz)>Math.abs(mvx);outer:for(const d of[.04,.09,.16,.26])for(const sg of[1,-1]){posX=ax?px0+sg*d:nx;posZ=ax?nz:pz0+sg*d;if(!carHitsWalls()){ok=ax?'z':'x';break outer;}}}
  if(!ok){posX=px0;posZ=pz0;if(hw2==='barrier'&&carHitsWalls()==='barrier')posX+=(posX>-40&&posX<-30?1:posX<-45?1:-1)*.06;}
  const along=ok==='x'?Math.abs(mvx)/ml:ok==='z'?Math.abs(mvz)/ml:0,im=Math.abs(st.v);
- if(im>8&&performance.now()-spinOutAt<8000&&!CUT.on){crashT=1;sfx('crash');koDelay=.35;}
+ if(im>8&&performance.now()-spinOutAt<8000&&!CUT.on){crashT=1;sfx('crash');koKmh=Math.round(im*3.6);koDelay=.35;}
  if(along<.6){if(im>4){crashT=Math.min(1,im/14);sfx('crash');toast(hw2==='barrier'?'You hit the barrier!':'You hit a wall!');}else if(im>1.5)sfx('grind');else if(im>1.2)sfx('thunk');st.v*=-.15;cruise=0;}
  else{st.v*=Math.exp(-dt*(.3+(1-along)*3));cruise=0;crashT=Math.max(crashT,.1);const fx=-Math.sin(yawCar)*Math.sign(st.v||1),fz=-Math.cos(yawCar)*Math.sign(st.v||1),ty=ok==='x'?(fx>0?-Math.PI/2:Math.PI/2):(fz<0?0:Math.PI);yawCar=lerpAngle(yawCar,st.v<0?ty+Math.PI:ty,Math.min(1,dt*1.8));P.scrT=(P.scrT||0)+dt;if(P.scrT>.07&&im>1){P.scrT=0;sfx('scrape');}if(!P.scrMsg&&im>5){P.scrMsg=1;toast('Scraping along the barrier!',1600);setTimeout(()=>{if(P)P.scrMsg=0;},4000);}}}
  carRig.position.set(posX,(A.liftH||0)+pathY,posZ);carRig.rotation.y=yawCar;
