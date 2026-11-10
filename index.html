@@ -3143,7 +3143,7 @@ function dmgReset(){Object.assign(DMG,{total:0,pull:0,hit:null,wx:0,wz:0,wvx:0,w
 function dmgDeform(f,r,speed,scrape){if(!P||!P.group||walking)return;const G=P.group,k=P.zScale||1,M=P.M;G.updateMatrixWorld(true);_di.copy(G.matrixWorld).invert();
  const n=Math.hypot(f,r)||1;f/=n;r/=n;const front=(P.bounds?P.bounds.front:-2.4)/k,rear=(P.bounds?P.bounds.rear:2.5)/k;
  const I=new THREE.Vector3(r*.97,.62,f>0?front*f*.97+(1-f)*0:rear*(-f)*.97);if(scrape)I.z=(Math.random()-.5)*2.4;
- const nrm=new THREE.Vector3(r,0,-f).normalize(),depth=scrape?Math.min(.035,.008+speed*.0012):clamp(speed*.013,.02,.48),R=scrape?.75:clamp(.45+speed*.022,.45,1.35);
+ const nrm=new THREE.Vector3(r,0,-f).normalize(),depth=scrape?Math.min(.04,.01+speed*.0014):clamp(speed*.015,.03,.55),R=scrape?.75:clamp(.45+speed*.022,.45,1.35);
  let touched=0;
  G.traverse(m=>{if(!m.isMesh||!m.geometry||!m.geometry.attributes.position)return;const mat=m.material;const isLight=P.L&&(mat===P.L.head||mat===P.L.tail||(P.L.ind&&P.L.ind.includes(mat)));
   if(!(mat===M.paint||(mat&&mat.userData&&mat.userData.isPaint)||mat===M.chrome||mat===M.grille||isLight))return;
@@ -3151,19 +3151,33 @@ function dmgDeform(f,r,speed,scrape){if(!P||!P.group||walking)return;const G=P.g
   if(c.distanceTo(I)>R+bs.radius*sc+.05)return;
   if(!m.userData.dmgOwn){m.geometry=m.geometry.clone();m.userData.dmgOwn=true;if(!isLight){m.material=m.material.clone();m.material.vertexColors=true;m.material.needsUpdate=true;const cc=new Float32Array(m.geometry.attributes.position.count*3).fill(1);m.geometry.setAttribute('color',new THREE.BufferAttribute(cc,3));}}
   const col=m.geometry.attributes.color;
-  const pos=m.geometry.attributes.position,inv=new THREE.Matrix4().copy(_dm).invert(),dirL=nrm.clone().negate().transformDirection(inv);
+  const pos=m.geometry.attributes.position,inv=new THREE.Matrix4().copy(_dm).invert(),dirL=nrm.clone().negate().transformDirection(inv),upL=new THREE.Vector3(0,1,0).transformDirection(inv);
   let any=false;for(let i=0;i<pos.count;i++){_dd.set(pos.getX(i),pos.getY(i),pos.getZ(i)).applyMatrix4(_dm);const dx=(_dd.x-I.x)*(scrape?1.4:1),dy=(_dd.y-I.y)*1.3,dz=(_dd.z-I.z)*(scrape?.35:1),d=Math.sqrt(dx*dx+dy*dy+dz*dz);if(d>=R)continue;
-   const w=(1-d/R),push=depth*w*w*(.75+Math.random()*.5),cr=depth*.18*w;
-   pos.setXYZ(i,pos.getX(i)+dirL.x*push+(Math.random()-.5)*cr,pos.getY(i)+dirL.y*push+(Math.random()-.5)*cr*.6-push*.15,pos.getZ(i)+dirL.z*push+(Math.random()-.5)*cr);any=true;
-   if(col){const tgt=scrape?.78:.42,k2=Math.min(1,w*(scrape?.9:1.4))*(.7+Math.random()*.3),cv=col.getX(i);const nv=cv+(tgt-cv)*k2;col.setXYZ(i,nv,nv*(scrape?1:.97),nv*(scrape?1.02:.93));}}
+   const w=(1-d/R),push=depth*w*w*(.75+Math.random()*.5),cr=depth*.32*w,bk=scrape?0:(_dd.y>I.y+.12?push*.55:-push*.22);
+   pos.setXYZ(i,pos.getX(i)+dirL.x*push+upL.x*bk+(Math.random()-.5)*cr,pos.getY(i)+dirL.y*push+upL.y*bk+(Math.random()-.5)*cr*.6,pos.getZ(i)+dirL.z*push+upL.z*bk+(Math.random()-.5)*cr);any=true;
+   if(col){const tgt=scrape?.88:.8,k2=Math.min(1,w*(scrape?.45:.55))*(.7+Math.random()*.3),cv=col.getX(i);const nv=cv+(tgt-cv)*k2;col.setXYZ(i,nv,nv*(scrape?1:.985),nv*(scrape?1.01:.97));}}
   if(col)col.needsUpdate=true;
   if(any){pos.needsUpdate=true;m.geometry.computeVertexNormals();m.geometry.computeBoundingSphere();touched++;}
   if(isLight&&!scrape&&speed>9&&c.distanceTo(I)<R*.8){if(!m.userData.broken){m.userData.broken=true;m.material=m.material.clone();m.material.color.setHex(0x1a1a1a);if(m.material.emissive)m.material.emissive.setHex(0);m.material.opacity=.5;}}});
  return touched;}
+/* frame bend: the whole end of the car twists away from the impact, wheels get knocked out of line */
+function dmgBend(f,r,sp){if(!P||!P.group)return;const G=P.group,k=P.zScale||1,M=P.M;G.updateMatrixWorld(true);_di.copy(G.matrixWorld).invert();const n=Math.hypot(f,r)||1;f/=n;r/=n;
+ const front=(P.bounds?P.bounds.front:-2.4)/k,rear=(P.bounds?P.bounds.rear:2.5)/k,endZ=f>=0?front:rear,farZ=f>=0?rear:front,b=clamp((sp-10)*.0065,0,.24)*(.6+Math.abs(f)*.4),m3=new THREE.Matrix3(),dl=new THREE.Vector3();
+ G.traverse(m=>{if(!m.isMesh||!m.geometry||!m.geometry.attributes.position)return;const mat=m.material;if(!(mat===M.paint||(mat&&mat.userData&&mat.userData.isPaint)||mat===M.chrome||mat===M.grille||mat===M.black||(P.L&&(mat===P.L.head||mat===P.L.tail))))return;
+  _dm.multiplyMatrices(_di,m.matrixWorld);if(!m.geometry.boundingSphere)m.geometry.computeBoundingSphere();const c=_dv3.copy(m.geometry.boundingSphere.center).applyMatrix4(_dm);
+  if(mat===M.black&&Math.abs(c.x)<.7&&c.z>front+.5&&c.z<rear-.5)return;/* skip black interior parts */
+  if(!m.userData.dmgOwn){m.geometry=m.geometry.clone();m.userData.dmgOwn=true;}
+  const pos=m.geometry.attributes.position,inv=new THREE.Matrix4().copy(_dm).invert();m3.setFromMatrix4(inv);let any=false;
+  for(let i=0;i<pos.count;i++){_dd.set(pos.getX(i),pos.getY(i),pos.getZ(i)).applyMatrix4(_dm);const t=clamp((_dd.z-farZ)/(endZ-farZ),0,1),w=t*t*t;if(w<.002)continue;
+   const hump=_dd.y>.78?Math.exp(-Math.pow((t-.62)/.13,2)):0;
+   dl.set(-r*b*w*1.15,-b*.28*w+b*.32*hump*Math.abs(f),(f>=0?1:-1)*b*.55*w*Math.abs(f)).applyMatrix3(m3);pos.setXYZ(i,pos.getX(i)+dl.x,pos.getY(i)+dl.y,pos.getZ(i)+dl.z);any=true;}
+  if(any){pos.needsUpdate=true;m.geometry.computeVertexNormals();m.geometry.computeBoundingSphere();}});
+ /* knock the nearest wheel out of line (camber) */
+ if(P.wheels&&sp>14){const idx=(f>=0?0:2)+((Math.abs(r)>.15?r:(Math.random()-.5))>0?1:0),wh=P.wheels[idx];if(wh&&wh.S&&wh.S.parent){const W=wh.S.parent,sd=idx%2?1:-1;W.rotation.z=clamp((W.rotation.z||0)+sd*Math.min(.16,(sp-14)*.006+.04),-.24,.24);W.rotation.x=clamp((W.rotation.x||0)+(Math.random()-.5)*.06,-.08,.08);}}}
 function dmgImpact(sev){/* called from onImpact */if(!P||walking||CUT.on)return;const h=DMG.hit&&performance.now()-DMG.hit.t<160?DMG.hit:null;let f,r,sp;
  const sY=Math.sin(yawCar),cY=Math.cos(yawCar),fx=-sY,fz=-cY,rx=cY,rz=-sY;
  if(h){f=h.x*fx+h.z*fz;r=h.x*rx+h.z*rz;sp=h.v;}else{f=DMG.vSign;r=(Math.random()-.5)*.6;sp=Math.max(DMG.v,sev*14);}
- if(sp<3)return;dmgDeform(f,r,sp,false);const add=clamp(sp*1.6,2,60);DMG.total=Math.min(100,DMG.total+add);
+ if(sp<3)return;dmgDeform(f,r,sp,false);if(sp>10)dmgBend(f,r,sp);const add=clamp(sp*1.6,2,60);DMG.total=Math.min(100,DMG.total+add);
  /* steering knocked out of line by a corner hit */
  if(Math.abs(r)>.2||sp>12)DMG.pull=clamp(DMG.pull+(r>0?-1:1)*Math.min(.06,sp*.002)*(Math.abs(r)>.2?1:.4),-.12,.12);
  /* body wobble */
