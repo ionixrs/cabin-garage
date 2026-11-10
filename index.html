@@ -121,6 +121,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #phone h2{font:700 13px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px;color:#2bd67b}
 #phone .note{margin:10px 0 0;color:var(--dim);font-size:12px;line-height:1.4}
 .btn.call{background:#1f9d4c;border-color:#1f9d4c;color:#fff}
+#pauseOv{position:fixed;inset:0;z-index:20;background:rgba(6,8,12,.62);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;pointer-events:auto}#pauseOv[hidden]{display:none}#pauseOv .pz{padding:22px 26px;text-align:center;max-width:min(420px,calc(100% - 32px))}#pauseOv h1{margin:0 0 8px;font:700 30px/1 var(--display);letter-spacing:.12em;text-transform:uppercase}#pauseOv p{margin:0 0 16px;color:var(--dim);line-height:1.45}.pzb{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 #cut{position:fixed;inset:0;z-index:9;background:#000;display:flex;align-items:flex-end;justify-content:center;pointer-events:auto;box-shadow:inset 0 0 180px 60px rgba(0,0,0,.85)}#cut[hidden]{display:none}#cut::before,#cut::after{content:'';position:absolute;left:0;right:0;height:9vh;background:#000}#cut::before{top:0}#cut::after{bottom:0}#cutCap{position:relative;z-index:1}#wake{position:fixed;inset:0;z-index:9;pointer-events:none}#wake[hidden]{display:none}#wake::before,#wake::after{content:'';position:absolute;left:0;right:0;height:51%;background:#000}#wake::before{top:0}#wake::after{bottom:0}#wake.go::before{animation:lidT 2.4s ease-in-out forwards}#wake.go::after{animation:lidB 2.4s ease-in-out forwards}@keyframes lidT{0%{transform:translateY(0)}30%{transform:translateY(-70%)}42%{transform:translateY(-12%)}62%{transform:translateY(-62%)}100%{transform:translateY(-101%)}}@keyframes lidB{0%{transform:translateY(0)}30%{transform:translateY(70%)}42%{transform:translateY(12%)}62%{transform:translateY(62%)}100%{transform:translateY(101%)}}#cutCap{margin:0 16px calc(90px + env(safe-area-inset-bottom,0px));max-width:640px;text-align:center;color:#f2f2f2;font:600 clamp(16px,2.6vw,24px)/1.4 var(--display);letter-spacing:.02em;text-shadow:0 2px 12px #000;transition:opacity .25s}@keyframes cutIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}#cutSkip{position:absolute;right:16px;bottom:calc(24px + env(safe-area-inset-bottom,0px))}
 #flash,#fade{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:8}#flash{background:#fff}#fade{background:#000;transition:opacity .7s}
 
@@ -186,7 +187,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
         <div class="mm-sec"><h3>World</h3><button class="btn" id="timeBtn">Day</button><button class="btn" id="rainBtn">Clear</button><button class="btn" id="trafficBtn" aria-pressed="true">Traffic</button><button class="btn" id="dynTimeBtn" aria-pressed="false">Auto day/night</button><button class="btn" id="dynWeatherBtn" aria-pressed="false">Changing weather</button><button class="btn" id="camsBtn" aria-pressed="true">Speed cameras: on</button></div>
         <div class="mm-sec"><h3>Car</h3><button class="btn" id="dashBtn" aria-pressed="false">Gauges</button><button class="btn" id="scrBtn" aria-expanded="false">Screen</button><button class="btn" id="lkaBtn" aria-pressed="true" title="Lane assist (' key)">Lane assist</button><button class="btn" id="abeltBtn" aria-pressed="false" title="Fasten the seatbelt automatically when you get in">Auto seatbelt</button><button class="btn" id="eaBtn" aria-pressed="true" title="Emergency Assist: stops the car if you stop steering">Emergency Assist</button><button class="btn" id="evadeBtn" aria-pressed="true" title="Swerves into a free lane during emergency braking">Evade assist</button><button class="btn" id="absBtn" aria-pressed="true">ABS</button><button class="btn" id="escBtn" aria-pressed="true">ESC</button><button class="btn" id="tcsBtn" aria-pressed="true">TCS</button><button class="btn" id="soundBtn" aria-pressed="true">Sound</button></div>
         <div class="mm-sec"><h3>Surprise emergencies</h3><button class="btn" id="surpriseBtn" aria-pressed="false">Off</button><small class="mm-note" id="surpriseNote">Turn on and something goes wrong at a random moment while you drive.</small></div>
-        <div class="mm-sec"><h3>Extras</h3><button class="btn" id="paintBtn">🎨 Paint shop</button><button class="btn" id="mmBtn" aria-pressed="true">Minimap</button><button class="btn" id="photoBtn">Photo</button><button class="btn" id="trophyBtn" aria-expanded="false">Trophies</button><button class="btn" id="helpBtn" aria-expanded="false">Controls</button></div>
+        <div class="mm-sec"><h3>Extras</h3><button class="btn" id="paintBtn">🎨 Paint shop</button><button class="btn" id="mmBtn" aria-pressed="true">Minimap</button><button class="btn" id="photoBtn">Photo</button><button class="btn" id="trophyBtn" aria-expanded="false">Trophies</button><button class="btn" id="pauseBtn" aria-pressed="false" title="Pause the game (Esc)">⏸ Pause</button><button class="btn" id="helpBtn" aria-expanded="false">Controls</button></div>
         <div class="mm-sec"><h3>Settings</h3><button class="btn" id="fsBtn" aria-pressed="false" title="Fullscreen (8 key)">⛶ Fullscreen</button><button class="btn" id="gfxBtn">Graphics: Auto</button><button class="btn" id="resetBtn" title="Reset the car, the drive and every setting">↻ Reset</button></div>
       </div>
     </div>
@@ -220,7 +221,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <dt>X · Y</dt><dd>Horn · change camera</dd>
       <dt>LB · RB</dt><dd>Left · right indicator</dd>
       <dt>D-pad</dt><dd>Up: lights · down: seatbelt · left / right: gear down / up</dd>
-      <dt>Back · Start</dt><dd>Hazards · this controls panel</dd>
+      <dt>Back · Start</dt><dd>Hazards · pause (the pause screen has a Controls button)</dd>
       <dt>L3 / R3</dt><dd>Get out / get in</dd>
     </dl>
     <p>On foot: W A S D to walk, Shift to run, drag to look. Click anything within reach: hood, trunk, fuel flap, tyres, door handles, engine parts. Walk back to the driver's door and press F to drive.</p>
@@ -265,7 +266,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div id="dash" class="panel" hidden><button class="x" data-close="dash" aria-label="Close">×</button><canvas id="dashCv" width="1024" height="384" aria-label="Instrument cluster"></canvas></div>
   <aside id="emerg" class="panel" hidden aria-label="Emergencies"><button class="x" data-close="emerg" aria-label="Close">×</button><h2>Emergencies</h2><p>Trigger a problem, then fix it the way you would in real life. Or pick “Surprise me” and an emergency will happen at a random time while you drive.</p><div id="emergList"></div><div class="ev-row"><b style="font:600 12px var(--display)">Surprise me:</b><button class="btn" data-evr="0">Off</button><button class="btn" data-evr="1">Rare</button><button class="btn" data-evr="2">Normal</button><button class="btn" data-evr="3">Often</button></div><button class="btn" id="randomFault">One random breakdown now</button></aside>
   <aside id="phone" class="panel" hidden aria-label="Phone"><button class="x" data-close="phone" aria-label="Close">×</button><div class="ph-top"><span id="phTime">12:00</span><span>5G ▮▮▮</span></div><div id="blitzApp" class="fault blitz"><div><b>📸 Blitzer warner</b><small id="blitzTxt">Warns you about speed cameras ahead.</small></div><button class="btn" id="blitzBtn" aria-pressed="false">Turn on</button></div><div id="blitzMore" hidden><button class="btn" id="blitzRep">📍 Report a camera here</button><p class="note" style="margin:6px 0 0">Real life: in Germany, using a speed-camera warner while driving is banned (§23 StVO). In this game it is allowed.</p></div><h2>💼 Jobs <span id="jobMoney" style="float:right;color:#7ee0a0"></span></h2><div id="jobList"></div><h2>Help on the road</h2><div id="phList"></div><p class="note">Services drive to wherever your car is, even on the freeway.</p></aside>
-  <div id="hurt" style="position:fixed;inset:0;pointer-events:none;opacity:0;z-index:7;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(150,0,0,.6) 100%)"></div><div id="flash"></div><div id="fade"></div><div id="wake" hidden></div><div id="cut" hidden><p id="cutCap"></p><button class="btn" id="cutSkip">Skip ⏩</button></div>
+  <div id="hurt" style="position:fixed;inset:0;pointer-events:none;opacity:0;z-index:7;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(150,0,0,.6) 100%)"></div><div id="flash"></div><div id="fade"></div><div id="pauseOv" hidden><div class="pz panel"><h1>Paused</h1><p>The whole game is frozen. Press <b>Esc</b>, <b>Pause</b> or <b>Start</b> on a controller to carry on.</p><div class="pzb"><button class="btn call" id="pzResume">▶ Resume</button><button class="btn" id="pzHelp">Controls</button></div></div></div><div id="wake" hidden></div><div id="cut" hidden><p id="cutCap"></p><button class="btn" id="cutSkip">Skip ⏩</button></div>
   <div id="scr" class="panel" hidden><button class="x" data-close="scr" aria-label="Close">×</button><canvas id="scrCv" width="1200" height="500" aria-label="Car touchscreen"></canvas></div>
   <button class="btn" id="photoExit" hidden>Exit photo mode</button>
 <div id="keys" class="panel" aria-label="Keyboard controls"><button class="x" data-close="keys" aria-label="Close">×</button>
@@ -1374,6 +1375,13 @@ function initAudio(){
  AU.radioF=ctx.createBiquadFilter();AU.radioF.type='lowpass';AU.radioF.frequency.value=9000;AU.radio=ctx.createGain();AU.radio.gain.value=0;AU.radioF.connect(AU.radio);AU.radio.connect(master);
  AU.next=ctx.currentTime;AU.step=0;setInterval(radioTick,30);
 }
+/* ===== pause: freezes the whole game ===== */
+const PAUSE={on:false,pad:false};
+function togglePause(force){const on=force===undefined?!PAUSE.on:!!force;if(on===PAUSE.on)return;PAUSE.on=on;for(const k in keys)keys[k]=false;if(typeof dragSteer!=='undefined')dragSteer=null;
+ const o=$('#pauseOv');if(o)o.hidden=!on;const b=$('#pauseBtn');if(b){b.setAttribute('aria-pressed',on);b.textContent=on?'▶ Resume':'⏸ Pause';}
+ try{if(AU.ctx){if(on)AU.ctx.suspend();else AU.ctx.resume();}}catch(e){}try{if(window.speechSynthesis){if(on)speechSynthesis.pause();else speechSynthesis.resume();}}catch(e){}
+ if(on){try{if(document.pointerLockElement)document.exitPointerLock();}catch(e){}}}
+function pausePad(){if(!navigator.getGamepads)return;let pads;try{pads=navigator.getGamepads();}catch(e){return;}let g=null;if(pads)for(const p of pads)if(p&&p.buttons&&p.buttons.length>9){g=p;break;}if(!g)return;const st9=!!(g.buttons[9]&&g.buttons[9].pressed);if(st9&&!PAUSE.pad)togglePause(false);PAUSE.pad=st9;}
 const now=()=>AU.ctx.currentTime;
 /* ===== engine sound synth: one voice per engine layout ===== */
 /* h: harmonic amplitudes of the firing tone, sh: sub-order (half firing rate) harmonics, am: uneven-firing lope, res: exhaust resonance [Hz, gain dB, Q], lp: load filter [base Hz, Hz per rpm], nz: intake/exhaust noise [amount, centre as multiple of firing f, Q], drive: saturation, pops: overrun crackle */
@@ -1848,7 +1856,7 @@ const PANEL_BTN={help:'#helpBtn',emerg:'#emergBtn',phone:'#phoneBtn',scr:'#scrBt
 function closePanel(id){const el=$('#'+id);if(!el)return;el.hidden=true;if(id==='dash'){st.dash=false;st.dashOff=true;$('#dashBtn').setAttribute('aria-pressed',false);}if(PANEL_BTN[id])$(PANEL_BTN[id]).setAttribute('aria-expanded',false);}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-close]');if(b){e.stopPropagation();closePanel(b.dataset.close);}});
 $('#toast').addEventListener('click',()=>{const t=$('#toast');t.style.opacity=0;t.style.pointerEvents='none';});
-addEventListener('keydown',e=>{if(e.code==='Escape'){['shop','help','emerg','phone','bigmap','trophies','paintPanel','trainPanel','borderPanel'].forEach(closePanel);if($('#ui').classList.contains('photo'))togglePhoto();}});
+addEventListener('keydown',e=>{if(e.code==='Pause'){togglePause();return;}if(e.code==='Escape'){const pl=['shop','help','emerg','phone','bigmap','trophies','paintPanel','trainPanel','borderPanel'],anyOpen=pl.some(id=>{const el=$('#'+id);return el&&!el.hidden;})||$('#ui').classList.contains('photo');if(PAUSE.on){togglePause(false);return;}if(!anyOpen){togglePause(true);return;}pl.forEach(closePanel);if($('#ui').classList.contains('photo'))togglePhoto();}});
 
 /* ===== emergencies ===== */
 const FAULTS=[
@@ -3320,7 +3328,7 @@ function padPoll(dt){if(!navigator.getGamepads)return;let pads;try{pads=navigato
  let g=null;if(pads)for(const p of pads)if(p&&p.connected!==false&&p.buttons&&p.buttons.length>=12&&p.axes&&p.axes.length>=2){g=p;break;}
  if(!g){if(GP.idx!==-1){GP.idx=-1;padRelease();toast('🎮 Controller disconnected',1800);}return;}
  const B=i=>!!(g.buttons[i]&&(g.buttons[i].pressed||g.buttons[i].value>.5)),V=i=>g.buttons[i]?+g.buttons[i].value||(g.buttons[i].pressed?1:0):0;
- if(GP.idx!==g.index){GP.idx=g.index;GP.prev=g.buttons.map((_,i)=>B(i));toast('🎮 Controller connected · press Start for the button layout',2600);return;}
+ if(GP.idx!==g.index){GP.idx=g.index;GP.prev=g.buttons.map((_,i)=>B(i));toast('🎮 Controller connected · press Start to pause, the layout is under Controls',2600);return;}
  const pr=i=>B(i)&&!GP.prev[i],rl=i=>!B(i)&&GP.prev[i],lx=padDz(g.axes[0],GP.dz),ly=padDz(g.axes[1],GP.dz),rx=padDz(g.axes[2],GP.dz),ry=padDz(g.axes[3],GP.dz);
  const busy=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('input,textarea');
  if(!busy){
@@ -3341,10 +3349,11 @@ function padPoll(dt){if(!navigator.getGamepads)return;let pads;try{pads=navigato
  if(pr(0))toggleEngine();
  if(pr(2)){horn(true);GP.hornOn=true;}if(rl(2)&&GP.hornOn){horn(false);GP.hornOn=false;}
  if(pr(3))padKey('KeyV');if(pr(4))padKey('KeyZ');if(pr(5))padKey('KeyC');
- if(pr(8))toggleHazard();if(pr(9))$('#helpBtn').click();if(pr(10)||pr(11))toggleWalk();
+ if(pr(8))toggleHazard();if(pr(9)){PAUSE.pad=true;togglePause(true);}if(pr(10)||pr(11))toggleWalk();
  if(pr(12))cycleLights();if(pr(13))toggleBelt();if(pr(14))padKey('KeyQ');if(pr(15))padKey('KeyE');}
  GP.prev=g.buttons.map((_,i)=>B(i));}
 function frame(t){
+ if(PAUSE.on){last=t;pausePad();requestAnimationFrame(frame);return;}
  const rawDt=(t-last)/1000,dt=Math.max(.001,Math.min(.05,rawDt));last=t;frameNo++;fpsWatch(Math.min(rawDt,.5));
  const c=car;padPoll(dt);
  /* engine cranking */
@@ -3584,6 +3593,7 @@ $('#loading').remove();
 try{const hid=[];scene.traverse(o=>{if(!o.visible&&o!==scene){hid.push(o);o.visible=true;}});const jm=A7JI.parts.map(p=>p[0]),cnt=jm.map(m=>{const c=m.count;m.count=1;return c;});renderer.compile(scene,camera);hid.forEach(o=>o.visible=false);jm.forEach((m,i)=>m.count=cnt[i]);}catch(e){}
 requestAnimationFrame(t=>{last=t;frame(t);});
 setTimeout(hideHint,14000);
+$('#pauseBtn').addEventListener('click',e=>{e.stopPropagation();togglePause();});$('#pzResume').onclick=e=>{e.stopPropagation();togglePause(false);};$('#pzHelp').onclick=e=>{e.stopPropagation();togglePause(false);$('#helpBtn').click();};
 $('#cutSkip').onclick=e=>{e.stopPropagation();if(CUT.on)endCut();};
 {const topEl=document.querySelector('.top');const placeTop=()=>{if(!topEl)return;const b=Math.round(topEl.getBoundingClientRect().bottom);if(b>0&&b!==placeTop.l){placeTop.l=b;document.documentElement.style.setProperty('--topH',(b-2)+'px');}};placeTop();addEventListener('resize',placeTop);if(window.ResizeObserver)new ResizeObserver(placeTop).observe(topEl);}
 $('#lkaBtn').addEventListener('click',e=>{e.stopPropagation();toggleLka();});$('#eaBtn').addEventListener('click',e=>{e.stopPropagation();toggleEA();});$('#abeltBtn').addEventListener('click',e=>{e.stopPropagation();toggleAutoBelt();});$('#abeltBtn').setAttribute('aria-pressed',ABELT.on);$('#fsBtn').addEventListener('click',e=>{e.stopPropagation();toggleFullscreen();});$('#evadeBtn').addEventListener('click',e=>{e.stopPropagation();st.evade=st.evade===false;$('#evadeBtn').setAttribute('aria-pressed',st.evade);sfx('click');toast('Evade assist '+(st.evade?'on: during emergency braking the car swerves into a free lane':'off'),2600);});$('#absBtn').addEventListener('click',e=>{e.stopPropagation();toggleSysAid('abs','ABS','wheels lock under hard braking, you cannot steer and the tyres squeal');});$('#escBtn').addEventListener('click',e=>{e.stopPropagation();toggleSysAid('esc','Stability control (ESC)','the car can slide and spin');});$('#tcsBtn').addEventListener('click',e=>{e.stopPropagation();toggleSysAid('tcs','Traction control (TCS)','wheels spin on slippery roads');});$('#trainPrompt').addEventListener('click',e=>{e.stopPropagation();initAudio();openTrainPanel();});$('#skipRide').addEventListener('click',e=>{e.stopPropagation();if(TRN.ride){TRN.ride.skip=true;sfx('click');}});$('#blitzBtn').addEventListener('click',e=>{e.stopPropagation();toggleBlitzer();});$('#blitzRep').addEventListener('click',e=>{e.stopPropagation();sfx('chime');toast('Thanks! Your report helps other drivers. (+1 community point)',2600);});try{if(localStorage.getItem('cabin-blitz')==='1')toggleBlitzer();}catch(e){}$('#camsBtn').addEventListener('click',e=>{e.stopPropagation();toggleCams();});$('#jobList').addEventListener('click',e=>{e.stopPropagation();const a=e.target.closest('[data-job]'),c=e.target.closest('[data-jobcancel]'),n=e.target.closest('[data-jobnew]');if(a)acceptJob(+a.dataset.job);if(c)cancelJob();if(n){makeOffers();renderJobs();sfx('click');}});
