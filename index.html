@@ -1599,11 +1599,14 @@ function updateDriver(){const d=P&&P.drv;if(!d)return;const out=walking;d.D.visi
  const inHead=st.view==='driver';d.head.visible=d.hr.visible=d.neck.visible=!inHead;d.body.forEach(o=>o.visible=!inHead);
  const R=P.wheelR||.18,G=P.group;G.updateMatrixWorld();
  for(const a of d.arms){const sd=a.sd;a.hand.position.set(sd*(R+.005),-.012,.012);a.hand.rotation.z=sd*.3;
+  if(sd>0&&st.edHand>0&&P.shifter){const hv=st.edHV||(st.edHV=new THREE.Vector3());P.shifter.updateMatrixWorld(true);P.shifter.localToWorld(hv.set(0,.13,.02));a.hand.parent.worldToLocal(hv);a.hand.position.lerp(hv,st.edHand);a.hand.rotation.z=sd*.3*(1-st.edHand);}
   const hw=a.hand.getWorldPosition(_dv[0]);const h=G.worldToLocal(hw);const sh=_dv[1].set(-.37+sd*.19,inHead?.94:1.0,inHead?.5:.42);
   const el=_dv[2].lerpVectors(sh,h,.5);el.x+=sd*.09;el.y-=.12;el.z+=.04;placeSeg(a.up,sh,el);placeSeg(a.lo,el,h);a.cuff.position.copy(h).lerp(el,.12);a.cuff.quaternion.copy(a.lo.quaternion);}
  const brk=(A.brk||0)>.05||keys.brake;for(const l of d.legs){const sd=l.sd,hip=_dv[0].set(-.37+sd*.1,.53,.36);
   const ft=sd>0?_dv[1].set(brk?-.42:-.27,.36+(sd>0?(brk?A.brk:A.thr||0)*-.02:0),-.86+(brk?(A.brk||0):(A.thr||0))*.03):_dv[1].set(-.6,.3,-.82);
-  const kn=_dv[2].set(-.37+sd*.12,.66,-.18);placeSeg(l.th,hip,kn);placeSeg(l.sh,kn,ft);l.foot.position.set(ft.x,ft.y-.03,ft.z-.06);l.foot.rotation.x=-.35;}}
+  if(sd>0&&st.edFoot){ft.y+=st.edFoot.lift*.09-st.edFoot.press*.02;ft.z+=st.edFoot.lift*.08+st.edFoot.press*.04;}
+  const kn=_dv[2].set(-.37+sd*.12,.66,-.18);placeSeg(l.th,hip,kn);placeSeg(l.sh,kn,ft);l.foot.position.set(ft.x,ft.y-.03,ft.z-.06);l.foot.rotation.x=-.35-(sd>0&&st.edFoot?st.edFoot.press*.3-st.edFoot.lift*.15:0);}
+ if(st.edShift!=null&&P.shifter&&!car.minimal)P.shifter.rotation.x=st.edShift;}
 function selectCar(id,cfg){if(typeof dmgReset==='function')dmgReset();car=cfg||CARS.find(c=>c.id===id)||CARS[0];disposeCar();
  Object.assign(st,{engine:false,cranking:0,gear:'P',v:0,rpm:0,doorL:false,doorR:false,winL:false,winR:false,sun:false,glove:false,visorL:false,visorR:false,arm:false,cup:false,ambColor:null,mode:'Comfort',faults:{oil:false,tyre:-1,heat:false,batt:false,brake:false,fire:false,throttle:false,limp:false},locked:false,hood:false,trunk:false,flap:false,refuel:false,rearFold:false,lightbar:false,headrest:false,mirrorDim:false,colTilt:1});
  for(const k of['doorL','doorR','winL','winR','sun','glove','visorL','visorR','arm','hood','trunk','flap','rearFold','headrest'])A[k]=0;A.colTilt=1;
@@ -3235,7 +3238,7 @@ function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('G
  const yaw=drive?rp.yaw:yawCar,fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=-fz,rz=fx,x0=drive?rp.x:posX,z0=drive?rp.z:posZ;
  let alt=0;if(drive&&a1){for(const s of[4.1,-4.1]){const x=x0+rx*s,z=z0+rz*s;if(x>-53&&x<-27&&onSurface(x,z)){alt=s;break;}}}
  const beat=SPM.src==='file'&&SPM.hasFile?.6:60/118;
- Object.assign(EDIT,{shifted:0,on:true,t:0,shot:-1,d:0,v:0,ts:1,lat:0,latV:0,drive,alt,x0,z0,yaw,fx,fz,rx,rz,fov0:camera.fov,ry:Math.random()*6.28,vol:null,beat,co:null,fix:null,time0:st.time,lights0:st.lights,acc:0,pitch:0,roll:0,flash:0});
+ Object.assign(EDIT,{shifted:0,stomp:0,on:true,t:0,shot:-1,d:0,v:0,ts:1,lat:0,latV:0,drive,alt,x0,z0,yaw,fx,fz,rx,rz,fov0:camera.fov,ry:Math.random()*6.28,vol:null,beat,co:null,fix:null,time0:st.time,lights0:st.lights,acc:0,pitch:0,roll:0,flash:0});
  const nb=EDIT_SEQ.reduce((a,x)=>a+x[1],0);if(SPM.src==='file'&&SPM.hasFile)EDIT.beat=.52;const bt=EDIT.beat;let b=0;EDIT.seq=EDIT_SEQ.map(([id,n])=>{const s={id,t0:b*bt,len:n*bt};b+=n;return s;});EDIT.dur=b*bt+1.2;
  if(st.time==='day'){st.time='dusk';applyTime();}st.lights=2;st.engine=true;st.hb=false;st.v=0;cruise=0;st.gear='D';EDIT.belt0=st.belt;st.belt=true;
  EDIT.tr0=st.traffic;st.traffic=false;applyTraffic();if(typeof ntRemove==='function')ntRemove();
@@ -3245,15 +3248,15 @@ function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('G
  /* exhaust flames */
  {const fl=new THREE.Group(),fm=new THREE.MeshBasicMaterial({color:0xff7a20,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}),fm2=fm.clone();fm2.color.setHex(0x3a7bff);
   const r0=(P.bounds?P.bounds.rear/(P.zScale||1):2.5)+.1;for(const s of[-1,1]){const c=new THREE.Mesh(new THREE.ConeGeometry(.07,.42,10),fm);c.rotation.x=Math.PI/2;c.position.set(s*.42,.27,r0+.22);fl.add(c);const c2=new THREE.Mesh(new THREE.ConeGeometry(.035,.2,8),fm2);c2.rotation.x=Math.PI/2;c2.position.set(s*.42,.27,r0+.08);fl.add(c2);}
-  fl.visible=false;(P.group||carRig).add(fl);EDIT.flames=fl;}
+  fl.visible=false;(P.group||carRig).add(fl);EDIT.flames=fl;const fw=new THREE.PointLight(0xffe2c4,0,1.6);fw.position.set(-.45,.62,-.62);(P.group||carRig).add(fw);EDIT.footL=fw;}
  {const sm=cutPts(160,1.6,0xe2e2e2,{opacity:.42});sm.material.toneMapped=true;{const c2=mkcv(64,64),x2=c2.getContext('2d'),gr=x2.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.45,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');x2.fillStyle=gr;x2.fillRect(0,0,64,64);sm.material.map=new THREE.CanvasTexture(c2);sm.material.needsUpdate=true;}scene.add(sm);EDIT.smoke=sm;EDIT.smAge=new Float32Array(160).fill(9);EDIT.smI=0;EDIT.v3=new THREE.Vector3();EDIT.dph=0;EDIT.slip=0;EDIT.sq=0;}
  const o=$('#cut');o.hidden=false;o.style.background='rgba(0,0,0,1)';o.classList.remove('bars');void o.offsetWidth;o.classList.add('bars','edit');
  let gr=$('#grain');if(!gr){gr=document.createElement('div');gr.id='grain';o.prepend(gr);}gr.style.backgroundImage=`url(${editNoiseURL()})`;
  $('#ui').classList.add('cine');cutCap('');scene.add(camera);}
 function editEnd(){if(!EDIT.on)return;EDIT.on=false;const o=$('#cut');o.hidden=true;o.style.background='rgba(0,0,0,1)';o.classList.remove('bars','edit');$('#ui').classList.remove('cine');canvas.style.filter='';
- if(EDIT.flames){if(EDIT.flames.parent)EDIT.flames.parent.remove(EDIT.flames);disposeGroup(EDIT.flames);EDIT.flames=null;}if(EDIT.smoke){scene.remove(EDIT.smoke);EDIT.smoke.geometry.dispose();if(EDIT.smoke.material.map)EDIT.smoke.material.map.dispose();EDIT.smoke.material.dispose();EDIT.smoke=null;}
+ if(EDIT.footL&&EDIT.footL.parent){EDIT.footL.parent.remove(EDIT.footL);EDIT.footL=null;}if(EDIT.flames){if(EDIT.flames.parent)EDIT.flames.parent.remove(EDIT.flames);disposeGroup(EDIT.flames);EDIT.flames=null;}if(EDIT.smoke){scene.remove(EDIT.smoke);EDIT.smoke.geometry.dispose();if(EDIT.smoke.material.map)EDIT.smoke.material.map.dispose();EDIT.smoke.material.dispose();EDIT.smoke=null;}
  if(EDIT.fov0){camera.fov=EDIT.fov0;camera.updateProjectionMatrix();}if(AU.master&&EDIT.vol!=null)AU.master.gain.value=EDIT.vol;spmStop(2.5);
- if(st.time!==EDIT.time0){st.time=EDIT.time0;applyTime();}st.lights=EDIT.lights0;st.edKmh=null;st.belt=EDIT.belt0;gearNum=1;
+ if(st.time!==EDIT.time0){st.time=EDIT.time0;applyTime();}st.lights=EDIT.lights0;st.edKmh=null;st.edFoot=null;st.edHand=0;st.edShift=null;st.belt=EDIT.belt0;gearNum=1;
  st.traffic=EDIT.tr0!==false;applyTraffic();quality=EDIT.q0;qualAuto=EDIT.qa0;applyQuality();
  if(EDIT.jumped&&EDIT.home){posX=EDIT.home.x;posZ=EDIT.home.z;yawCar=EDIT.home.yaw;carRig.position.set(posX,0,posZ);}else yawCar=EDIT.yaw;carRig.rotation.set(0,yawCar,0);st.v=0;st.hb=true;lastPZ=posZ;setView(st.view||'driver');toast("🎬 That's a wrap!",2200);}
 function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&EA.stage)eaCancel(true);
@@ -3277,8 +3280,10 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
    EDIT.sq-=dt;if(EDIT.sq<=0&&AU.ctx){EDIT.sq=.16;nburst(.24,'bandpass',1000+Math.random()*500,.05);}}
   for(let i=0;i<a.count;i++){if(ag[i]>=2.2){a.setY(i,-50);continue;}ag[i]+=ds;a.setY(i,a.getY(i)+ds*(.4+ag[i]*.5));a.setX(i,a.getX(i)+Math.sin(i*1.7)*ds*.7);}a.needsUpdate=true;}
  st.edKmh=EDIT.v*3.6;if(st.engine){{const gs=[0,14,26,38,52,66,1e3],g=gs.findIndex((x,i)=>EDIT.v<gs[i+1]),lo=gs[g],hi=Math.min(gs[g+1],95),fr=clamp((EDIT.v-lo)/(hi-lo),0,1);st.rpm=EDIT.v<2?900:2600+fr*(Math.min(car.redline||7000,7200)-2900);EDIT.gear=g+1;gearNum=EDIT.gear;
-  if(id==='pedal'){EDIT.gear=gearNum=5;st.rpm=3400+q*3600;}else if(id==='shift'){if(q<.35){EDIT.gear=gearNum=5;st.rpm=7000;}else{EDIT.gear=gearNum=6;st.rpm=4600+(q-.35)*900;if(!EDIT.shifted){EDIT.shifted=1;if(AU.ctx){nburst(.08,'lowpass',300,.3);tone2(180,.08,'square',.05);nburst(.05,'bandpass',800,.15,null,now()+.05);}}}}}A.thr=EDIT.acc>.5?.9:.25;if(id==='pedal')A.thr=Math.min(1,q/.3);if(id==='shift')A.thr=q>.32&&q<.4?.3:1;}
- if(P&&P.paddles&&P.paddles.up)P.paddles.up.rotation.x=id==='shift'&&q>.3&&q<.45?-.35:0;
+  if(id==='pedal'){EDIT.gear=gearNum=5;st.rpm=q<.3?3200:3200+(q-.3)/.7*3900;}else if(id==='shift'){if(q<.43){EDIT.gear=gearNum=5;st.rpm=7000;}else{EDIT.gear=gearNum=6;st.rpm=4600+(q-.43)*900;if(!EDIT.shifted){EDIT.shifted=1;if(AU.ctx){nburst(.08,'lowpass',300,.3);tone2(180,.08,'square',.05);nburst(.05,'bandpass',800,.15,null,now()+.05);}}}}}A.thr=EDIT.acc>.5?.9:.25;if(id==='shift')A.thr=q>.38&&q<.46?.3:1;}
+ if(EDIT.footL)EDIT.footL.intensity=id==='pedal'?2.2:0;
+ if(id==='pedal'){const lift=q<.3?1:q<.42?1-(q-.3)/.12:0;st.edFoot={lift,press:1-lift};if(q>=.3&&!EDIT.stomp){EDIT.stomp=1;if(AU.ctx)nburst(.06,'lowpass',200,.25);}A.thr=1-lift;}else st.edFoot=null;
+ if(id==='shift'){const e=x=>x*x*(3-2*x);st.edHand=q<.28?e(q/.28):q<.62?1:q>.9?0:e(1-(q-.62)/.28);st.edShift=q>.36&&q<.5?-.32*Math.sin((q-.36)/.14*Math.PI):0;}else{st.edHand=0;st.edShift=null;}
  /* exhaust flames on the exhaust shot and when lifting */
  if(EDIT.flames){const pop=(id==='exh'&&Math.sin(u*9)>.5)||id==='qrear'||(EDIT.acc<-1&&Math.random()<.2);EDIT.flames.visible=pop&&Math.random()<.7;if(EDIT.flames.visible){EDIT.flames.scale.set(1,1,.6+Math.random()*.8);if(Math.random()<.12&&AU.ctx)nburst(.04,'bandpass',700,.1);}}
  /* cuts */
@@ -3305,8 +3310,8 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
   case 'drift1':{lag=true;cp=P2(-8.5+q*1.5,3.8,.65);lk=C;fov=40;shake=.4;break;}
   case 'drift2':{cp=P2(.5-q*1.5,6.2,.95);lk=C;fov=52;shake=.3;break;}
   case 'drift3':{lag=true;cp=P2(8.5,-1.4,1.0);lk=P2(-2,0,.6);fov=50;shake=.6;break;}
-  case 'pedal':{cp=P2(-.35,-.62,.62);lk=P2(-.9,-.3,.36);fov=55;shake=.5;break;}
-  case 'shift':{cp=P2(-.02+q*.02,-.02,1.0);lk=P2(-.45,-.25,.86);fov=44;shake=.4;break;}
+  case 'pedal':{cp=P2(-.38,-.6,.66);lk=P2(-.9,-.3,.38);fov=58;shake=.5;break;}
+  case 'shift':{cp=P2(.32,.4,1.12);lk=P2(-.2,-.12,.78);fov=60;shake=.4;break;}
   case 'gaugeA':{cp=P2(.1+q*.03,-.36,1.08);lk=P2(-.42,-.5,.86);fov=13+q*2;shake=.4;break;}
   case 'qgauge':{cp=P2(.1,-.36,1.08);lk=P2(-.42,-.5,.86);fov=11;shake=.6;break;}
   case 'gaugeC':{cp=P2(.1,-.36+(q-.5)*.08,1.08);lk=P2(-.42,-.5,.86);fov=14;shake=.5;break;}
@@ -4156,7 +4161,7 @@ function frame(t){
  if(st.faults.tyre>=0){body.rotation.z+=(st.faults.tyre%2===0?1:-1)*.012;body.rotation.x+=(st.faults.tyre<2?-1:1)*.008;}
  if(c.minimal)P.shifter.rotation.y=A.shift*3;else P.shifter.rotation.x=A.shift;
  P.wheel.rotation.z=steer*2.3;updateDriver();{const go=(st.view==='outside'||walking)?.7:.4;if(P.M.glass.opacity!==go)P.M.glass.opacity=go;}
- P.pedals[0].rotation.x=-.55+A.thr*.3;P.pedals[1].rotation.x=-.55+A.brk*.3;
+ P.pedals[0].rotation.x=-.55+A.thr*.3+(st.edFoot?st.edFoot.press*.25:0);P.pedals[1].rotation.x=-.55+A.brk*.3;
  P.seatD.position.z=.42-A.seatZ*.03;P.seatD.position.y=A.seatY*.02;
  P.vents.forEach((vv,i)=>{if(!vv)return;A.vents[i]+=((st.vents[i]?0:1)-A.vents[i])*Math.min(1,dt*8);vv.sl.forEach(s=>s.rotation.x=A.vents[i]*1.2);});
  P.knobs.forEach(k=>k.g.rotation.y=-(k.k==='vol'?st.vol/10:st.fan/5)*4.5);
