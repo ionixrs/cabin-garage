@@ -3291,7 +3291,7 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
   case 'head':{cp=P2(-2.9-q*.3,-1.3,.75);lk=P2(-2.3,-.6,.72);fov=34;shake=.3;break;}
   case 'grille':{cp=P2(-3.6+q*.6,.15,.65);lk=P2(-2.4,0,.62);fov=30;shake=.3;break;}
   case 'wheel':{cp=P2(-1.4,-1.7+q*.2,.38);lk=P2(-1.35,-.85,.36);fov=40;shake=.6;break;}
-  case 'cabin':{cp=P2(.5,.33,1.12);lk=P2(-.3,-.37,.95);fov=60;shake=.4;break;}
+  case 'cabin':{cp=P2(.3,.42,1.16);lk=P2(-.3,-.32,.92);fov=82;shake=.4;break;}
   case 'exh':{cp=P2(3.5+q*.4,.85,.5);lk=P2(2.5,.42,.27);fov=36;shake=.5;break;}
   case 'chase':{lag=true;cp=P2(7.5-q*1.5,-1.6,.75);lk=P2(-3,0,.7);fov=48;shake=.35;break;}
   case 'side':{cp=P2(-.5+q,-8.5,1.0);lk=P2(0,0,.75);fov=26;shake=.2;break;}
@@ -3306,10 +3306,10 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
   case 'gaugeA':{cp=P2(.1+q*.03,-.36,1.08);lk=P2(-.42,-.5,.86);fov=13+q*2;shake=.4;break;}
   case 'qgauge':{cp=P2(.1,-.36,1.08);lk=P2(-.42,-.5,.86);fov=11;shake=.6;break;}
   case 'gaugeC':{cp=P2(.1,-.36+(q-.5)*.08,1.08);lk=P2(-.42,-.5,.86);fov=14;shake=.5;break;}
-  case 'screen':{cp=P2(.15,-.1+q*.06,1.1);lk=P2(-.4,.18,.98);fov=32;shake=.4;break;}
-  case 'shifter':{cp=P2(.5-q*.05,.3,1.15);lk=P2(0,.02,.7);fov=42;shake=.4;break;}
-  case 'rear':{cp=P2(1.25,0,1.18);lk=P2(-6,0,.9);fov=62;shake=.5;break;}
-  case 'hands':{cp=P2(-.05,.05,1.0);lk=P2(-.32,-.37,.97);fov=44;shake=.5;break;}
+  case 'screen':{cp=P2(.5,-.05+q*.06,1.16);lk=P2(-.4,.12,.95);fov=66;shake=.4;break;}
+  case 'shifter':{cp=P2(.18-q*.05,.08,1.3);lk=P2(-.25,0,.7);fov=74;shake=.4;break;}
+  case 'rear':{cp=P2(1.55,0,1.22);lk=P2(-6,0,.88);fov=84;shake=.5;break;}
+  case 'hands':{cp=P2(.25,.2,1.08);lk=P2(-.35,-.37,.95);fov=74;shake=.5;break;}
   case 'gauge':{/* the speedometer climbing to 300 */cp=P2(.18-q*.06,-.42,1.06);lk=P2(-.42,-.47,.9);fov=28-q*5;shake=.45;break;}
   case 'bumper':{cp=P2(-2.75,.35,.3);lk=P2(-40,.2,.35);fov=78;shake=1.2;break;}
   case 'drone':{cp=P2(6-q*4,EDIT.alt*.5,16+q*4);lk=P2(-6,EDIT.alt*.5,0);fov=50;break;}
