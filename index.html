@@ -3227,7 +3227,7 @@ function ntUpdate(dt){if(NTK.fly){ntFly(dt);return;}
 
 /* ===== car edit: a music-video style showcase — graded, speed ramps, lane change, detail shots ===== */
 const EDIT={on:false,t:0};
-const EDIT_SEQ=[['est',8],['head',4],['grille',4],['wheel',4],['cabin',4],['exh',4],['chase',4],['side',4],['qwheel',2],['qhood',2],['qrear',2],['qdrone',2],['orbit',8],['bumper',4],['gauge',8],['drone',4],['flyby',4],['mirror',4],['slowOrbit',8],['slowWheel',4],['hood',4],['crane',4],['outro',8]];
+const EDIT_SEQ=[['est',8],['head',4],['grille',4],['wheel',4],['cabin',4],['exh',4],['chase',4],['gaugeA',4],['side',4],['screen',4],['qwheel',2],['qhood',2],['qgauge',2],['qrear',2],['qdrone',2],['orbit',8],['shifter',4],['bumper',4],['gauge',8],['rear',4],['drone',4],['flyby',4],['hands',4],['mirror',4],['slowOrbit',8],['slowWheel',4],['hood',4],['gaugeC',4],['crane',4],['outro',8]];
 function editNoiseURL(){if(EDIT.grainURL)return EDIT.grainURL;const c=mkcv(192,192),x=c.getContext('2d'),d=x.createImageData(192,192);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255;}x.putImageData(d,0,0);return EDIT.grainURL=c.toDataURL();}
 function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('Get in the car first');return;}initAudio();
  const rp=roadPose(posX,posZ,yawCar),a1=posX>-53&&posX<-27,a7=posX<-56&&Math.abs(posZ-ZX)<13,onRoad=a1||a7||Math.abs(posX)<6,drive=onRoad&&!trkZone(posX,posZ)&&!cityZone(posX,posZ);
@@ -3262,9 +3262,9 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
  /* speed ramps in and out of slow motion */
  const slowShot=id==='slowOrbit'||id==='slowWheel';EDIT.ts+=((slowShot?.28:1)-EDIT.ts)*Math.min(1,dt*3);const ds=dt*EDIT.ts;
  /* the car drives itself: cruise, build up, flat out */
- const VT={est:14,head:14,grille:14,wheel:14,cabin:14,exh:14,chase:30,side:30,qwheel:42,qhood:42,qrear:42,qdrone:42,orbit:55,bumper:58,gauge:86,outro:80},vT=!EDIT.drive?0:(VT[id]!=null?VT[id]:84),v0=EDIT.v;EDIT.v+=(vT-EDIT.v)*Math.min(1,ds*(id==='gauge'?.75:.6));EDIT.acc=(EDIT.v-v0)/Math.max(1e-4,ds);EDIT.d+=EDIT.v*ds;
+ const VT={est:14,head:14,grille:14,wheel:14,cabin:14,exh:14,chase:30,side:30,qwheel:42,qhood:42,qrear:42,qdrone:42,orbit:55,bumper:58,gauge:86,outro:80,gaugeA:42,screen:42,qgauge:55,shifter:58},vT=!EDIT.drive?0:(VT[id]!=null?VT[id]:84),v0=EDIT.v;EDIT.v+=(vT-EDIT.v)*Math.min(1,ds*(id==='gauge'?.75:.6));EDIT.acc=(EDIT.v-v0)/Math.max(1e-4,ds);EDIT.d+=EDIT.v*ds;
  /* lane change over and back */
- const latT=EDIT.alt&&['drone','flyby','mirror','slowOrbit','slowWheel'].includes(id)?EDIT.alt:0,la=(latT-EDIT.lat)*2.2-EDIT.latV*2.6;EDIT.latV+=la*ds;EDIT.lat+=EDIT.latV*ds;
+ const latT=EDIT.alt&&['drone','flyby','hands','mirror','slowOrbit','slowWheel'].includes(id)?EDIT.alt:0,la=(latT-EDIT.lat)*2.2-EDIT.latV*2.6;EDIT.latV+=la*ds;EDIT.lat+=EDIT.latV*ds;
  const {fx,fz,rx,rz}=EDIT;posX=EDIT.x0+fx*EDIT.d+rx*EDIT.lat;posZ=EDIT.z0+fz*EDIT.d+rz*EDIT.lat;const hd=EDIT.v>1?Math.atan2(EDIT.latV,EDIT.v):0;yawCar=EDIT.yaw-hd;lastPZ=posZ;st.v=0;
  /* body: squat under power, roll in the lane change */
  EDIT.pitch+=(clamp(-EDIT.acc*.006,-.03,.03)-EDIT.pitch)*Math.min(1,ds*4);EDIT.roll+=(clamp(-la*.02,-.04,.04)-EDIT.roll)*Math.min(1,ds*4);
@@ -3294,6 +3294,13 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
   case 'qrear':{cp=P2(3.3,-.6,.42);lk=P2(-2,0,.8);fov=60;shake=.9;break;}
   case 'qdrone':{cp=P2(-3,0,12);lk=P2(-3.01,0,0);fov=55;break;}
   case 'orbit':{lag=true;const a=EDIT.ry+ease(q)*Math.PI*1.4,R=7.5;cp=new THREE.Vector3(posX+Math.sin(a)*R,1.0+Math.sin(q*3)*.3,posZ+Math.cos(a)*R);lk=C;fov=44;shake=.3;break;}
+  case 'gaugeA':{cp=P2(.1+q*.03,-.36,1.08);lk=P2(-.42,-.5,.86);fov=13+q*2;shake=.4;break;}
+  case 'qgauge':{cp=P2(.1,-.36,1.08);lk=P2(-.42,-.5,.86);fov=11;shake=.6;break;}
+  case 'gaugeC':{cp=P2(.1,-.36+(q-.5)*.08,1.08);lk=P2(-.42,-.5,.86);fov=14;shake=.5;break;}
+  case 'screen':{cp=P2(.15,-.1+q*.06,1.1);lk=P2(-.4,.18,.98);fov=32;shake=.4;break;}
+  case 'shifter':{cp=P2(.5-q*.05,.3,1.15);lk=P2(0,.02,.7);fov=42;shake=.4;break;}
+  case 'rear':{cp=P2(1.25,0,1.18);lk=P2(-6,0,.9);fov=62;shake=.5;break;}
+  case 'hands':{cp=P2(-.05,.05,1.0);lk=P2(-.32,-.37,.97);fov=44;shake=.5;break;}
   case 'gauge':{/* the speedometer climbing to 300 */cp=P2(.18-q*.06,-.42,1.06);lk=P2(-.42,-.47,.9);fov=28-q*5;shake=.45;break;}
   case 'bumper':{cp=P2(-2.75,.35,.3);lk=P2(-40,.2,.35);fov=78;shake=1.2;break;}
   case 'drone':{cp=P2(6-q*4,EDIT.alt*.5,16+q*4);lk=P2(-6,EDIT.alt*.5,0);fov=50;break;}
