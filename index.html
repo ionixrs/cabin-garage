@@ -3230,7 +3230,8 @@ const EDIT={on:false,t:0};
 const EDIT_SEQ=[['est',8],['head',4],['grille',4],['wheel',4],['cabin',4],['exh',4],['chase',4],['side',4],['qwheel',2],['qhood',2],['qrear',2],['qdrone',2],['orbit',8],['bumper',4],['drone',4],['flyby',4],['mirror',4],['slowOrbit',8],['slowWheel',4],['hood',4],['crane',4],['outro',8]];
 function editNoiseURL(){if(EDIT.grainURL)return EDIT.grainURL;const c=mkcv(192,192),x=c.getContext('2d'),d=x.createImageData(192,192);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255;}x.putImageData(d,0,0);return EDIT.grainURL=c.toDataURL();}
 function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('Get in the car first');return;}initAudio();
- const rp=roadPose(posX,posZ,yawCar),a1=posX>-53&&posX<-27,onRoad=a1||(posX<-56&&Math.abs(posZ-ZX)<13)||Math.abs(posX)<6,drive=onRoad&&!trkZone(posX,posZ)&&!cityZone(posX,posZ);
+ const rp=roadPose(posX,posZ,yawCar),a1=posX>-53&&posX<-27,a7=posX<-56&&Math.abs(posZ-ZX)<13,onRoad=a1||a7||Math.abs(posX)<6,drive=onRoad&&!trkZone(posX,posZ)&&!cityZone(posX,posZ);
+ EDIT.home={x:posX,z:posZ,yaw:yawCar};EDIT.jump=!(a1||a7);EDIT.jumped=false;
  const yaw=drive?rp.yaw:yawCar,fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=-fz,rz=fx,x0=drive?rp.x:posX,z0=drive?rp.z:posZ;
  let alt=0;if(drive&&a1){for(const s of[4.1,-4.1]){const x=x0+rx*s,z=z0+rz*s;if(x>-53&&x<-27&&onSurface(x,z)){alt=s;break;}}}
  const beat=SPM.src==='file'&&SPM.hasFile?.6:60/118;
@@ -3253,9 +3254,11 @@ function editEnd(){if(!EDIT.on)return;EDIT.on=false;const o=$('#cut');o.hidden=t
  if(EDIT.fov0){camera.fov=EDIT.fov0;camera.updateProjectionMatrix();}if(AU.master&&EDIT.vol!=null)AU.master.gain.value=EDIT.vol;spmStop(2.5);
  if(st.time!==EDIT.time0){st.time=EDIT.time0;applyTime();}st.lights=EDIT.lights0;st.edKmh=null;
  st.traffic=EDIT.tr0!==false;applyTraffic();quality=EDIT.q0;qualAuto=EDIT.qa0;applyQuality();
- yawCar=EDIT.yaw;carRig.rotation.set(0,yawCar,0);st.v=0;st.hb=true;lastPZ=posZ;setView(st.view||'driver');toast("🎬 That's a wrap!",2200);}
+ if(EDIT.jumped&&EDIT.home){posX=EDIT.home.x;posZ=EDIT.home.z;yawCar=EDIT.home.yaw;carRig.position.set(posX,0,posZ);}else yawCar=EDIT.yaw;carRig.rotation.set(0,yawCar,0);st.v=0;st.hb=true;lastPZ=posZ;setView(st.view||'driver');toast("🎬 That's a wrap!",2200);}
 function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&EA.stage)eaCancel(true);
  const t=EDIT.t,o=$('#cut'),seq=EDIT.seq;let si=seq.findIndex(s=>t<s.t0+s.len);if(si<0)si=seq.length-1;const S=seq[si],u=t-S.t0,q=clamp(u/S.len,0,1),id=S.id,ease=x=>x*x*(3-2*x);
+ /* after the intro, cut to the Autobahn */
+ if(EDIT.jump&&!EDIT.jumped&&si>=1){EDIT.jumped=true;const fz0=-1,yaw=0;Object.assign(EDIT,{x0:-32.95,z0:-350,yaw,fx:-Math.sin(yaw),fz:-Math.cos(yaw),rx:Math.cos(yaw),rz:-Math.sin(yaw),d:0,lat:0,latV:0,drive:true,alt:-4.1,v:Math.max(EDIT.v,12)});EDIT.flash=1;}
  /* speed ramps in and out of slow motion */
  const slowShot=id==='slowOrbit'||id==='slowWheel';EDIT.ts+=((slowShot?.28:1)-EDIT.ts)*Math.min(1,dt*3);const ds=dt*EDIT.ts;
  /* the car drives itself: cruise, build up, flat out */
