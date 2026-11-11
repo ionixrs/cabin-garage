@@ -1649,7 +1649,7 @@ function drawCluster(){
  const C=P.cluster;if(!C)return;const x=C.ctx,W=1024,H=384,T=modeTheme(car.cl||evCl()),ev=!car.redline;
  if(T.bg==='transparent')x.clearRect(0,0,W,H);else{x.fillStyle=T.bg;x.fillRect(0,0,W,H);}
  if(st.faults.batt){if(T.bg!=='transparent'){x.fillStyle='#000';x.fillRect(0,0,W,H);}return;}
- const kmh=Math.abs(st.v*3.6),on=st.engine,dmax=car.vmax>290?340:car.vmax>200?280:car.vmax>180?220:200;
+ const kmh=st.edKmh!=null?st.edKmh:Math.abs(st.v*3.6),on=st.engine,dmax=car.vmax>290?340:car.vmax>200?280:car.vmax>180?220:200;
  const r=car.cluster==='vintage'?170:168,pct=Math.round(fuel*100),fc=fuel<.12?'#ffb020':T.accent,range=Math.round(fuel*(ev?450:800));
  dial(x,200,192,r,dmax,dmax>220?40:20,Math.max(spdN,sweepF*dmax),T,v=>v,null,'km/h',(car.cluster==='vintage'||(car.cluster==='classic'&&st.mode!=='Sport'))?null:Math.round(kmh));
  gapGauge(x,200,192,r,fuel,fc,T,'E','F',(ev?'BATTERY ':'FUEL ')+pct+'%');
@@ -1687,7 +1687,7 @@ function drawScreen(){
  if(car.retro)return drawRetro(S,x,W,H,U,btn);
  let X0=0;
  if(car.cluster==='none'){const pw=W*.3;X0=pw;x.fillStyle=U.panel;x.fillRect(0,0,pw,H);
-  const kmh=Math.round(Math.abs(st.v*3.6));
+  const kmh=Math.round(st.edKmh!=null?st.edKmh:Math.abs(st.v*3.6));
   ['P','R','N','D'].forEach((g,i)=>txt(x,g,pw*.13+i*pw*.17,H*.1,34,st.gear===g?U.accent:U.dim,'center',700));
   txt(x,String(kmh),pw/2,H*.32,150,st.mode==='Sport'?'#e0251b':st.mode==='Eco'?'#14a85a':U.text,'center',600);txt(x,'km/h',pw/2,H*.45,26,U.dim);
   x.beginPath();x.arc(pw*.86,H*.1,30,0,7);x.fillStyle='#fff';x.fill();x.lineWidth=7;x.strokeStyle='#d0141a';x.stroke();txt(x,limitFree?'∞':String(limit),pw*.86,H*.105,24,'#111','center',700,'Barlow');
@@ -3236,7 +3236,9 @@ function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('G
  const beat=SPM.src==='file'&&SPM.hasFile?.6:60/118;
  Object.assign(EDIT,{on:true,t:0,shot:-1,d:0,v:0,ts:1,lat:0,latV:0,drive,alt,x0,z0,yaw,fx,fz,rx,rz,fov0:camera.fov,ry:Math.random()*6.28,vol:null,beat,co:null,fix:null,time0:st.time,lights0:st.lights,acc:0,pitch:0,roll:0,flash:0});
  let b=0;EDIT.seq=EDIT_SEQ.map(([id,n])=>{const s={id,t0:b*beat,len:n*beat};b+=n;return s;});EDIT.dur=b*beat+1.2;
- if(st.time==='day'){st.time='dusk';applyTime();}st.lights=2;st.engine=true;st.hb=false;st.v=0;cruise=0;
+ if(st.time==='day'){st.time='dusk';applyTime();}st.lights=2;st.engine=true;st.hb=false;st.v=0;cruise=0;st.gear='D';
+ EDIT.tr0=st.traffic;st.traffic=false;applyTraffic();if(typeof ntRemove==='function')ntRemove();
+ EDIT.q0=quality;EDIT.qa0=qualAuto;quality=2;qualAuto=false;applyQuality();renderer.setPixelRatio(Math.min((devicePixelRatio||1)*1.5,2.5));resize();if(sun.shadow.mapSize.x!==4096){sun.shadow.mapSize.set(4096,4096);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;}}
  if(AU.master){EDIT.vol=AU.master.gain.value;AU.master.gain.value=EDIT.vol*.32;}
  if(SPM.playing)spmStop(0);spmStart(true);SPM.test=EDIT.dur+1;
  /* exhaust flames */
@@ -3249,7 +3251,8 @@ function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('G
 function editEnd(){if(!EDIT.on)return;EDIT.on=false;const o=$('#cut');o.hidden=true;o.style.background='rgba(0,0,0,1)';o.classList.remove('bars','edit');$('#ui').classList.remove('cine');canvas.style.filter='';
  if(EDIT.flames){if(EDIT.flames.parent)EDIT.flames.parent.remove(EDIT.flames);disposeGroup(EDIT.flames);EDIT.flames=null;}
  if(EDIT.fov0){camera.fov=EDIT.fov0;camera.updateProjectionMatrix();}if(AU.master&&EDIT.vol!=null)AU.master.gain.value=EDIT.vol;spmStop(2.5);
- if(st.time!==EDIT.time0){st.time=EDIT.time0;applyTime();}st.lights=EDIT.lights0;
+ if(st.time!==EDIT.time0){st.time=EDIT.time0;applyTime();}st.lights=EDIT.lights0;st.edKmh=null;
+ st.traffic=EDIT.tr0!==false;applyTraffic();quality=EDIT.q0;qualAuto=EDIT.qa0;applyQuality();
  yawCar=EDIT.yaw;carRig.rotation.set(0,yawCar,0);st.v=0;st.hb=true;lastPZ=posZ;setView(st.view||'driver');toast("🎬 That's a wrap!",2200);}
 function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&EA.stage)eaCancel(true);
  const t=EDIT.t,o=$('#cut'),seq=EDIT.seq;let si=seq.findIndex(s=>t<s.t0+s.len);if(si<0)si=seq.length-1;const S=seq[si],u=t-S.t0,q=clamp(u/S.len,0,1),id=S.id,ease=x=>x*x*(3-2*x);
@@ -3264,7 +3267,7 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
  EDIT.pitch+=(clamp(-EDIT.acc*.006,-.03,.03)-EDIT.pitch)*Math.min(1,ds*4);EDIT.roll+=(clamp(-la*.02,-.04,.04)-EDIT.roll)*Math.min(1,ds*4);
  carRig.position.set(posX,0,posZ);carRig.rotation.set(EDIT.pitch,yawCar,EDIT.roll);
  if(P&&P.wheels)P.wheels.forEach(w=>{w.sp.rotation.x-=EDIT.v*ds/w.r;});
- if(st.engine){st.rpm=1800+(EDIT.v/55)*4600*(.8+.2*Math.sin(t*.7));A.thr=EDIT.acc>.5?.9:.25;}
+ st.edKmh=EDIT.v*3.6;if(st.engine){st.rpm=1800+(EDIT.v/55)*4600*(.8+.2*Math.sin(t*.7));A.thr=EDIT.acc>.5?.9:.25;}
  /* exhaust flames on the exhaust shot and when lifting */
  if(EDIT.flames){const pop=(id==='exh'&&Math.sin(u*9)>.5)||id==='qrear'||(EDIT.acc<-1&&Math.random()<.2);EDIT.flames.visible=pop&&Math.random()<.7;if(EDIT.flames.visible){EDIT.flames.scale.set(1,1,.6+Math.random()*.8);if(Math.random()<.12&&AU.ctx)nburst(.04,'bandpass',700,.1);}}
  /* cuts */
