@@ -328,6 +328,11 @@ const CARS=[
  trim:'carbon',ambient:'#e8b84a',wheel:'flat',cluster:'sport',screen:[.36,.16],sound:'v8',vmax:305,accel:11.2,redline:7200,ws:[1.0,.82],lift:-.03,hood:1.25,trunkLen:0.72,seats:4,roof:'sunroof',
  cl:{bg:'#060607',face:'#0c0d0e',ring:'#3a3528',tick:'#f1ede4',num:'#f1ede4',needle:'#ff3b30',accent:'#e8b84a',text:'#f1ede4',dim:'#7d786c',red:'#ff3b30'},
  ui:{bg:'#0b0b0a',panel:'#171614',panel2:'#24221d',text:'#f3efe6',dim:'#8d877a',accent:'#e8b84a',onText:'#14110a'}},
+{id:'wendtk',brand:'wendt',feat:'autopilot',rails:true,spokes:5,exhausts:1,name:'Wendt Pendler Kombi',kind:'Family estate',blurb:'2.0L turbo diesel · 150 hp · lane pilot · huge boot',engine:'2.0 L turbo diesel, 150 hp, 360 Nm, 7-speed automatic',
+ paint:0x2c3e55,leather:0x2a2b2e,leather2:0x3a3c41,stitch:'#8c96a3',dash:0x1c1d20,soft:0x2a2c30,headliner:0xcfcac0,carpet:0x1e1f22,rim:0x1f2023,
+ trim:'chrome',ambient:'#5ab4ff',wheel:'round',cluster:'sport',screen:[.38,.17],sound:'diesel',vmax:220,accel:4.6,redline:4800,ws:[.96,.84],lift:.01,hood:1.15,trunkLen:0.95,seats:4,roof:'sunroof',
+ cl:{bg:'#07090c',face:'#0d1117',ring:'#2c3542',tick:'#e8edf3',num:'#e8edf3',needle:'#ff5a36',accent:'#5ab4ff',text:'#e8edf3',dim:'#728196',red:'#ff3b30'},
+ ui:{bg:'#0b0f15',panel:'#141b25',panel2:'#1d2734',text:'#eef2f8',dim:'#8693a6',accent:'#5ab4ff',onText:'#ffffff'}},
 {id:'lindhofr6',brand:'lindhof',feat:'launch',awd:true,flares:true,wr:.37,spokes:10,exhausts:2,caliper:0xb3201e,rimCol:0x4a4d52,carbonRoof:false,bucket:true,rails:true,name:'Lindhof R6 Kombi',kind:'Performance estate',blurb:'4.0L twin-turbo V8 · 630 hp · all-wheel drive · estate',engine:'4.0 L twin-turbo V8, 630 hp, all-wheel drive, 0-100 km/h in 3.4 s',
  paint:0x8a8f94,leather:0x151516,leather2:0x2a2a2d,stitch:'#d23a2a',dash:0x121213,soft:0x1c1c1e,headliner:0x19191b,carpet:0x0f0f10,rim:0x141415,
  trim:'carbon',ambient:'#d23a2a',wheel:'flat',cluster:'sport',screen:[.36,.16],sound:'v8',vmax:305,accel:10.6,redline:7000,ws:[.98,.82],lift:-.02,hood:1.25,trunkLen:0.9,seats:4,roof:'sunroof',
@@ -459,7 +464,7 @@ function setGlow(root,h){root&&root.traverse(m=>{if(m.userData.glow)m.userData.g
 
 /* ================= CABIN BUILDER ================= */
 const DZ=-.8,DL=1.35;
-const BODY={kessler9:'coupe','nordring-c':'coupe',ironhorse:'coupe',strada:'coupe',nordring:'saloon',aurelia:'saloon',vierlingk:'saloon',vierlingr5:'saloon',lindhofr6:'estate',volt:'hatch',pico:'hatch'};
+const BODY={kessler9:'coupe','nordring-c':'coupe',ironhorse:'coupe',strada:'coupe',nordring:'saloon',aurelia:'saloon',vierlingk:'saloon',vierlingr5:'saloon',lindhofr6:'estate',wendtk:'estate',volt:'hatch',pico:'hatch'};
 function bodyStyle(c,rY){const b=BODY[c.id];if(!b||c.convertible||c.seats!==4)return null;const zR=2.2+(c.trunkLen||.6)*.7;
  const o=b==='coupe'?{sS:1.3,zT:zR-.1,yT:.99}:b==='saloon'?{sS:1.68,zT:2.6,yT:.99}:b==='estate'?{sS:zR-.42,zT:zR-.05,yT:1.1}:{sS:1.62,zT:zR-.04,yT:1.06};o.b=b;o.rY=rY;o.y=z=>z<=o.sS?rY:rY+(o.yT-rY)*Math.min(1,(z-o.sS)/(o.zT-o.sS));return o;}
 const CARZ=.82;
