@@ -3227,7 +3227,7 @@ function ntUpdate(dt){if(NTK.fly){ntFly(dt);return;}
 
 /* ===== car edit: a music-video style showcase — graded, speed ramps, lane change, detail shots ===== */
 const EDIT={on:false,t:0};
-const EDIT_SEQ=[['est',8],['head',4],['grille',4],['wheel',4],['cabin',4],['exh',4],['chase',4],['gaugeA',4],['side',4],['screen',4],['qwheel',2],['qhood',2],['qgauge',2],['qrear',2],['qdrone',2],['orbit',8],['shifter',4],['bumper',4],['gauge',8],['rear',4],['drone',4],['flyby',4],['hands',4],['mirror',4],['slowOrbit',8],['slowWheel',4],['hood',4],['gaugeC',4],['crane',4],['outro',8]];
+const EDIT_SEQ=[['est',4],['head',4],['wheel',4],['cabin',4],['exh',4],['chase',4],['gaugeA',4],['side',4],['drift1',4],['drift2',4],['drift3',4],['screen',4],['qwheel',2],['qhood',2],['qgauge',2],['qrear',2],['orbit',6],['shifter',4],['bumper',2],['gauge',6],['rear',4],['drone',4],['flyby',4],['hands',4],['slowOrbit',6],['slowWheel',4],['hood',4],['gaugeC',4],['crane',2],['outro',6]];
 function editNoiseURL(){if(EDIT.grainURL)return EDIT.grainURL;const c=mkcv(192,192),x=c.getContext('2d'),d=x.createImageData(192,192);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255;}x.putImageData(d,0,0);return EDIT.grainURL=c.toDataURL();}
 function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('Get in the car first');return;}initAudio();
  const rp=roadPose(posX,posZ,yawCar),a1=posX>-53&&posX<-27,a7=posX<-56&&Math.abs(posZ-ZX)<13,onRoad=a1||a7||Math.abs(posX)<6,drive=onRoad&&!trkZone(posX,posZ)&&!cityZone(posX,posZ);
@@ -3236,7 +3236,7 @@ function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('G
  let alt=0;if(drive&&a1){for(const s of[4.1,-4.1]){const x=x0+rx*s,z=z0+rz*s;if(x>-53&&x<-27&&onSurface(x,z)){alt=s;break;}}}
  const beat=SPM.src==='file'&&SPM.hasFile?.6:60/118;
  Object.assign(EDIT,{on:true,t:0,shot:-1,d:0,v:0,ts:1,lat:0,latV:0,drive,alt,x0,z0,yaw,fx,fz,rx,rz,fov0:camera.fov,ry:Math.random()*6.28,vol:null,beat,co:null,fix:null,time0:st.time,lights0:st.lights,acc:0,pitch:0,roll:0,flash:0});
- let b=0;EDIT.seq=EDIT_SEQ.map(([id,n])=>{const s={id,t0:b*beat,len:n*beat};b+=n;return s;});EDIT.dur=b*beat+1.2;
+ const nb=EDIT_SEQ.reduce((a,x)=>a+x[1],0);if(SPM.src==='file'&&SPM.hasFile)EDIT.beat=58.8/nb;const bt=EDIT.beat;let b=0;EDIT.seq=EDIT_SEQ.map(([id,n])=>{const s={id,t0:b*bt,len:n*bt};b+=n;return s;});EDIT.dur=60;
  if(st.time==='day'){st.time='dusk';applyTime();}st.lights=2;st.engine=true;st.hb=false;st.v=0;cruise=0;st.gear='D';EDIT.belt0=st.belt;st.belt=true;
  EDIT.tr0=st.traffic;st.traffic=false;applyTraffic();if(typeof ntRemove==='function')ntRemove();
  EDIT.q0=quality;EDIT.qa0=qualAuto;quality=2;qualAuto=false;applyQuality();renderer.setPixelRatio(Math.min((devicePixelRatio||1)*1.5,2.5));resize();if(sun.shadow.mapSize.x!==4096){sun.shadow.mapSize.set(4096,4096);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;}}
@@ -3246,11 +3246,12 @@ function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('G
  {const fl=new THREE.Group(),fm=new THREE.MeshBasicMaterial({color:0xff7a20,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}),fm2=fm.clone();fm2.color.setHex(0x3a7bff);
   const r0=(P.bounds?P.bounds.rear/(P.zScale||1):2.5)+.1;for(const s of[-1,1]){const c=new THREE.Mesh(new THREE.ConeGeometry(.07,.42,10),fm);c.rotation.x=Math.PI/2;c.position.set(s*.42,.27,r0+.22);fl.add(c);const c2=new THREE.Mesh(new THREE.ConeGeometry(.035,.2,8),fm2);c2.rotation.x=Math.PI/2;c2.position.set(s*.42,.27,r0+.08);fl.add(c2);}
   fl.visible=false;(P.group||carRig).add(fl);EDIT.flames=fl;}
+ {const sm=cutPts(160,1.6,0xe2e2e2,{opacity:.42});sm.material.toneMapped=true;{const c2=mkcv(64,64),x2=c2.getContext('2d'),gr=x2.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.45,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');x2.fillStyle=gr;x2.fillRect(0,0,64,64);sm.material.map=new THREE.CanvasTexture(c2);sm.material.needsUpdate=true;}scene.add(sm);EDIT.smoke=sm;EDIT.smAge=new Float32Array(160).fill(9);EDIT.smI=0;EDIT.v3=new THREE.Vector3();EDIT.dph=0;EDIT.slip=0;EDIT.sq=0;}
  const o=$('#cut');o.hidden=false;o.style.background='rgba(0,0,0,1)';o.classList.remove('bars');void o.offsetWidth;o.classList.add('bars','edit');
  let gr=$('#grain');if(!gr){gr=document.createElement('div');gr.id='grain';o.prepend(gr);}gr.style.backgroundImage=`url(${editNoiseURL()})`;
  $('#ui').classList.add('cine');cutCap('');scene.add(camera);}
 function editEnd(){if(!EDIT.on)return;EDIT.on=false;const o=$('#cut');o.hidden=true;o.style.background='rgba(0,0,0,1)';o.classList.remove('bars','edit');$('#ui').classList.remove('cine');canvas.style.filter='';
- if(EDIT.flames){if(EDIT.flames.parent)EDIT.flames.parent.remove(EDIT.flames);disposeGroup(EDIT.flames);EDIT.flames=null;}
+ if(EDIT.flames){if(EDIT.flames.parent)EDIT.flames.parent.remove(EDIT.flames);disposeGroup(EDIT.flames);EDIT.flames=null;}if(EDIT.smoke){scene.remove(EDIT.smoke);EDIT.smoke.geometry.dispose();if(EDIT.smoke.material.map)EDIT.smoke.material.map.dispose();EDIT.smoke.material.dispose();EDIT.smoke=null;}
  if(EDIT.fov0){camera.fov=EDIT.fov0;camera.updateProjectionMatrix();}if(AU.master&&EDIT.vol!=null)AU.master.gain.value=EDIT.vol;spmStop(2.5);
  if(st.time!==EDIT.time0){st.time=EDIT.time0;applyTime();}st.lights=EDIT.lights0;st.edKmh=null;st.belt=EDIT.belt0;gearNum=1;
  st.traffic=EDIT.tr0!==false;applyTraffic();quality=EDIT.q0;qualAuto=EDIT.qa0;applyQuality();
@@ -3262,14 +3263,19 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
  /* speed ramps in and out of slow motion */
  const slowShot=id==='slowOrbit'||id==='slowWheel';EDIT.ts+=((slowShot?.28:1)-EDIT.ts)*Math.min(1,dt*3);const ds=dt*EDIT.ts;
  /* the car drives itself: cruise, build up, flat out */
- const VT={est:14,head:14,grille:14,wheel:14,cabin:14,exh:14,chase:30,side:30,qwheel:42,qhood:42,qrear:42,qdrone:42,orbit:55,bumper:58,gauge:86,outro:80,gaugeA:42,screen:42,qgauge:55,shifter:58},vT=!EDIT.drive?0:(VT[id]!=null?VT[id]:84),v0=EDIT.v;EDIT.v+=(vT-EDIT.v)*Math.min(1,ds*(id==='gauge'?.75:.6));EDIT.acc=(EDIT.v-v0)/Math.max(1e-4,ds);EDIT.d+=EDIT.v*ds;
+ const VT={est:14,head:14,grille:14,wheel:14,cabin:14,exh:14,chase:30,side:30,qwheel:42,qhood:42,qrear:42,qdrone:42,orbit:55,bumper:58,gauge:86,outro:80,gaugeA:42,screen:42,qgauge:55,shifter:58,drift1:28,drift2:28,drift3:28},vT=!EDIT.drive?0:(VT[id]!=null?VT[id]:84),v0=EDIT.v;EDIT.v+=(vT-EDIT.v)*Math.min(1,ds*(id==='gauge'?.95:.6));EDIT.acc=(EDIT.v-v0)/Math.max(1e-4,ds);EDIT.d+=EDIT.v*ds;
  /* lane change over and back */
- const latT=EDIT.alt&&['drone','flyby','hands','mirror','slowOrbit','slowWheel'].includes(id)?EDIT.alt:0,la=(latT-EDIT.lat)*2.2-EDIT.latV*2.6;EDIT.latV+=la*ds;EDIT.lat+=EDIT.latV*ds;
- const {fx,fz,rx,rz}=EDIT;posX=EDIT.x0+fx*EDIT.d+rx*EDIT.lat;posZ=EDIT.z0+fz*EDIT.d+rz*EDIT.lat;const hd=EDIT.v>1?Math.atan2(EDIT.latV,EDIT.v):0;yawCar=EDIT.yaw-hd;lastPZ=posZ;st.v=0;
+ const drift=id.startsWith('drift');if(drift)EDIT.dph+=ds*1.25;let latT=EDIT.alt&&['drone','flyby','hands','mirror','slowOrbit','slowWheel'].includes(id)?EDIT.alt:0;if(drift)latT=EDIT.alt/2+(EDIT.alt?1.5:1)*Math.sin(EDIT.dph);
+ const la=(latT-EDIT.lat)*(drift?7:2.2)-EDIT.latV*(drift?4:2.6);EDIT.latV+=la*ds;EDIT.lat+=EDIT.latV*ds;
+ const {fx,fz,rx,rz}=EDIT;posX=EDIT.x0+fx*EDIT.d+rx*EDIT.lat;posZ=EDIT.z0+fz*EDIT.d+rz*EDIT.lat;const hd=EDIT.v>1?Math.atan2(EDIT.latV,EDIT.v):0;EDIT.slip+=((drift?-hd*9:0)-EDIT.slip)*Math.min(1,ds*3);yawCar=EDIT.yaw-hd+EDIT.slip;lastPZ=posZ;st.v=0;
  /* body: squat under power, roll in the lane change */
  EDIT.pitch+=(clamp(-EDIT.acc*.006,-.03,.03)-EDIT.pitch)*Math.min(1,ds*4);EDIT.roll+=(clamp(-la*.02,-.04,.04)-EDIT.roll)*Math.min(1,ds*4);
  carRig.position.set(posX,0,posZ);carRig.rotation.set(EDIT.pitch,yawCar,EDIT.roll);
- if(P&&P.wheels)P.wheels.forEach(w=>{w.sp.rotation.x-=EDIT.v*ds/w.r;});
+ if(P&&P.wheels)P.wheels.forEach(w=>{w.sp.rotation.x-=EDIT.v*ds/w.r*(drift&&!w.front?1.6:1);if(w.front)w.S.rotation.y=-EDIT.slip*.8;});
+ /* drift: tyre smoke from the rear wheels and a squeal */
+ if(EDIT.smoke){const a=EDIT.smoke.geometry.attributes.position,ag=EDIT.smAge,v3=EDIT.v3;if(drift&&Math.abs(EDIT.slip)>.08&&P&&P.wheels){P.wheels.forEach(w=>{if(w.front)return;w.sp.getWorldPosition(v3);for(let k=0;k<2;k++){const i=EDIT.smI=(EDIT.smI+1)%a.count;a.setXYZ(i,v3.x+(Math.random()-.5)*.5,.3,v3.z+(Math.random()-.5)*.5);ag[i]=0;}});
+   EDIT.sq-=dt;if(EDIT.sq<=0&&AU.ctx){EDIT.sq=.16;nburst(.24,'bandpass',1000+Math.random()*500,.05);}}
+  for(let i=0;i<a.count;i++){if(ag[i]>=2.2){a.setY(i,-50);continue;}ag[i]+=ds;a.setY(i,a.getY(i)+ds*(.4+ag[i]*.5));a.setX(i,a.getX(i)+Math.sin(i*1.7)*ds*.7);}a.needsUpdate=true;}
  st.edKmh=EDIT.v*3.6;if(st.engine){{const gs=[0,14,26,38,52,66,1e3],g=gs.findIndex((x,i)=>EDIT.v<gs[i+1]),lo=gs[g],hi=Math.min(gs[g+1],95),fr=clamp((EDIT.v-lo)/(hi-lo),0,1);st.rpm=EDIT.v<2?900:2600+fr*(Math.min(car.redline||7000,7200)-2900);EDIT.gear=g+1;gearNum=EDIT.gear;}A.thr=EDIT.acc>.5?.9:.25;}
  /* exhaust flames on the exhaust shot and when lifting */
  if(EDIT.flames){const pop=(id==='exh'&&Math.sin(u*9)>.5)||id==='qrear'||(EDIT.acc<-1&&Math.random()<.2);EDIT.flames.visible=pop&&Math.random()<.7;if(EDIT.flames.visible){EDIT.flames.scale.set(1,1,.6+Math.random()*.8);if(Math.random()<.12&&AU.ctx)nburst(.04,'bandpass',700,.1);}}
@@ -3294,6 +3300,9 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
   case 'qrear':{cp=P2(3.3,-.6,.42);lk=P2(-2,0,.8);fov=60;shake=.9;break;}
   case 'qdrone':{cp=P2(-3,0,12);lk=P2(-3.01,0,0);fov=55;break;}
   case 'orbit':{lag=true;const a=EDIT.ry+ease(q)*Math.PI*1.4,R=7.5;cp=new THREE.Vector3(posX+Math.sin(a)*R,1.0+Math.sin(q*3)*.3,posZ+Math.cos(a)*R);lk=C;fov=44;shake=.3;break;}
+  case 'drift1':{lag=true;cp=P2(-8.5+q*1.5,3.8,.65);lk=C;fov=40;shake=.4;break;}
+  case 'drift2':{cp=P2(.5-q*1.5,6.2,.95);lk=C;fov=52;shake=.3;break;}
+  case 'drift3':{lag=true;cp=P2(8.5,-1.4,1.0);lk=P2(-2,0,.6);fov=50;shake=.6;break;}
   case 'gaugeA':{cp=P2(.1+q*.03,-.36,1.08);lk=P2(-.42,-.5,.86);fov=13+q*2;shake=.4;break;}
   case 'qgauge':{cp=P2(.1,-.36,1.08);lk=P2(-.42,-.5,.86);fov=11;shake=.6;break;}
   case 'gaugeC':{cp=P2(.1,-.36+(q-.5)*.08,1.08);lk=P2(-.42,-.5,.86);fov=14;shake=.5;break;}
