@@ -140,6 +140,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #paintPanel{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--topH,120px) + 20px);width:min(360px,calc(100% - 32px));padding:14px 16px;z-index:12;pointer-events:auto}#paintPanel h2{margin:0 0 6px;font:700 15px/1.2 var(--display)}#paintPanel h3{font:700 11px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:12px 0 6px}.sws{display:flex;flex-wrap:wrap;gap:8px}.sw{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.5);cursor:pointer}.sw:hover{transform:scale(1.1)}
 @media (max-width:720px){#mmCv{width:110px;height:110px}}
 #psMeter{position:absolute;right:16px;bottom:118px;z-index:6;width:150px;padding:10px 12px;pointer-events:none!important;font:600 12px/1.3 var(--display,system-ui);font-variant-numeric:tabular-nums}#psMeter[hidden]{display:none!important}#psMeter .psm-top{display:flex;align-items:baseline;gap:6px}#psmVal{font-size:30px;font-weight:700;line-height:1}#psMeter .psm-u{opacity:.75;letter-spacing:.1em}#psMeter .psm-bar{height:7px;margin:7px 0 5px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden}#psmFill{display:block;height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,#2ecc71,#ffd166 65%,#ff4b4b)}#psMeter .psm-sub{display:flex;justify-content:space-between;opacity:.7;font-size:11px}
+#cut{overflow:hidden}#grain{position:absolute;inset:-50%;z-index:1;pointer-events:none;opacity:0;background-size:192px 192px;mix-blend-mode:overlay}#cut.edit #grain{opacity:.16;animation:grain .5s steps(5) infinite}@keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-7%,4%)}40%{transform:translate(5%,-6%)}60%{transform:translate(-3%,8%)}80%{transform:translate(8%,2%)}100%{transform:translate(0,0)}}#cut.edit{box-shadow:inset 0 0 220px 90px rgba(0,0,0,.72)}#cut.edit::before,#cut.edit::after{height:max(11vh,calc((100vh - 100vw / 2.39) / 2))}#cut.edit #cutCap{font:700 clamp(16px,3vw,32px)/1.25 var(--display);letter-spacing:.3em;text-transform:uppercase;opacity:.92}
 #ui.cine>*:not(#flash):not(#fade):not(#wake):not(#cut):not(#pauseOv){visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 #songPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(380px,calc(100vw - 32px));padding:16px 18px;font:500 14px/1.45 var(--body,system-ui)}#songPanel h3{margin:0 0 6px;font:700 18px var(--display,system-ui)}#songPanel .sp-hint{margin:0 0 12px;opacity:.8;font-size:13px}#songPanel .sp-file{display:inline-block;cursor:pointer}#songPanel .sp-name{margin:8px 0 10px;font-size:13px;opacity:.85;word-break:break-all}#songPanel .sp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}#songPanel .sp-row input[type=text],#songPanel select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:inherit}#songPanel .sp-row input[type=range]{flex:1;max-width:190px}#songPanel .sp-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}#songPanel [hidden]{display:none}#spmPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(380px,calc(100vw - 32px));padding:16px 18px;font:500 14px/1.45 var(--body,system-ui)}#spmPanel h3{margin:0 0 6px;font:700 18px var(--display,system-ui)}#spmPanel .sp-hint{margin:0 0 12px;opacity:.8;font-size:13px}#spmPanel .sp-file{display:inline-block;cursor:pointer}#spmPanel .sp-name{margin:8px 0 10px;font-size:13px;opacity:.85;word-break:break-all}#spmPanel .sp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}#spmPanel .sp-row input[type=text],#spmPanel select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:inherit}#spmPanel .sp-row input[type=range]{flex:1;max-width:190px}#spmPanel .sp-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}#spmPanel [hidden]{display:none}
 #lapBox{position:absolute;left:16px;top:calc(var(--topH,120px) + 14px);padding:10px 14px;z-index:6;pointer-events:none!important;font:600 14px/1.5 var(--display);letter-spacing:.02em;font-variant-numeric:tabular-nums}#lapBox[hidden]{display:none}#lapBox b{font-size:15px}
@@ -3224,53 +3225,86 @@ function ntUpdate(dt){if(NTK.fly){ntFly(dt);return;}
  if(along>400||along<-2200||CUT.on){ntRemove();return;}
  if(!walking&&Math.abs(lat)<1.28+.9&&along>-8.2-2.4&&along<8.2+2.4)ntHit(Math.round(kmh));}
 
-/* ===== car edit: a music-video style showcase of your car, beat-cut shots, no crash ===== */
-const EDIT={on:false,t:0,beat:60/118*4,shots:12,shot:-1,d:0,v:0,drive:false};
-function editStart(){if(EDIT.on||CUT.on||NTK.fly||walking||!P){if(walking)toast('Get in the car first');return;}initAudio();
- const rp=roadPose(posX,posZ,yawCar),onRoad=(posX>-53&&posX<-27)||(posX<-56&&Math.abs(posZ-ZX)<13)||Math.abs(posX)<6;EDIT.drive=onRoad&&!trkZone(posX,posZ)&&!cityZone(posX,posZ);
- Object.assign(EDIT,{on:true,t:0,shot:-1,d:0,v:0,x0:EDIT.drive?rp.x:posX,z0:EDIT.drive?rp.z:posZ,yaw:EDIT.drive?rp.yaw:yawCar,fov0:camera.fov,ry:Math.random()*6.28,kick:0,vol:null,eng:st.engine});
- EDIT.beat=SPM.src==='file'&&SPM.hasFile?2.4:60/118*4;EDIT.dur=EDIT.beat*EDIT.shots+3.2;
- st.engine=true;st.hb=false;st.v=0;cruise=0;st.lights=st.time==='day'?st.lights:2;
- if(AU.master){EDIT.vol=AU.master.gain.value;AU.master.gain.value=EDIT.vol*.35;}
+/* ===== car edit: a music-video style showcase — graded, speed ramps, lane change, detail shots ===== */
+const EDIT={on:false,t:0};
+const EDIT_SEQ=[['est',8],['head',4],['grille',4],['wheel',4],['cabin',4],['exh',4],['chase',4],['side',4],['qwheel',2],['qhood',2],['qrear',2],['qdrone',2],['orbit',8],['bumper',4],['drone',4],['flyby',4],['mirror',4],['slowOrbit',8],['slowWheel',4],['hood',4],['crane',4],['outro',8]];
+function editNoiseURL(){if(EDIT.grainURL)return EDIT.grainURL;const c=mkcv(192,192),x=c.getContext('2d'),d=x.createImageData(192,192);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255;}x.putImageData(d,0,0);return EDIT.grainURL=c.toDataURL();}
+function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('Get in the car first');return;}initAudio();
+ const rp=roadPose(posX,posZ,yawCar),a1=posX>-53&&posX<-27,onRoad=a1||(posX<-56&&Math.abs(posZ-ZX)<13)||Math.abs(posX)<6,drive=onRoad&&!trkZone(posX,posZ)&&!cityZone(posX,posZ);
+ const yaw=drive?rp.yaw:yawCar,fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=-fz,rz=fx,x0=drive?rp.x:posX,z0=drive?rp.z:posZ;
+ let alt=0;if(drive&&a1){for(const s of[4.1,-4.1]){const x=x0+rx*s,z=z0+rz*s;if(x>-53&&x<-27&&onSurface(x,z)){alt=s;break;}}}
+ const beat=SPM.src==='file'&&SPM.hasFile?.6:60/118;
+ Object.assign(EDIT,{on:true,t:0,shot:-1,d:0,v:0,ts:1,lat:0,latV:0,drive,alt,x0,z0,yaw,fx,fz,rx,rz,fov0:camera.fov,ry:Math.random()*6.28,vol:null,beat,co:null,fix:null,time0:st.time,lights0:st.lights,acc:0,pitch:0,roll:0,flash:0});
+ let b=0;EDIT.seq=EDIT_SEQ.map(([id,n])=>{const s={id,t0:b*beat,len:n*beat};b+=n;return s;});EDIT.dur=b*beat+1.2;
+ if(st.time==='day'){st.time='dusk';applyTime();}st.lights=2;st.engine=true;st.hb=false;st.v=0;cruise=0;
+ if(AU.master){EDIT.vol=AU.master.gain.value;AU.master.gain.value=EDIT.vol*.32;}
  if(SPM.playing)spmStop(0);spmStart(true);SPM.test=EDIT.dur+1;
- const o=$('#cut');o.hidden=false;o.style.background='rgba(0,0,0,1)';o.classList.remove('bars');void o.offsetWidth;o.classList.add('bars');$('#ui').classList.add('cine');cutCap('');scene.add(camera);}
-function editEnd(){if(!EDIT.on)return;EDIT.on=false;const o=$('#cut');o.hidden=true;o.style.background='rgba(0,0,0,1)';o.classList.remove('bars');$('#ui').classList.remove('cine');canvas.style.filter='';
+ /* exhaust flames */
+ {const fl=new THREE.Group(),fm=new THREE.MeshBasicMaterial({color:0xff7a20,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}),fm2=fm.clone();fm2.color.setHex(0x3a7bff);
+  const r0=(P.bounds?P.bounds.rear/(P.zScale||1):2.5)+.1;for(const s of[-1,1]){const c=new THREE.Mesh(new THREE.ConeGeometry(.07,.42,10),fm);c.rotation.x=Math.PI/2;c.position.set(s*.42,.27,r0+.22);fl.add(c);const c2=new THREE.Mesh(new THREE.ConeGeometry(.035,.2,8),fm2);c2.rotation.x=Math.PI/2;c2.position.set(s*.42,.27,r0+.08);fl.add(c2);}
+  fl.visible=false;(P.group||carRig).add(fl);EDIT.flames=fl;}
+ const o=$('#cut');o.hidden=false;o.style.background='rgba(0,0,0,1)';o.classList.remove('bars');void o.offsetWidth;o.classList.add('bars','edit');
+ let gr=$('#grain');if(!gr){gr=document.createElement('div');gr.id='grain';o.prepend(gr);}gr.style.backgroundImage=`url(${editNoiseURL()})`;
+ $('#ui').classList.add('cine');cutCap('');scene.add(camera);}
+function editEnd(){if(!EDIT.on)return;EDIT.on=false;const o=$('#cut');o.hidden=true;o.style.background='rgba(0,0,0,1)';o.classList.remove('bars','edit');$('#ui').classList.remove('cine');canvas.style.filter='';
+ if(EDIT.flames){if(EDIT.flames.parent)EDIT.flames.parent.remove(EDIT.flames);disposeGroup(EDIT.flames);EDIT.flames=null;}
  if(EDIT.fov0){camera.fov=EDIT.fov0;camera.updateProjectionMatrix();}if(AU.master&&EDIT.vol!=null)AU.master.gain.value=EDIT.vol;spmStop(2.5);
- carRig.rotation.set(0,yawCar,0);st.v=0;st.hb=true;lastPZ=posZ;setView(st.view||'driver');toast('🎬 That\'s a wrap!',2200);}
-function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&EA.stage)eaCancel(true);const t=EDIT.t,B=EDIT.beat,si=Math.floor(t/B),st0=si*B,s=t-st0,q=s/B,o=$('#cut');
- /* the car drives itself down the lane, speeding up; slow motion on a couple of shots */
- const slow=si===7||si===10?.35:1,vT=EDIT.drive?(si<1?8:si<3?28:si<9?44:52):0;EDIT.v+=(vT-EDIT.v)*Math.min(1,dt*.8);const dd=EDIT.v*dt*slow;EDIT.d+=dd;
- const fx=-Math.sin(EDIT.yaw),fz=-Math.cos(EDIT.yaw),rx=-fz,rz=fx;posX=EDIT.x0+fx*EDIT.d;posZ=EDIT.z0+fz*EDIT.d;yawCar=EDIT.yaw;lastPZ=posZ;st.v=0;
- carRig.position.set(posX,0,posZ);carRig.rotation.set(Math.sin(t*2.1)*.004,yawCar,Math.sin(t*1.3)*.006);
- if(P&&P.wheels)P.wheels.forEach(w=>{w.sp.rotation.x-=EDIT.v*slow*dt/w.r;});
- if(st.engine){st.rpm=2200+((EDIT.v*slow)/52)*4200+Math.sin(t*3)*200;A.thr=si>=2&&si<9?.8:.3;}
- /* on every cut: a flash of white and a thump */
- if(si!==EDIT.shot){EDIT.shot=si;EDIT.kick=1;if(si>0&&si<EDIT.shots&&AU.ctx)nburst(.12,'lowpass',180,.25);
-  const caps=['','','','','',car.name.toUpperCase(),'',car.engine||car.blurb||'','','','',''];if(si<EDIT.shots)cutCap(caps[si]||'');
-  if(si>=EDIT.shots)cutCap(car.name.toUpperCase()+' · '+(car.kind||''));}
- EDIT.kick=Math.max(0,EDIT.kick-dt*4);
- const P2=(along,side,y)=>new THREE.Vector3(posX-fx*along+rx*side,y,posZ-fz*along+rz*side);
- const cam=(p,l,fov,roll)=>{camera.position.copy(p);camera.lookAt(l);if(roll)camera.rotation.z+=roll;if(camera.fov!==fov){camera.fov=fov;camera.updateProjectionMatrix();}};
- const C=new THREE.Vector3(posX,.7,posZ),ahead=P2(-30,0,.6);
- switch(Math.min(si,EDIT.shots)){
-  case 0:{/* title: low front, the car rolls towards the lens */cam(P2(-9+q*2,.6,.35),P2(0,0,.8),40);break;}
-  case 1:{/* front wheel tracking close-up */cam(P2(-1.3+q*.4,-2.0,.42),P2(-1.4,-.8,.4),50);break;}
-  case 2:{/* rear three-quarter, low and tilted */cam(P2(6.5,2.4-q*1.2,.5),P2(-1,0,.8),45,.12);break;}
-  case 3:{/* drone overhead */cam(P2(-2+q*4,0,14),P2(-2,0,0),55);camera.rotation.z=0;break;}
-  case 4:{/* side tracking, long lens */cam(P2(0,-9,1.1),P2(0,0,.8),24);break;}
-  case 5:{/* name card: slow push-in on the front */cam(P2(-6+q*1.5,-1.2,1.0),P2(0,0,.75),35);break;}
-  case 6:{/* hood cam looking down the road */const h=P2(-1.6,0,1.18);cam(h,ahead,70);break;}
-  case 7:{/* slow-motion roadside fly-by with a whip pan */if(q<.02||!EDIT.fly)EDIT.fly=P2(-14,-3.4,.7);cam(EDIT.fly,C,38,(q-.5)*.08);if(q>.98)EDIT.fly=null;break;}
-  case 8:{/* driver's view, steering wheel and road */const hp=new THREE.Vector3();head.getWorldPosition(hp);camera.position.copy(hp);camera.lookAt(ahead.x,hp.y-.1,ahead.z);if(camera.fov!==62){camera.fov=62;camera.updateProjectionMatrix();}break;}
-  case 9:{/* low rear, exhausts, the road rushing away */cam(P2(3.6,.4,.3),P2(-4,0,.7),48);break;}
-  case 10:{/* slow-motion 180° orbit */const a=EDIT.ry+q*Math.PI,R=6;cam(new THREE.Vector3(posX+Math.sin(a)*R,1.2,posZ+Math.cos(a)*R),C,42);break;}
-  case 11:{/* crane up and away */cam(P2(9+q*6,3+q*2,1.5+q*7),C,50);break;}
-  default:{/* outro: the car drives off into the distance, title card */const u=t-EDIT.shots*B;if(!EDIT.outro)EDIT.outro=P2(-2,1.5,1.2);cam(EDIT.outro,C,32+u*2);}}
- /* hand-held drift */
- camera.position.y+=Math.sin(t*1.7)*.02;camera.position.x+=Math.sin(t*1.1)*.02;
- /* look: graded colour, white flash on each cut, fade in/out */
- let a=0;if(t<.8)a=1-t/.8;const end=EDIT.shots*B+2.2;if(t>end)a=Math.min(1,(t-end)/.9);o.style.background=`rgba(${EDIT.kick>.5?'255,255,255':'0,0,0'},${Math.max(a,EDIT.kick>.5?(EDIT.kick-.5)*.5:0).toFixed(2)})`;
- canvas.style.filter=`contrast(1.15) saturate(${slow<1?.75:1.2}) brightness(${1+EDIT.kick*.12})`+(slow<1?' sepia(.15)':'');
+ if(st.time!==EDIT.time0){st.time=EDIT.time0;applyTime();}st.lights=EDIT.lights0;
+ yawCar=EDIT.yaw;carRig.rotation.set(0,yawCar,0);st.v=0;st.hb=true;lastPZ=posZ;setView(st.view||'driver');toast("🎬 That's a wrap!",2200);}
+function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&EA.stage)eaCancel(true);
+ const t=EDIT.t,o=$('#cut'),seq=EDIT.seq;let si=seq.findIndex(s=>t<s.t0+s.len);if(si<0)si=seq.length-1;const S=seq[si],u=t-S.t0,q=clamp(u/S.len,0,1),id=S.id,ease=x=>x*x*(3-2*x);
+ /* speed ramps in and out of slow motion */
+ const slowShot=id==='slowOrbit'||id==='slowWheel';EDIT.ts+=((slowShot?.28:1)-EDIT.ts)*Math.min(1,dt*3);const ds=dt*EDIT.ts;
+ /* the car drives itself: cruise, build up, flat out */
+ const vT=!EDIT.drive?0:si<6?14:si<8?30:si<12?42:si<17?55:50,v0=EDIT.v;EDIT.v+=(vT-EDIT.v)*Math.min(1,ds*.6);EDIT.acc=(EDIT.v-v0)/Math.max(1e-4,ds);EDIT.d+=EDIT.v*ds;
+ /* lane change over and back */
+ const latT=EDIT.alt&&['drone','flyby','mirror','slowOrbit','slowWheel'].includes(id)?EDIT.alt:0,la=(latT-EDIT.lat)*2.2-EDIT.latV*2.6;EDIT.latV+=la*ds;EDIT.lat+=EDIT.latV*ds;
+ const {fx,fz,rx,rz}=EDIT;posX=EDIT.x0+fx*EDIT.d+rx*EDIT.lat;posZ=EDIT.z0+fz*EDIT.d+rz*EDIT.lat;const hd=EDIT.v>1?Math.atan2(EDIT.latV,EDIT.v):0;yawCar=EDIT.yaw-hd;lastPZ=posZ;st.v=0;
+ /* body: squat under power, roll in the lane change */
+ EDIT.pitch+=(clamp(-EDIT.acc*.006,-.03,.03)-EDIT.pitch)*Math.min(1,ds*4);EDIT.roll+=(clamp(-la*.02,-.04,.04)-EDIT.roll)*Math.min(1,ds*4);
+ carRig.position.set(posX,0,posZ);carRig.rotation.set(EDIT.pitch,yawCar,EDIT.roll);
+ if(P&&P.wheels)P.wheels.forEach(w=>{w.sp.rotation.x-=EDIT.v*ds/w.r;});
+ if(st.engine){st.rpm=1800+(EDIT.v/55)*4600*(.8+.2*Math.sin(t*.7));A.thr=EDIT.acc>.5?.9:.25;}
+ /* exhaust flames on the exhaust shot and when lifting */
+ if(EDIT.flames){const pop=(id==='exh'&&Math.sin(u*9)>.5)||id==='qrear'||(EDIT.acc<-1&&Math.random()<.2);EDIT.flames.visible=pop&&Math.random()<.7;if(EDIT.flames.visible){EDIT.flames.scale.set(1,1,.6+Math.random()*.8);if(Math.random()<.12&&AU.ctx)nburst(.04,'bandpass',700,.1);}}
+ /* cuts */
+ if(si!==EDIT.shot){EDIT.shot=si;EDIT.co=null;EDIT.fix=null;EDIT.flash=si>0&&(S.len<EDIT.beat*3||id==='orbit'||id==='slowOrbit'||id==='bumper')?1:0;if(EDIT.flash&&AU.ctx)nburst(.12,'lowpass',160,.2);
+  const cap={est:'Cabin Garage presents',orbit:car.name,slowOrbit:car.engine||car.blurb||'',outro:car.name+' · '+(car.kind||'')}[id];cutCap(cap||'');}
+ EDIT.flash=Math.max(0,EDIT.flash-dt*5);
+ /* camera */
+ const P2=(along,side,y)=>new THREE.Vector3(posX-fx*along+rx*side,y,posZ-fz*along+rz*side),C=new THREE.Vector3(posX,.65,posZ);
+ let cp,lk,fov=50,shake=0,lag=false;
+ switch(id){
+  case 'est':{if(!EDIT.fix)EDIT.fix=P2(-90,-9,4.5);cp=EDIT.fix.clone();cp.y-=q*1.2;lk=C;fov=32-q*8;break;}
+  case 'head':{cp=P2(-2.9-q*.3,-1.3,.75);lk=P2(-2.3,-.6,.72);fov=34;shake=.3;break;}
+  case 'grille':{cp=P2(-3.6+q*.6,.15,.65);lk=P2(-2.4,0,.62);fov=30;shake=.3;break;}
+  case 'wheel':{cp=P2(-1.4,-1.7+q*.2,.38);lk=P2(-1.35,-.85,.36);fov=40;shake=.6;break;}
+  case 'cabin':{cp=P2(.5,.33,1.12);lk=P2(-.3,-.37,.95);fov=60;shake=.4;break;}
+  case 'exh':{cp=P2(3.5+q*.4,.85,.5);lk=P2(2.5,.42,.27);fov=36;shake=.5;break;}
+  case 'chase':{lag=true;cp=P2(7.5-q*1.5,-1.6,.75);lk=P2(-3,0,.7);fov=48;shake=.35;break;}
+  case 'side':{cp=P2(-.5+q,-8.5,1.0);lk=P2(0,0,.75);fov=26;shake=.2;break;}
+  case 'qwheel':{cp=P2(1.15,-1.6,.36);lk=P2(1.2,-.85,.34);fov=42;shake=.8;break;}
+  case 'qhood':{cp=P2(-1.7,0,1.16);lk=P2(-40,0,.6);fov=72;shake=.9;break;}
+  case 'qrear':{cp=P2(3.3,-.6,.42);lk=P2(-2,0,.8);fov=60;shake=.9;break;}
+  case 'qdrone':{cp=P2(-3,0,12);lk=P2(-3.01,0,0);fov=55;break;}
+  case 'orbit':{lag=true;const a=EDIT.ry+ease(q)*Math.PI*1.4,R=7.5;cp=new THREE.Vector3(posX+Math.sin(a)*R,1.0+Math.sin(q*3)*.3,posZ+Math.cos(a)*R);lk=C;fov=44;shake=.3;break;}
+  case 'bumper':{cp=P2(-2.75,.35,.3);lk=P2(-40,.2,.35);fov=78;shake=1.2;break;}
+  case 'drone':{cp=P2(6-q*4,EDIT.alt*.5,16+q*4);lk=P2(-6,EDIT.alt*.5,0);fov=50;break;}
+  case 'flyby':{if(!EDIT.fix)EDIT.fix=P2(-45,-6.5-Math.abs(EDIT.alt),1.1);cp=EDIT.fix.clone();lk=C;fov=30;break;}
+  case 'mirror':{cp=P2(-.55,-1.12,1.08);lk=P2(4,-1.1,.8);fov=60;shake=.6;break;}
+  case 'slowOrbit':{const a=EDIT.ry+2+ease(q)*Math.PI,R=5.5;cp=new THREE.Vector3(posX+Math.sin(a)*R,.55+q*.6,posZ+Math.cos(a)*R);lk=C;fov=40;break;}
+  case 'slowWheel':{cp=P2(-1.4+(q-.5)*.6,-1.5,.4);lk=P2(-1.4,-.85,.38);fov=36;break;}
+  case 'hood':{cp=P2(-1.65,0,1.17);lk=P2(-50,0,.5);fov=66;shake=.7;break;}
+  case 'crane':{cp=P2(8+q*10,2.5+q*3,1.4+ease(q)*12);lk=C;fov=48;break;}
+  default:{if(!EDIT.fix)EDIT.fix=P2(-1.5,2.4,1.0);cp=EDIT.fix.clone();lk=C;fov=34+q*6;}}
+ if(lag){const off=cp.clone().sub(C);if(!EDIT.co)EDIT.co=off.clone();EDIT.co.lerp(off,Math.min(1,dt*2.2));cp=C.clone().add(EDIT.co);}
+ const sh=shake*(EDIT.v/50+.3)*.012;cp.x+=(Math.sin(t*31)+Math.sin(t*17.3))*sh;cp.y+=(Math.sin(t*27.1)+Math.sin(t*41))*sh;cp.x+=Math.sin(t*.9)*.025;cp.y+=Math.sin(t*1.3)*.015;
+ camera.position.copy(cp);camera.lookAt(lk);camera.rotation.z+=Math.sin(t*.5)*.006+(id==='flyby'?(q-.5)*.06:0);if(camera.fov!==fov){camera.fov=fov;camera.updateProjectionMatrix();}
+ /* look: fades, white flash on hard cuts, warm grade, colder slow motion */
+ let a=0;if(t<1.2)a=1-t/1.2;const endT=EDIT.dur-2.2;if(t>endT)a=Math.min(1,(t-endT)/1.6);
+ o.style.background=EDIT.flash>.05?`rgba(255,255,255,${(EDIT.flash*.55).toFixed(2)})`:`rgba(0,0,0,${a.toFixed(2)})`;
+ const blur=id==='flyby'&&q>.3&&q<.6?1.2:0;
+ canvas.style.filter=`contrast(1.18) saturate(${slowShot?.8:1.15}) brightness(${(1.02+EDIT.flash*.15).toFixed(2)}) sepia(${slowShot?.22:.08}) hue-rotate(-4deg)`+(blur?` blur(${blur}px)`:'');
  if(t>=EDIT.dur)editEnd();}
 
 /* ===== jobs, money, paint shop, minimap, save ===== */
