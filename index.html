@@ -2212,7 +2212,7 @@ function updateSkids(dt){if(!P||!P.wheels)return;const sp=Math.abs(st.v);
  let any=false;for(let i=0;i<SKID.sm.length;i++){const q=SKID.sm[i];if(q.life<=0)continue;any=true;q.life-=dt;q.y+=q.vy*dt;const k=1-q.life/q.max,sc=q.life<=0?0:(.4+k*2.2)*Math.min(1,q.life*1.5);_sk.p.set(q.x,q.y,q.z);_sk.s.set(sc,sc,sc);_sk.q.identity();_sk.m.compose(_sk.p,_sk.q,_sk.s);SKID.smoke.setMatrixAt(i,_sk.m);}
  if(any||SKID.anyPrev)SKID.smoke.instanceMatrix.needsUpdate=true;SKID.anyPrev=any;}
 
-function updateSys(dt){escT=Math.max(0,escT-dt);tcsT=Math.max(0,tcsT-dt);spdN+=(Math.abs(st.v)*3.6-spdN)*Math.min(1,dt*7);
+function updateSys(dt){escT=Math.max(0,escT-dt);tcsT=Math.max(0,tcsT-dt);spdN+=((st.edKmh!=null?st.edKmh:Math.abs(st.v)*3.6)-spdN)*Math.min(1,dt*7);
  if((absAct||wheelLock)&&!walking){absSndT-=dt;if(absSndT<=0){absSndT=absAct?.075:.11;sfx(absAct?'abs':'squeal');}if(absAct&&!reduceMotion)head.position.y+=(Math.random()-.5)*.003;}
  const fl=(performance.now()/90|0)%2,key=[absAct&&fl,wheelLock,escT>0&&fl,tcsT>0&&fl,st.abs===false,st.esc===false,st.tcs===false,walking].join();if(key===sysShown)return;sysShown=key;
  const set=(id,act,dis)=>{const e=document.getElementById(id);if(e){e.className=walking?'':act?'on':dis?'dis':'';e.textContent=id.slice(1)+(dis&&!act?' OFF':'');}};
@@ -3227,7 +3227,7 @@ function ntUpdate(dt){if(NTK.fly){ntFly(dt);return;}
 
 /* ===== car edit: a music-video style showcase — graded, speed ramps, lane change, detail shots ===== */
 const EDIT={on:false,t:0};
-const EDIT_SEQ=[['est',8],['head',4],['grille',4],['wheel',4],['cabin',4],['exh',4],['chase',4],['side',4],['qwheel',2],['qhood',2],['qrear',2],['qdrone',2],['orbit',8],['bumper',4],['drone',4],['flyby',4],['mirror',4],['slowOrbit',8],['slowWheel',4],['hood',4],['crane',4],['outro',8]];
+const EDIT_SEQ=[['est',8],['head',4],['grille',4],['wheel',4],['cabin',4],['exh',4],['chase',4],['side',4],['qwheel',2],['qhood',2],['qrear',2],['qdrone',2],['orbit',8],['bumper',4],['gauge',8],['drone',4],['flyby',4],['mirror',4],['slowOrbit',8],['slowWheel',4],['hood',4],['crane',4],['outro',8]];
 function editNoiseURL(){if(EDIT.grainURL)return EDIT.grainURL;const c=mkcv(192,192),x=c.getContext('2d'),d=x.createImageData(192,192);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255;}x.putImageData(d,0,0);return EDIT.grainURL=c.toDataURL();}
 function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('Get in the car first');return;}initAudio();
  const rp=roadPose(posX,posZ,yawCar),a1=posX>-53&&posX<-27,a7=posX<-56&&Math.abs(posZ-ZX)<13,onRoad=a1||a7||Math.abs(posX)<6,drive=onRoad&&!trkZone(posX,posZ)&&!cityZone(posX,posZ);
@@ -3237,7 +3237,7 @@ function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('G
  const beat=SPM.src==='file'&&SPM.hasFile?.6:60/118;
  Object.assign(EDIT,{on:true,t:0,shot:-1,d:0,v:0,ts:1,lat:0,latV:0,drive,alt,x0,z0,yaw,fx,fz,rx,rz,fov0:camera.fov,ry:Math.random()*6.28,vol:null,beat,co:null,fix:null,time0:st.time,lights0:st.lights,acc:0,pitch:0,roll:0,flash:0});
  let b=0;EDIT.seq=EDIT_SEQ.map(([id,n])=>{const s={id,t0:b*beat,len:n*beat};b+=n;return s;});EDIT.dur=b*beat+1.2;
- if(st.time==='day'){st.time='dusk';applyTime();}st.lights=2;st.engine=true;st.hb=false;st.v=0;cruise=0;st.gear='D';
+ if(st.time==='day'){st.time='dusk';applyTime();}st.lights=2;st.engine=true;st.hb=false;st.v=0;cruise=0;st.gear='D';EDIT.belt0=st.belt;st.belt=true;
  EDIT.tr0=st.traffic;st.traffic=false;applyTraffic();if(typeof ntRemove==='function')ntRemove();
  EDIT.q0=quality;EDIT.qa0=qualAuto;quality=2;qualAuto=false;applyQuality();renderer.setPixelRatio(Math.min((devicePixelRatio||1)*1.5,2.5));resize();if(sun.shadow.mapSize.x!==4096){sun.shadow.mapSize.set(4096,4096);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;}}
  if(AU.master){EDIT.vol=AU.master.gain.value;AU.master.gain.value=EDIT.vol*.32;}
@@ -3252,7 +3252,7 @@ function editStart(){if(EDIT.on||CUT.on||NTK.fly||!P)return;if(walking){toast('G
 function editEnd(){if(!EDIT.on)return;EDIT.on=false;const o=$('#cut');o.hidden=true;o.style.background='rgba(0,0,0,1)';o.classList.remove('bars','edit');$('#ui').classList.remove('cine');canvas.style.filter='';
  if(EDIT.flames){if(EDIT.flames.parent)EDIT.flames.parent.remove(EDIT.flames);disposeGroup(EDIT.flames);EDIT.flames=null;}
  if(EDIT.fov0){camera.fov=EDIT.fov0;camera.updateProjectionMatrix();}if(AU.master&&EDIT.vol!=null)AU.master.gain.value=EDIT.vol;spmStop(2.5);
- if(st.time!==EDIT.time0){st.time=EDIT.time0;applyTime();}st.lights=EDIT.lights0;st.edKmh=null;
+ if(st.time!==EDIT.time0){st.time=EDIT.time0;applyTime();}st.lights=EDIT.lights0;st.edKmh=null;st.belt=EDIT.belt0;gearNum=1;
  st.traffic=EDIT.tr0!==false;applyTraffic();quality=EDIT.q0;qualAuto=EDIT.qa0;applyQuality();
  if(EDIT.jumped&&EDIT.home){posX=EDIT.home.x;posZ=EDIT.home.z;yawCar=EDIT.home.yaw;carRig.position.set(posX,0,posZ);}else yawCar=EDIT.yaw;carRig.rotation.set(0,yawCar,0);st.v=0;st.hb=true;lastPZ=posZ;setView(st.view||'driver');toast("🎬 That's a wrap!",2200);}
 function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&EA.stage)eaCancel(true);
@@ -3262,7 +3262,7 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
  /* speed ramps in and out of slow motion */
  const slowShot=id==='slowOrbit'||id==='slowWheel';EDIT.ts+=((slowShot?.28:1)-EDIT.ts)*Math.min(1,dt*3);const ds=dt*EDIT.ts;
  /* the car drives itself: cruise, build up, flat out */
- const vT=!EDIT.drive?0:si<6?14:si<8?30:si<12?42:si<17?55:50,v0=EDIT.v;EDIT.v+=(vT-EDIT.v)*Math.min(1,ds*.6);EDIT.acc=(EDIT.v-v0)/Math.max(1e-4,ds);EDIT.d+=EDIT.v*ds;
+ const VT={est:14,head:14,grille:14,wheel:14,cabin:14,exh:14,chase:30,side:30,qwheel:42,qhood:42,qrear:42,qdrone:42,orbit:55,bumper:58,gauge:86,outro:80},vT=!EDIT.drive?0:(VT[id]!=null?VT[id]:84),v0=EDIT.v;EDIT.v+=(vT-EDIT.v)*Math.min(1,ds*(id==='gauge'?.75:.6));EDIT.acc=(EDIT.v-v0)/Math.max(1e-4,ds);EDIT.d+=EDIT.v*ds;
  /* lane change over and back */
  const latT=EDIT.alt&&['drone','flyby','mirror','slowOrbit','slowWheel'].includes(id)?EDIT.alt:0,la=(latT-EDIT.lat)*2.2-EDIT.latV*2.6;EDIT.latV+=la*ds;EDIT.lat+=EDIT.latV*ds;
  const {fx,fz,rx,rz}=EDIT;posX=EDIT.x0+fx*EDIT.d+rx*EDIT.lat;posZ=EDIT.z0+fz*EDIT.d+rz*EDIT.lat;const hd=EDIT.v>1?Math.atan2(EDIT.latV,EDIT.v):0;yawCar=EDIT.yaw-hd;lastPZ=posZ;st.v=0;
@@ -3270,12 +3270,12 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
  EDIT.pitch+=(clamp(-EDIT.acc*.006,-.03,.03)-EDIT.pitch)*Math.min(1,ds*4);EDIT.roll+=(clamp(-la*.02,-.04,.04)-EDIT.roll)*Math.min(1,ds*4);
  carRig.position.set(posX,0,posZ);carRig.rotation.set(EDIT.pitch,yawCar,EDIT.roll);
  if(P&&P.wheels)P.wheels.forEach(w=>{w.sp.rotation.x-=EDIT.v*ds/w.r;});
- st.edKmh=EDIT.v*3.6;if(st.engine){st.rpm=1800+(EDIT.v/55)*4600*(.8+.2*Math.sin(t*.7));A.thr=EDIT.acc>.5?.9:.25;}
+ st.edKmh=EDIT.v*3.6;if(st.engine){{const gs=[0,14,26,38,52,66,1e3],g=gs.findIndex((x,i)=>EDIT.v<gs[i+1]),lo=gs[g],hi=Math.min(gs[g+1],95),fr=clamp((EDIT.v-lo)/(hi-lo),0,1);st.rpm=EDIT.v<2?900:2600+fr*(Math.min(car.redline||7000,7200)-2900);EDIT.gear=g+1;gearNum=EDIT.gear;}A.thr=EDIT.acc>.5?.9:.25;}
  /* exhaust flames on the exhaust shot and when lifting */
  if(EDIT.flames){const pop=(id==='exh'&&Math.sin(u*9)>.5)||id==='qrear'||(EDIT.acc<-1&&Math.random()<.2);EDIT.flames.visible=pop&&Math.random()<.7;if(EDIT.flames.visible){EDIT.flames.scale.set(1,1,.6+Math.random()*.8);if(Math.random()<.12&&AU.ctx)nburst(.04,'bandpass',700,.1);}}
  /* cuts */
  if(si!==EDIT.shot){EDIT.shot=si;EDIT.co=null;EDIT.fix=null;EDIT.flash=si>0&&(S.len<EDIT.beat*3||id==='orbit'||id==='slowOrbit'||id==='bumper')?1:0;if(EDIT.flash&&AU.ctx)nburst(.12,'lowpass',160,.2);
-  const cap={est:'Cabin Garage presents',orbit:car.name,slowOrbit:car.engine||car.blurb||'',outro:car.name+' · '+(car.kind||'')}[id];cutCap(cap||'');}
+  const cap={gauge:'',est:'Cabin Garage presents',orbit:car.name,slowOrbit:car.engine||car.blurb||'',outro:car.name+' · '+(car.kind||'')}[id];cutCap(cap||'');}
  EDIT.flash=Math.max(0,EDIT.flash-dt*5);
  /* camera */
  const P2=(along,side,y)=>new THREE.Vector3(posX-fx*along+rx*side,y,posZ-fz*along+rz*side),C=new THREE.Vector3(posX,.65,posZ);
@@ -3294,6 +3294,7 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
   case 'qrear':{cp=P2(3.3,-.6,.42);lk=P2(-2,0,.8);fov=60;shake=.9;break;}
   case 'qdrone':{cp=P2(-3,0,12);lk=P2(-3.01,0,0);fov=55;break;}
   case 'orbit':{lag=true;const a=EDIT.ry+ease(q)*Math.PI*1.4,R=7.5;cp=new THREE.Vector3(posX+Math.sin(a)*R,1.0+Math.sin(q*3)*.3,posZ+Math.cos(a)*R);lk=C;fov=44;shake=.3;break;}
+  case 'gauge':{/* the speedometer climbing to 300 */cp=P2(.18-q*.06,-.42,1.06);lk=P2(-.42,-.47,.9);fov=28-q*5;shake=.45;break;}
   case 'bumper':{cp=P2(-2.75,.35,.3);lk=P2(-40,.2,.35);fov=78;shake=1.2;break;}
   case 'drone':{cp=P2(6-q*4,EDIT.alt*.5,16+q*4);lk=P2(-6,EDIT.alt*.5,0);fov=50;break;}
   case 'flyby':{if(!EDIT.fix)EDIT.fix=P2(-45,-6.5-Math.abs(EDIT.alt),1.1);cp=EDIT.fix.clone();lk=C;fov=30;break;}
