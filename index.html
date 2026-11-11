@@ -3175,6 +3175,54 @@ function spmUI(){$('#spmOn').value=SPM.on?'1':'0';$('#spmKmh').value=String(SPM.
  $('#spmTest').addEventListener('click',async()=>{initAudio();if(SPM.playing){spmStop(.4);return;}await spmStart(true);SPM.test=12;$('#spmTest').textContent='■ Stop';});
  spmUI();}
 
+/* ===== night truck: R6 Kombi at 300 km/h at night → 80 % chance a lorry appears 1 km ahead in your lane; hit it and you fly ===== */
+const NTK={truck:null,armed:true,cool:0,fly:null};
+function ntModel(){const g=new THREE.Group(),wh=std(0xe8e8ea,.5,.2),cab=std(0x1d3f8a,.4,.4),bk=std(0x111111,.7),gl=std(0x16202a,.1,.5),A=(geo,m,x,y,z)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=true;g.add(o);return o;};
+ A(new THREE.BoxGeometry(2.5,2.9,2.3),cab,0,1.95,-7.0);A(new THREE.BoxGeometry(2.3,1.0,.05),gl,0,2.6,-8.17);A(new THREE.BoxGeometry(2.5,.5,.3),std(0x2a2a2c,.5,.6),0,.75,-8.1);
+ A(new THREE.BoxGeometry(2.55,3.0,13.4),wh,0,2.45,1.3);A(new THREE.BoxGeometry(2.4,.25,13.4),bk,0,.85,1.3);
+ const tc=mkcv(512,128),tx=tc.getContext('2d');tx.fillStyle='#e8e8ea';tx.fillRect(0,0,512,128);tx.fillStyle='#1d3f8a';tx.font='800 64px "Chakra Petch", Arial';tx.textAlign='center';tx.textBaseline='middle';tx.fillText('NORDFRACHT',256,66);
+ for(const s of[-1,1]){const pl=A(new THREE.PlaneGeometry(8,2),new THREE.MeshBasicMaterial({map:tex(tc)}),s*1.28,2.5,1.3);pl.rotation.y=s*Math.PI/2;}
+ for(const z of[-7.2,-1.8,4.8,6.2,7.6])for(const s of[-1,1]){const w=A(new THREE.CylinderGeometry(.52,.52,.4,16),bk,s*1.05,.52,z);w.rotation.z=Math.PI/2;}
+ const red=new THREE.MeshBasicMaterial({color:0xff1a10,toneMapped:false}),amb=new THREE.MeshBasicMaterial({color:0xffa010,toneMapped:false});
+ for(const s of[-1,1]){A(new THREE.BoxGeometry(.5,.22,.06),red,s*.95,1.0,8.03);for(let k=0;k<5;k++)A(new THREE.BoxGeometry(.06,.1,.12),amb,s*1.29,1.1,-4+k*2.6);}
+ A(new THREE.BoxGeometry(2.4,.12,.05),new THREE.MeshBasicMaterial({color:0xd8202a,toneMapped:false}),0,.62,8.03);/* red-white reflective tape */
+ for(let k=0;k<6;k++)A(new THREE.BoxGeometry(.38,.12,.055),new THREE.MeshBasicMaterial({color:k%2?0xf2f2f2:0xd8202a,toneMapped:false}),-1.0+k*.4,.62,8.04);
+ const rl=new THREE.PointLight(0xff2010,1.6,30);rl.position.set(0,1.2,9);g.add(rl);
+ g.traverse(o=>{o.userData.noHit=true;});return g;}
+function ntSpawn(){const rp=roadPose(posX,posZ,yawCar),fx=-Math.sin(rp.yaw),fz=-Math.cos(rp.yaw);const g=ntModel();g.rotation.y=rp.yaw;scene.add(g);
+ NTK.truck={g,x:rp.x+fx*1000,z:rp.z+fz*1000,yaw:rp.yaw,fx,fz,rx:-fz,rz:fx,v:80/3.6};g.position.set(NTK.truck.x,0,NTK.truck.z);}
+function ntRemove(){if(!NTK.truck)return;scene.remove(NTK.truck.g);disposeGroup(NTK.truck.g);NTK.truck=null;}
+function ntHit(kmh){const T=NTK.truck,hx=posX,hz=posZ,rp=roadPose(hx,hz,yawCar);initAudio();
+ const sp=Math.max(30,Math.abs(st.v)),side=Math.random()<.5?-1:1;
+ NTK.fly={t:0,x:posX,y:0,z:posZ,vx:-Math.sin(yawCar)*sp*.32+T.rx*side*4,vy:16+Math.random()*5,vz:-Math.cos(yawCar)*sp*.32+T.rz*side*4,
+  rx:0,ry:yawCar,rz:0,wx:-(3.2+Math.random()*2),wy:side*(1.5+Math.random()),wz:side*(2.5+Math.random()*2),bounced:0,rest:0,kmh,hit:{x:rp.x,z:rp.z,yaw:rp.yaw},yaw0:yawCar,fade:0};
+ st.v=0;st.engine=false;cruise=0;spinRate=0;yawRate=0;st.hazard=true;if(typeof EA!=='undefined'&&EA.stage)eaCancel(true);
+ try{dmgDeform(1,0,40,false);dmgDeform(1,side*.6,30,false);DMG.total=Math.min(100,DMG.total+55);}catch(e){}
+ $('#flash').style.opacity=1;setTimeout(()=>$('#flash').style.opacity=0,160);
+ if(AU.ctx){tone2(38,1.6,'sine',.6);nburst(1.2,'lowpass',380,.9);nburst(.6,'highpass',2500,.35);tone2(120,.4,'sawtooth',.12);}
+ T.v=Math.max(0,T.v-6);}
+function ntFly(dt){const F=NTK.fly;if(!F)return;F.t+=dt;const sd=dt*(F.t<.7?.3:1);
+ if(!F.rest){F.vy-=9.8*sd;F.x+=F.vx*sd;F.y+=F.vy*sd;F.z+=F.vz*sd;F.rx+=F.wx*sd;F.ry+=F.wy*sd;F.rz+=F.wz*sd;
+  if(F.y<=0&&F.vy<0){F.y=0;if(F.bounced<2){F.bounced++;F.vy*=-.32;F.vx*=.5;F.vz*=.5;F.wx*=.4;F.wz*=.4;if(AU.ctx){nburst(.5,'lowpass',500,.7);tone2(50,.5,'sine',.4);}}
+   else{F.rest=F.t;F.vx=F.vz=0;F.rx=Math.round(F.rx/Math.PI)*Math.PI;F.rz=Math.round(F.rz/Math.PI)*Math.PI;if(AU.ctx)nburst(.7,'lowpass',300,.6);}}}
+ posX=F.x;posZ=F.z;st.v=0;carRig.position.set(F.x,F.y,F.z);carRig.rotation.set(F.rx,F.ry,F.rz);
+ /* chase camera */
+ const bx=-Math.sin(F.yaw0),bz=-Math.cos(F.yaw0),ang=F.t*.35;camera.position.set(F.x-bx*11+Math.sin(ang)*4,3.4+F.y*.55,F.z-bz*11+Math.cos(ang)*4);camera.lookAt(F.x,F.y+.6,F.z);
+ if(F.rest&&F.t-F.rest>1.4){F.fade+=dt*2.2;$('#fade').style.opacity=Math.min(1,F.fade).toFixed(2);
+  if(F.fade>=1.15){const H=F.hit;posX=H.x;posZ=H.z;yawCar=H.yaw;lastPZ=posZ;carRig.position.set(posX,0,posZ);carRig.rotation.set(0,yawCar,0);st.v=0;st.engine=false;st.hb=true;st.hazard=false;
+   const dist=Math.round(Math.hypot(F.x-F.hit.x,F.z-F.hit.z));NTK.fly=null;ntRemove();setView(st.view||'driver');
+   let k=1;const fo=()=>{k-=.05;$('#fade').style.opacity=Math.max(0,k).toFixed(2);if(k>0)requestAnimationFrame(fo);};requestAnimationFrame(fo);
+   STATS.truck=(STATS.truck||0)+1;toast(`You hit the truck at ${F.kmh} km/h and flew ${dist} m! You're back where you hit it. Press START.`,5200);}}}
+function ntUpdate(dt){if(NTK.fly){ntFly(dt);return;}
+ NTK.cool=Math.max(0,NTK.cool-dt);const kmh=Math.abs(st.v*3.6);
+ if(kmh<290)NTK.armed=true;
+ if(!NTK.truck&&NTK.armed&&!NTK.cool&&kmh>=300&&car&&car.id==='lindhofr6'&&st.time==='night'&&!walking&&!CUT.on){NTK.armed=false;NTK.cool=20;if(Math.random()<.8)ntSpawn();}
+ const T=NTK.truck;if(!T)return;
+ T.x+=T.fx*T.v*dt;T.z+=T.fz*T.v*dt;T.g.position.set(T.x,0,T.z);
+ const dx=posX-T.x,dz=posZ-T.z,along=dx*T.fx+dz*T.fz,lat=dx*T.rx+dz*T.rz;
+ if(along>400||along<-2200||CUT.on){ntRemove();return;}
+ if(!walking&&Math.abs(lat)<1.28+.9&&along>-8.2-2.4&&along<8.2+2.4)ntHit(Math.round(kmh));}
+
 /* ===== jobs, money, paint shop, minimap, save ===== */
 let money=0;try{money=+(localStorage.getItem('cabin-money')||0)||0;}catch(e){}
 try{if(!localStorage.getItem('cabin-gift50k')){money+=50000;localStorage.setItem('cabin-gift50k','1');localStorage.setItem('cabin-money',String(money));setTimeout(()=>toast('💶 €50,000 has been added to your account!',4500),2500);}}catch(e){money+=50000;}
@@ -4041,6 +4089,7 @@ function frame(t){
  if(st.view==='outside'&&!walking){const ao=yawCar+camYaw,dO=car.truck?17:7.5;camera.position.set(posX+Math.sin(ao)*dO,clamp(1.3-camPitch*5,.4,8)+pathY,posZ+Math.cos(ao)*dO);camera.lookAt(posX,.9+pathY,posZ);}
  else camera.rotation.set(camPitch,camYaw,0);
  if(CUT.on)cutStep(dt);
+ ntUpdate(dt);
  /* world recycling */
  for(let i=0;i<NT;i++){const tr=trees[i];let moved=false;if(tr.z-posZ>200){placeTree(tr,posZ-200+Math.random()*10,posX);moved=true;}else if(tr.z-posZ<-200){placeTree(tr,posZ+200-Math.random()*10,posX);moved=true;}else if(Math.abs(tr.x-posX)>120){placeTree(tr,posZ+(Math.random()-.5)*400,posX);moved=true;}if(moved)setTree(i);}
  trunks.instanceMatrix.needsUpdate=crowns.instanceMatrix.needsUpdate=true;
