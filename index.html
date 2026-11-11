@@ -139,6 +139,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #mmCv{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(var(--topH,120px) + 12px);width:150px;height:150px;border-radius:50%;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none;z-index:3}#ui.immersive #mmCv{display:block}
 #paintPanel{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--topH,120px) + 20px);width:min(360px,calc(100% - 32px));padding:14px 16px;z-index:12;pointer-events:auto}#paintPanel h2{margin:0 0 6px;font:700 15px/1.2 var(--display)}#paintPanel h3{font:700 11px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:12px 0 6px}.sws{display:flex;flex-wrap:wrap;gap:8px}.sw{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.5);cursor:pointer}.sw:hover{transform:scale(1.1)}
 @media (max-width:720px){#mmCv{width:110px;height:110px}}
+#songPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(380px,calc(100vw - 32px));padding:16px 18px;font:500 14px/1.45 var(--body,system-ui)}#songPanel h3{margin:0 0 6px;font:700 18px var(--display,system-ui)}#songPanel .sp-hint{margin:0 0 12px;opacity:.8;font-size:13px}#songPanel .sp-file{display:inline-block;cursor:pointer}#songPanel .sp-name{margin:8px 0 10px;font-size:13px;opacity:.85;word-break:break-all}#songPanel .sp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}#songPanel .sp-row input[type=text],#songPanel select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:inherit}#songPanel .sp-row input[type=range]{flex:1;max-width:190px}#songPanel .sp-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}#songPanel [hidden]{display:none}
 #lapBox{position:absolute;left:16px;top:calc(var(--topH,120px) + 14px);padding:10px 14px;z-index:6;pointer-events:none!important;font:600 14px/1.5 var(--display);letter-spacing:.02em;font-variant-numeric:tabular-nums}#lapBox[hidden]{display:none}#lapBox b{font-size:15px}
 #eaPill{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--topH,120px) + 112px);padding:10px 18px;z-index:7;pointer-events:none!important;font:700 15px/1.2 var(--display);letter-spacing:.03em;color:#fff}#eaPill[hidden]{display:none}#eaPill.s1{background:#c77700;border-color:#c77700;animation:eaPulse .9s infinite}#eaPill.s2,#eaPill.s3{background:#c8102e;border-color:#c8102e}#eaPill.s2{animation:eaPulse .6s infinite}@keyframes eaPulse{50%{opacity:.55}}
 #blitzPill{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--topH,120px) + 64px);display:flex;align-items:center;gap:10px;padding:8px 16px;z-index:6;pointer-events:none!important;border-color:#f2c200}#blitzPill[hidden]{display:none}#blitzPill b{font:800 18px/1 var(--display)}#blitzPill small{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;border:4px solid #d0141a;background:#fff;color:#111;font:800 12px/1 var(--display)}#blitzPill.over{background:rgba(200,16,46,.85);border-color:#ff5a6e}
@@ -186,7 +187,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <button class="btn" id="moreBtn" aria-expanded="false">☰ More</button>
       <div id="moreMenu" class="panel" hidden>
         <div class="mm-sec"><h3>World</h3><button class="btn" id="timeBtn">Day</button><button class="btn" id="rainBtn">Clear</button><button class="btn" id="trafficBtn" aria-pressed="true">Traffic</button><button class="btn" id="dynTimeBtn" aria-pressed="false">Auto day/night</button><button class="btn" id="dynWeatherBtn" aria-pressed="false">Changing weather</button><button class="btn" id="camsBtn" aria-pressed="true">Speed cameras: on</button></div>
-        <div class="mm-sec"><h3>Car</h3><button class="btn" id="dashBtn" aria-pressed="false">Gauges</button><button class="btn" id="scrBtn" aria-expanded="false">Screen</button><button class="btn" id="lkaBtn" aria-pressed="true" title="Lane assist (' key)">Lane assist</button><button class="btn" id="abeltBtn" aria-pressed="false" title="Fasten the seatbelt automatically when you get in">Auto seatbelt</button><button class="btn" id="eaBtn" aria-pressed="true" title="Emergency Assist: stops the car if you stop steering">Emergency Assist</button><button class="btn" id="evadeBtn" aria-pressed="true" title="Swerves into a free lane during emergency braking">Evade assist</button><button class="btn" id="absBtn" aria-pressed="true">ABS</button><button class="btn" id="escBtn" aria-pressed="true">ESC</button><button class="btn" id="tcsBtn" aria-pressed="true">TCS</button><button class="btn" id="soundBtn" aria-pressed="true">Sound</button></div>
+        <div class="mm-sec"><h3>Car</h3><button class="btn" id="dashBtn" aria-pressed="false">Gauges</button><button class="btn" id="scrBtn" aria-expanded="false">Screen</button><button class="btn" id="lkaBtn" aria-pressed="true" title="Lane assist (' key)">Lane assist</button><button class="btn" id="abeltBtn" aria-pressed="false" title="Fasten the seatbelt automatically when you get in">Auto seatbelt</button><button class="btn" id="songBtn" aria-pressed="false" title="Your own song plays slowed + reverb when you pass out in a crash">🎵 Crash song</button><button class="btn" id="eaBtn" aria-pressed="true" title="Emergency Assist: stops the car if you stop steering">Emergency Assist</button><button class="btn" id="evadeBtn" aria-pressed="true" title="Swerves into a free lane during emergency braking">Evade assist</button><button class="btn" id="absBtn" aria-pressed="true">ABS</button><button class="btn" id="escBtn" aria-pressed="true">ESC</button><button class="btn" id="tcsBtn" aria-pressed="true">TCS</button><button class="btn" id="soundBtn" aria-pressed="true">Sound</button></div>
         <div class="mm-sec"><h3>Surprise emergencies</h3><button class="btn" id="surpriseBtn" aria-pressed="false">Off</button><small class="mm-note" id="surpriseNote">Turn on and something goes wrong at a random moment while you drive.</small></div>
         <div class="mm-sec"><h3>Extras</h3><button class="btn" id="paintBtn">🎨 Paint shop</button><button class="btn" id="trkBtn" title="Drive to the Waypoint Ring race circuit">🏁 Racetrack</button><button class="btn" id="raceBtn" title="3-lap race against three drivers (on the racetrack)">🚦 Race</button><button class="btn" id="mmBtn" aria-pressed="true">Minimap</button><button class="btn" id="photoBtn">Photo</button><button class="btn" id="trophyBtn" aria-expanded="false">Trophies</button><button class="btn" id="pauseBtn" aria-pressed="false" title="Pause the game (Esc)">⏸ Pause</button><button class="btn" id="helpBtn" aria-expanded="false">Controls</button></div>
         <div class="mm-sec"><h3>Settings</h3><button class="btn" id="fsBtn" aria-pressed="false" title="Fullscreen (8 key)">⛶ Fullscreen</button><button class="btn" id="gfxBtn">Graphics: Auto</button><button class="btn" id="resetBtn" title="Reset the car, the drive and every setting">↻ Reset</button></div>
@@ -229,7 +230,17 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <p>Drag anywhere to look around, scroll to zoom. Everything that lights up under the pointer can be clicked: door handles, window switches, glovebox, sun visors, cup holders, armrest, vents, stalks, knobs, seats and the touchscreen. Scroll over a knob to turn it.</p>
   </aside>
   <button class="btn" id="trainPrompt" hidden>🚆</button><button class="btn" id="skipRide" hidden>⏩ Skip to the next stop</button><aside id="trainPanel" class="panel" hidden aria-label="Train"><button class="x" data-close="trainPanel" aria-label="Close">×</button><h2>🚆 Where to?</h2><p class="note">Waypoint Express. Free tickets. With the Autozug your car rides along.</p><div id="trainList"></div></aside>
-  <div id="eaPill" class="panel" hidden></div><div id="lapBox" class="panel" hidden></div><div id="blitzPill" class="panel" hidden><span id="blitzIco">📸</span><b id="blitzDist">500 m</b><small id="blitzLim">100</small></div>
+  <div id="eaPill" class="panel" hidden></div><div id="songPanel" class="panel" hidden role="dialog" aria-label="Crash song">
+ <h3>🎵 Crash song</h3>
+ <p class="sp-hint">When you pass out in a crash, your song plays slowed + reverb through the cutscene. Pick an audio file from your computer (MP3, M4A, WAV). It stays on this device only.</p>
+ <label class="sp-file btn">Choose song file…<input id="songFile" type="file" accept="audio/*" hidden></label>
+ <div id="songName" class="sp-name"></div>
+ <div class="sp-row"><label for="songStart">Start at (best part)</label><input id="songStart" type="text" inputmode="numeric" placeholder="1:23" size="6"></div>
+ <div class="sp-row"><label for="songSpeed">Speed</label><select id="songSpeed"><option value="0.85">Slowed a bit (0.85×)</option><option value="0.8">Slowed (0.8×)</option><option value="0.75">Very slowed (0.75×)</option><option value="1">Normal (1×)</option></select></div>
+ <div class="sp-row"><label for="songRev">Reverb</label><input id="songRev" type="range" min="0" max="1" step="0.05"></div>
+ <div class="sp-btns"><button class="btn" id="songTest">▶ Test</button><button class="btn" id="songDel">Remove</button><button class="btn" id="songClose">Done</button></div>
+</div>
+<div id="lapBox" class="panel" hidden></div><div id="blitzPill" class="panel" hidden><span id="blitzIco">📸</span><b id="blitzDist">500 m</b><small id="blitzLim">100</small></div>
   <canvas id="mmCv" width="150" height="150" aria-label="Minimap"></canvas><aside id="borderPanel" class="panel" hidden aria-label="Border control"><h2 id="bdTitle">Customs</h2><p id="bdText" class="note"></p><div id="bdBtns"></div></aside><aside id="paintPanel" class="panel" hidden aria-label="Paint shop"><button class="x" data-close="paintPanel" aria-label="Close">×</button><h2>🎨 Paint shop <span id="paintMoney" style="float:right;color:#7ee0a0"></span></h2><p class="note">Park on a gas station forecourt. Paint and rims are free.</p><h3>Body paint</h3><div id="paintSw" class="sws"></div><h3>Rims</h3><div id="rimSw" class="sws"></div></aside>
   <div id="welcome" hidden><div class="wc panel"><h1>Cabin Garage</h1><p class="sub">An open-road driving sandbox: Autobahn, city, trains and jobs.</p>
  <div class="wgrid"><div><b>🚗 Drive</b><span>Enter starts the engine · E for Drive · W/S gas &amp; brake · A/D steer</span></div><div><b>💼 Earn</b><span>Phone → Jobs: taxi rides, parcel deliveries, Autobahn sprints</span></div>
@@ -2937,6 +2948,47 @@ function toggleTrack(){if(walking){toast('Get in your car first');return;}const 
 
 function trkMini(x){if(!TRK.built)return;const S=TRK.S;x.strokeStyle='#6b6f75';x.lineWidth=TRK.W;x.lineJoin='round';x.beginPath();S.forEach((p,i)=>i?x.lineTo(p.x,p.z):x.moveTo(p.x,p.z));x.closePath();x.stroke();x.strokeStyle='#fff';x.lineWidth=1.5;x.beginPath();x.moveTo(S[0].x+S[0].nx*7,S[0].z+S[0].nz*7);x.lineTo(S[0].x-S[0].nx*7,S[0].z-S[0].nz*7);x.stroke();}
 
+/* ===== crash song: the player's own audio file, slowed + reverb, plays while you are knocked out ===== */
+const SONG={has:false,name:'',start:0,speed:.8,rev:.6,buf:null,ir:null,src:null,out:null,testT:0};
+try{Object.assign(SONG,JSON.parse(localStorage.getItem('cabin-song')||'{}'));}catch(e){}
+SONG.buf=null;SONG.src=null;SONG.out=null;
+function songSaveCfg(){try{localStorage.setItem('cabin-song',JSON.stringify({has:SONG.has,name:SONG.name,start:SONG.start,speed:SONG.speed,rev:SONG.rev}));}catch(e){}}
+function songDB(){return new Promise((res,rej)=>{const r=indexedDB.open('cabin-song',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function songPut(blob){const db=await songDB();await new Promise((res,rej)=>{const t=db.transaction('f','readwrite');if(blob)t.objectStore('f').put(blob,'song');else t.objectStore('f').delete('song');t.oncomplete=res;t.onerror=()=>rej(t.error);});}
+async function songGet(){const db=await songDB();return new Promise((res,rej)=>{const r=db.transaction('f').objectStore('f').get('song');r.onsuccess=()=>res(r.result||null);r.onerror=()=>rej(r.error);});}
+async function songBuffer(){if(SONG.buf)return SONG.buf;initAudio();if(!AU.ctx)return null;const b=await songGet();if(!b)return null;SONG.buf=await AU.ctx.decodeAudioData(await b.arrayBuffer());return SONG.buf;}
+function songIR(ctx,sec){const n=Math.floor(ctx.sampleRate*sec),b=ctx.createBuffer(2,n,ctx.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);let lp=0;for(let i=0;i<n;i++){lp+=((Math.random()*2-1)-lp)*.35;d[i]=lp*Math.pow(1-i/n,2.4);}}return b;}
+function songParse(v){v=String(v||'').trim();if(!v)return 0;const p=v.split(':').map(Number);if(p.some(isNaN))return 0;return p.length>1?p[0]*60+p[1]:p[0];}
+function songFmt(s){s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+async function songPlay(test){if(!SONG.has)return false;let buf;try{buf=await songBuffer();}catch(e){toast('Could not play that song file. Try an MP3, M4A or WAV.');return false;}
+ if(!buf||(!test&&!CUT.on))return false;songStop(0);const ctx=AU.ctx;if(ctx.state==='suspended'&&!PAUSE.on)ctx.resume();
+ const src=ctx.createBufferSource();src.buffer=buf;src.playbackRate.value=SONG.speed;
+ const conv=ctx.createConvolver();conv.buffer=SONG.ir||(SONG.ir=songIR(ctx,4.5));
+ const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=SONG.speed<1?7500:16000;
+ const body=ctx.createBiquadFilter();body.type='lowshelf';body.frequency.value=180;body.gain.value=SONG.speed<1?3:0;
+ const dry=ctx.createGain(),wet=ctx.createGain(),out=ctx.createGain();dry.gain.value=1-SONG.rev*.5;wet.gain.value=SONG.rev*1.2;
+ src.connect(body);body.connect(lp);lp.connect(dry);lp.connect(conv);conv.connect(wet);dry.connect(out);wet.connect(out);out.connect(ctx.destination);
+ const T=ctx.currentTime,vol=st.sound?.85:0;out.gain.setValueAtTime(0,T);out.gain.linearRampToValueAtTime(vol,T+(test?.4:2.2));
+ src.start(T,Math.max(0,Math.min(SONG.start,buf.duration-2)));SONG.src=src;SONG.out=out;src.onended=()=>{if(SONG.src===src){SONG.src=null;}};return true;}
+function songStop(fade){if(!SONG.src||!AU.ctx)return;const T=AU.ctx.currentTime,s=SONG.src,o=SONG.out;SONG.src=null;SONG.testT=0;
+ try{o.gain.cancelScheduledValues(T);o.gain.setValueAtTime(o.gain.value,T);o.gain.linearRampToValueAtTime(0,T+fade+.02);s.stop(T+fade+.08);}catch(e){}
+ const b=$('#songTest');if(b)b.textContent='▶ Test';}
+function songUI(){const p=$('#songPanel');if(!p)return;$('#songName').textContent=SONG.has?SONG.name:'No song picked yet';$('#songStart').value=songFmt(SONG.start);$('#songSpeed').value=String(SONG.speed);$('#songRev').value=String(SONG.rev);
+ $('#songTest').disabled=!SONG.has;$('#songDel').disabled=!SONG.has;const b=$('#songBtn');if(b)b.setAttribute('aria-pressed',SONG.has);}
+function songOpen(on){const p=$('#songPanel');p.hidden=!on;if(on)songUI();else if(SONG.testT)songStop(.3);}
+{const p=$('#songPanel');p.addEventListener('keydown',e=>e.stopPropagation());p.addEventListener('keyup',e=>e.stopPropagation());
+ $('#songBtn').addEventListener('click',()=>songOpen($('#songPanel').hidden));$('#songClose').addEventListener('click',()=>songOpen(false));
+ $('#songFile').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;songStop(0);
+  try{initAudio();const buf=await AU.ctx.decodeAudioData(await f.arrayBuffer());await songPut(f);SONG.buf=buf;SONG.has=true;SONG.name=f.name;if(SONG.start>buf.duration-2)SONG.start=0;songSaveCfg();songUI();toast('🎵 Crash song saved: '+f.name);}
+  catch(err){toast('That file could not be read as audio. Try an MP3, M4A or WAV.',3200);}e.target.value='';});
+ $('#songStart').addEventListener('change',e=>{SONG.start=songParse(e.target.value);e.target.value=songFmt(SONG.start);songSaveCfg();});
+ $('#songSpeed').addEventListener('change',e=>{SONG.speed=+e.target.value;songSaveCfg();if(SONG.src)SONG.src.playbackRate.value=SONG.speed;});
+ $('#songRev').addEventListener('input',e=>{SONG.rev=+e.target.value;songSaveCfg();});
+ $('#songRev').addEventListener('change',()=>{if(SONG.testT){songPlay(true).then(ok=>{if(ok){SONG.testT=1;$('#songTest').textContent='■ Stop';}});}});
+ $('#songTest').addEventListener('click',async()=>{if(SONG.src){songStop(.3);return;}const ok=await songPlay(true);if(ok){SONG.testT=1;$('#songTest').textContent='■ Stop';}});
+ $('#songDel').addEventListener('click',async()=>{songStop(.2);try{await songPut(null);}catch(e){}SONG.has=false;SONG.name='';SONG.buf=null;songSaveCfg();songUI();toast('Crash song removed');});
+ songUI();}
+
 /* ===== jobs, money, paint shop, minimap, save ===== */
 let money=0;try{money=+(localStorage.getItem('cabin-money')||0)||0;}catch(e){}
 try{if(!localStorage.getItem('cabin-gift50k')){money+=50000;localStorage.setItem('cabin-gift50k','1');localStorage.setItem('cabin-money',String(money));setTimeout(()=>toast('💶 €50,000 has been added to your account!',4500),2500);}}catch(e){money+=50000;}
@@ -3237,7 +3289,7 @@ function knockOut(){if(CUT.on||walking||!P)return;initAudio();CUT.on=true;CUT.t=
  g.traverse(o=>{o.userData.noHit=true;});CUT.props=g;
  /* overlay, muffled sound */
  const o=$('#cut');o.hidden=false;o.style.background='rgba(0,0,0,1)';$('#flash').style.opacity=1;setTimeout(()=>$('#flash').style.opacity=0,120);
- if(AU.ctx){tone2(3100,3,'sine',.05);if(AU.master){CUT.vol=AU.master.gain.value;AU.master.gain.value=CUT.vol*.55;}}cutCap('…');scene.add(camera);}
+ if(AU.ctx){tone2(3100,3,'sine',.05);if(AU.master){CUT.vol=AU.master.gain.value;AU.master.gain.value=CUT.vol*.55;}}songPlay(false);cutCap('…');scene.add(camera);}
 function cutShot(n,text){if(CUT.shot!==n){CUT.shot=n;if(text)cutCap(text);}}
 function cutStep(dt){if(!CUT.on)return;CUT.t+=dt;const t=CUT.t,o=$('#cut'),rp=CUT.rp,F=CUT.f;st.v=0;
  /* the car: crashed pose until the crew straightens it (18–20.5 s) */
@@ -3271,7 +3323,7 @@ function cutStep(dt){if(!CUT.on)return;CUT.t+=dt;const t=CUT.t,o=$('#cut'),rp=CU
  else{/* high crane shot as the car is pulled straight */const s=t-18,ang=CUT.ry+1.3+s*.25;cam(posX+Math.sin(ang)*9,6.5-s*.5,posZ+Math.cos(ang)*9,posX,.6,posZ);}
  if(t>3.2&&t<20.5){const sh=t<6.5?.02:.012;camera.position.x+=Math.sin(t*7.3)*sh;camera.position.y+=Math.sin(t*9.1+1)*sh;camera.rotation.z+=Math.sin(t*2.3)*.012;}
  if(t>=CUT.dur)endCut();}
-function endCut(){if(!CUT.on)return;if(!CUT.done){CUT.t=20.6;cutStep(0);}CUT.on=false;canvas.style.filter='';if(CUT.props){scene.remove(CUT.props);disposeGroup(CUT.props);CUT.props=null;}CUT.lights=[];if(AU.ctx&&AU.master&&CUT.vol!=null){AU.master.gain.value=CUT.vol;CUT.vol=null;}
+function endCut(){if(!CUT.on)return;songStop(4);if(!CUT.done){CUT.t=20.6;cutStep(0);}CUT.on=false;canvas.style.filter='';if(CUT.props){scene.remove(CUT.props);disposeGroup(CUT.props);CUT.props=null;}CUT.lights=[];if(AU.ctx&&AU.master&&CUT.vol!=null){AU.master.gain.value=CUT.vol;CUT.vol=null;}
  posX=CUT.rp.x;posZ=CUT.rp.z;yawCar=CUT.rp.yaw;hp=60;st.v=0;spinRate=0;st.engine=false;st.hb=true;cruise=0;if(P)P.blk=0;setView(st.view||'driver');
  const o=$('#cut');o.hidden=true;o.style.background='rgba(0,0,0,1)';
  /* eyes open: two eyelids slide apart, blinking once */
