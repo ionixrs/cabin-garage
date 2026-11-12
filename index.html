@@ -154,7 +154,7 @@ html,body{overscroll-behavior:none}canvas#c{touch-action:none}
 @media (max-height:520px){.top{gap:6px}.top .btn,.tools .btn{padding:5px 7px;font-size:10.5px}.brand p{display:none}#hud{font-size:11px;padding:6px 9px;bottom:calc(118px + env(safe-area-inset-bottom,0px))}#mmCv{transform:scale(.72);transform-origin:top right}.readout b{font-size:18px}
  #ui.touch .hold{width:52px;height:52px}#ui.touch .hold.gas{height:70px;width:54px}#ui.touch .hold.brake{width:60px;height:52px}.pad .group{gap:4px;padding:5px}#psMeter{bottom:96px;transform:scale(.85);transform-origin:bottom right}}
 #rotHint{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(5,7,10,.86);padding:24px}#rotHint[hidden]{display:none}#rotHint .panel{padding:22px 24px;text-align:center;max-width:320px}#rotHint .rh-ic{font-size:44px;animation:rhSpin 1.6s ease-in-out infinite}@keyframes rhSpin{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(90deg)}}#rotHint p{margin:8px 0 14px;font:600 15px/1.4 var(--display)}
-#songPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(380px,calc(100vw - 32px));padding:16px 18px;font:500 14px/1.45 var(--body,system-ui)}#songPanel h3{margin:0 0 6px;font:700 18px var(--display,system-ui)}#songPanel .sp-hint{margin:0 0 12px;opacity:.8;font-size:13px}#songPanel .sp-file{display:inline-block;cursor:pointer}#songPanel .sp-name{margin:8px 0 10px;font-size:13px;opacity:.85;word-break:break-all}#songPanel .sp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}#songPanel .sp-row input[type=text],#songPanel select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:inherit}#songPanel .sp-row input[type=range]{flex:1;max-width:190px}#songPanel .sp-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}#songPanel [hidden]{display:none}#editPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(380px,calc(100vw - 32px));padding:16px 18px;font:500 14px/1.45 var(--body,system-ui)}#editPanel h3{margin:0 0 6px;font:700 18px var(--display,system-ui)}#editPanel .sp-hint{margin:0 0 12px;opacity:.8;font-size:13px}#editPanel .sp-file{display:inline-block;cursor:pointer}#editPanel .sp-name{margin:8px 0 10px;font-size:13px;opacity:.85;word-break:break-all}#editPanel .sp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}#editPanel .sp-row input[type=text],#editPanel select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:inherit}#editPanel .sp-row input[type=range]{flex:1;max-width:190px}#editPanel .sp-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}#editPanel [hidden]{display:none}#editPanel .ep-list{display:grid;gap:8px}#editPanel .ep-list .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:10px 12px;font-weight:700}#editPanel .ep-list small{font-weight:500;opacity:.75;font-size:12px;margin-top:2px}#tunePanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(380px,calc(100vw - 32px));padding:16px 18px;font:500 14px/1.45 var(--body,system-ui)}#tunePanel h3{margin:0 0 6px;font:700 18px var(--display,system-ui)}#tunePanel .sp-hint{margin:0 0 12px;opacity:.8;font-size:13px}#tunePanel .sp-file{display:inline-block;cursor:pointer}#tunePanel .sp-name{margin:8px 0 10px;font-size:13px;opacity:.85;word-break:break-all}#tunePanel .sp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}#tunePanel .sp-row input[type=text],#tunePanel select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:inherit}#tunePanel .sp-row input[type=range]{flex:1;max-width:190px}#tunePanel .sp-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}#tunePanel [hidden]{display:none}#tunePanel .ep-list{display:grid;gap:8px}#tunePanel .ep-list .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:10px 12px;font-weight:700}#tunePanel .ep-list small{font-weight:500;opacity:.75;font-size:12px;margin-top:2px}#tunePanel .ep-list .btn{position:relative;padding-right:118px}#tunePanel .tp{position:absolute;right:12px;top:50%;transform:translateY(-50%);font:700 12px/1 var(--display);color:var(--accent)}#tunePanel [aria-pressed=true]{border-color:var(--accent);background:rgba(61,139,255,.16)}#tunePanel .btn:disabled{opacity:.45}#hackBox{margin-top:10px}#hackLog{height:110px;overflow-y:auto;background:#05090a;border:1px solid #1d3a24;border-radius:8px;padding:8px;font:500 12px/1.45 ui-monospace,Menlo,monospace;color:#7dffa0}#hackLog .bad{color:#ff6b5b}#hackLog .ok{color:#b8ffcc}#hackBar{position:relative;height:22px;margin:10px 0;border-radius:6px;background:#10161a;border:1px solid #23303a;overflow:hidden}#hackZone{position:absolute;top:0;bottom:0;background:rgba(46,204,113,.55)}#hackMark{position:absolute;top:-2px;bottom:-2px;width:4px;margin-left:-2px;background:#fff;box-shadow:0 0 8px #fff}#spmPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(380px,calc(100vw - 32px));padding:16px 18px;font:500 14px/1.45 var(--body,system-ui)}#spmPanel h3{margin:0 0 6px;font:700 18px var(--display,system-ui)}#spmPanel .sp-hint{margin:0 0 12px;opacity:.8;font-size:13px}#spmPanel .sp-file{display:inline-block;cursor:pointer}#spmPanel .sp-name{margin:8px 0 10px;font-size:13px;opacity:.85;word-break:break-all}#spmPanel .sp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}#spmPanel .sp-row input[type=text],#spmPanel select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:inherit}#spmPanel .sp-row input[type=range]{flex:1;max-width:190px}#spmPanel .sp-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}#spmPanel [hidden]{display:none}
+#songPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(380px,calc(100vw - 32px));padding:16px 18px;font:500 14px/1.45 var(--body,system-ui)}#songPanel h3{margin:0 0 6px;font:700 18px var(--display,system-ui)}#songPanel .sp-hint{margin:0 0 12px;opacity:.8;font-size:13px}#songPanel .sp-file{display:inline-block;cursor:pointer}#songPanel .sp-name{margin:8px 0 10px;font-size:13px;opacity:.85;word-break:break-all}#songPanel .sp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}#songPanel .sp-row input[type=text],#songPanel select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:inherit}#songPanel .sp-row input[type=range]{flex:1;max-width:190px}#songPanel .sp-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}#songPanel [hidden]{display:none}#editPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(380px,calc(100vw - 32px));padding:16px 18px;font:500 14px/1.45 var(--body,system-ui)}#editPanel h3{margin:0 0 6px;font:700 18px var(--display,system-ui)}#editPanel .sp-hint{margin:0 0 12px;opacity:.8;font-size:13px}#editPanel .sp-file{display:inline-block;cursor:pointer}#editPanel .sp-name{margin:8px 0 10px;font-size:13px;opacity:.85;word-break:break-all}#editPanel .sp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}#editPanel .sp-row input[type=text],#editPanel select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:inherit}#editPanel .sp-row input[type=range]{flex:1;max-width:190px}#editPanel .sp-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}#editPanel [hidden]{display:none}#editPanel .ep-list{display:grid;gap:8px}#editPanel .ep-list .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:10px 12px;font-weight:700}#editPanel .ep-list small{font-weight:500;opacity:.75;font-size:12px;margin-top:2px}#tunePanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(380px,calc(100vw - 32px));padding:16px 18px;font:500 14px/1.45 var(--body,system-ui)}#tunePanel h3{margin:0 0 6px;font:700 18px var(--display,system-ui)}#tunePanel .sp-hint{margin:0 0 12px;opacity:.8;font-size:13px}#tunePanel .sp-file{display:inline-block;cursor:pointer}#tunePanel .sp-name{margin:8px 0 10px;font-size:13px;opacity:.85;word-break:break-all}#tunePanel .sp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}#tunePanel .sp-row input[type=text],#tunePanel select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:inherit}#tunePanel .sp-row input[type=range]{flex:1;max-width:190px}#tunePanel .sp-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}#tunePanel [hidden]{display:none}#tunePanel .ep-list{display:grid;gap:8px}#tunePanel .ep-list .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:10px 12px;font-weight:700}#tunePanel .ep-list small{font-weight:500;opacity:.75;font-size:12px;margin-top:2px}#tunePanel .ep-list .btn{position:relative;padding-right:118px}#tunePanel .tp{position:absolute;right:12px;top:50%;transform:translateY(-50%);font:700 12px/1 var(--display);color:var(--accent)}#tunePanel [aria-pressed=true]{border-color:var(--accent);background:rgba(61,139,255,.16)}#tunePanel .btn:disabled{opacity:.45}#hackBox{margin-top:10px}#hsBox{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}#hsBox h4{margin:0 0 4px;font:700 15px var(--display,system-ui)}#hsBox .sp-row b{min-width:92px;text-align:right;font:700 12px var(--display);color:var(--accent)}#hsBox .hs-chk{display:flex;align-items:center;gap:8px;margin:7px 0;cursor:pointer}#hsBox .hs-chk small{opacity:.7;font-size:12px}#tunePanel{max-height:calc(100dvh - 24px);overflow-y:auto}#nosChip{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font:700 10px/1 var(--display);letter-spacing:.08em;padding:3px 7px;border-radius:6px;border:1px solid #3aa0ff;color:#8cc8ff;background:rgba(10,30,60,.7);white-space:nowrap;cursor:pointer;z-index:2}#nosChip[hidden]{display:none}#nosChip.on{background:#1e6fff;color:#fff;box-shadow:0 0 12px #3aa0ff}#nosChip.cd{opacity:.6;border-color:var(--line);color:var(--dim)}#hackLog{height:110px;overflow-y:auto;background:#05090a;border:1px solid #1d3a24;border-radius:8px;padding:8px;font:500 12px/1.45 ui-monospace,Menlo,monospace;color:#7dffa0}#hackLog .bad{color:#ff6b5b}#hackLog .ok{color:#b8ffcc}#hackBar{position:relative;height:22px;margin:10px 0;border-radius:6px;background:#10161a;border:1px solid #23303a;overflow:hidden}#hackZone{position:absolute;top:0;bottom:0;background:rgba(46,204,113,.55)}#hackMark{position:absolute;top:-2px;bottom:-2px;width:4px;margin-left:-2px;background:#fff;box-shadow:0 0 8px #fff}#spmPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(380px,calc(100vw - 32px));padding:16px 18px;font:500 14px/1.45 var(--body,system-ui)}#spmPanel h3{margin:0 0 6px;font:700 18px var(--display,system-ui)}#spmPanel .sp-hint{margin:0 0 12px;opacity:.8;font-size:13px}#spmPanel .sp-file{display:inline-block;cursor:pointer}#spmPanel .sp-name{margin:8px 0 10px;font-size:13px;opacity:.85;word-break:break-all}#spmPanel .sp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}#spmPanel .sp-row input[type=text],#spmPanel select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:inherit}#spmPanel .sp-row input[type=range]{flex:1;max-width:190px}#spmPanel .sp-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}#spmPanel [hidden]{display:none}
 #lapBox{position:absolute;left:16px;top:calc(var(--topH,120px) + 14px);padding:10px 14px;z-index:6;pointer-events:none!important;font:600 14px/1.5 var(--display);letter-spacing:.02em;font-variant-numeric:tabular-nums}#lapBox[hidden]{display:none}#lapBox b{font-size:15px}
 #eaPill{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--topH,120px) + 112px);padding:10px 18px;z-index:7;pointer-events:none!important;font:700 15px/1.2 var(--display);letter-spacing:.03em;color:#fff}#eaPill[hidden]{display:none}#eaPill.s1{background:#c77700;border-color:#c77700;animation:eaPulse .9s infinite}#eaPill.s2,#eaPill.s3{background:#c8102e;border-color:#c8102e}#eaPill.s2{animation:eaPulse .6s infinite}@keyframes eaPulse{50%{opacity:.55}}
 #blitzPill{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--topH,120px) + 64px);display:flex;align-items:center;gap:10px;padding:8px 16px;z-index:6;pointer-events:none!important;border-color:#f2c200}#blitzPill[hidden]{display:none}#blitzPill b{font:800 18px/1 var(--display)}#blitzPill small{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;border:4px solid #d0141a;background:#fff;color:#111;font:800 12px/1 var(--display)}#blitzPill.over{background:rgba(200,16,46,.85);border-color:#ff5a6e}
@@ -258,6 +258,19 @@ html,body{overscroll-behavior:none}canvas#c{touch-action:none}
   <button class="btn" data-tst="3">💻 Stage 3 · Hack the ECU<small>Remove the speed limiter: around 400 km/h. Runs hot at full speed.</small><span class="tp"></span></button>
  </div>
  <div id="hackBox" hidden><div id="hackLog"></div><div id="hackBar"><div id="hackZone"></div><div id="hackMark"></div></div><div class="sp-btns"><button class="btn" id="hackCancel">Unplug</button><button class="btn call" id="hackBtn">BYPASS (Space)</button></div></div>
+ <div id="hsBox" hidden>
+  <h4>💻 ECU settings</h4>
+  <p class="sp-hint" style="margin-bottom:6px">Only on the hacked ECU. Changes apply at once.</p>
+  <div class="sp-row"><label for="hsBar">Boost pressure</label><input type="range" id="hsBar" min="1" max="2.2" step="0.1"><b id="hsBarV"></b></div>
+  <div class="sp-row"><label for="hsGear">Gearing</label><select id="hsGear"><option value="short">Short · quicker 0–200</option><option value="normal">Normal</option><option value="long">Long · higher top speed</option></select></div>
+  <div class="sp-row"><label for="hsLim">Speed limiter</label><select id="hsLim"><option value="0">Off</option><option value="250">250 km/h</option><option value="300">300 km/h</option><option value="350">350 km/h</option><option value="400">400 km/h</option></select></div>
+  <div class="sp-row"><label for="hsCool">Cooling</label><select id="hsCool"><option value="stock">Stock radiator</option><option value="race">Race radiator · no overheating</option></select></div>
+  <label class="hs-chk"><input type="checkbox" id="hsLaunch"> Launch control <small>hold BRAKE + GAS, let go of BRAKE</small></label>
+  <label class="hs-chk"><input type="checkbox" id="hsNos"> Nitro <small>Tab or tap NOS · 5 s, recharges in 20 s</small></label>
+  <label class="hs-chk"><input type="checkbox" id="hsPops"> Pops &amp; bangs <small>crackle when you lift off</small></label>
+  <label class="hs-chk"><input type="checkbox" id="hsRev"> Anti-lag <small>keeps boost up between shifts, faster pickup</small></label>
+  <div class="sp-btns"><button class="btn" id="hsReset">Reset ECU settings</button></div>
+ </div>
  <p class="sp-hint" id="tuneMoney"></p>
  <div class="sp-btns"><button class="btn" id="tuneClose">Done</button></div>
 </div>
@@ -311,7 +324,7 @@ html,body{overscroll-behavior:none}canvas#c{touch-action:none}
       <div class="seg" id="gears" role="group" aria-label="Gear">
         <button class="btn" data-gear="P">P</button><button class="btn" data-gear="R">R</button><button class="btn" data-gear="N">N</button><button class="btn" data-gear="D">D</button>
       </div>
-      <div class="readout"><span id="sysB"><i id="bABS">ABS</i><i id="bESC">ESC</i><i id="bTCS">TCS</i></span><span id="lkaBadge" title="Lane assist">LANE</span><b id="spd">0</b><small>KM/H</small></div>
+      <div class="readout"><span id="sysB"><i id="bABS">ABS</i><i id="bESC">ESC</i><i id="bTCS">TCS</i></span><span id="lkaBadge" title="Lane assist">LANE</span><button id="nosChip" hidden aria-label="Nitro">NOS</button><b id="spd">0</b><small>KM/H</small></div>
       <button class="hold sm2" id="hbkBtn">HAND<br>BRAKE</button>
       <button class="hold brake" id="brakeBtn">BRAKE</button>
       <button class="hold gas" id="gasBtn">GAS</button>
@@ -3535,17 +3548,18 @@ var TUNE={map:{},hot:0,heatT:0};try{TUNE.map=JSON.parse(localStorage.getItem('ca
 var TUNE_ST=[{n:'Stock',d:'Factory settings.',pow:1,top:1,price:0},{n:'Stage 1 · Sport remap',d:'Remapped fuel and ignition. A bit more punch.',pow:1.12,top:1.05,price:0},
  {n:'Stage 2 · Turbo & exhaust',d:'Bigger turbo, freer exhaust, louder. Much faster.',pow:1.28,top:1.12,price:0},{n:'Stage 3 · Hacked ECU',d:'Speed limiter removed, maximum boost. Around 400 km/h. Runs hot.',pow:1.55,top:0,price:0}];
 function tuneStage(id){return TUNE.map[id]||0;}
-function tunePow(c){return TUNE_ST[tuneStage(c.id)].pow;}
+function tunePow(c){const s=tuneStage(c.id);return TUNE_ST[s].pow*(s===3?hsPowK(hsGet(c.id)):1);}
 /* steady-state top speed of the physics (Comfort mode) for given accel, vmax and drag factor */
 function tuneTop(A,vmaxKmh,d){const V=vmaxKmh/3.6;let lo=0,hi=V;for(let i=0;i<50;i++){const v=(lo+hi)/2;if(A*(1-(v/V)*(v/V))>.12+.00045*d*v*v)lo=v;else hi=v;}return lo*3.6;}
 function tuneApply(c){if(!c)return;if(!c._b)c._b={vmax:c.vmax,accel:c.accel,dragK:c.dragK||1};const b=c._b,s=tuneStage(c.id),S=TUNE_ST[s];
  if(!s){c.vmax=b.vmax;c.accel=b.accel;c.dragK=b.dragK;return;}
- const A=b.accel*S.pow,top0=tuneTop(b.accel,b.vmax,b.dragK),T=s===3?clamp(Math.max(400,top0*1.25),400,430):top0*S.top;
+ const H=s===3?hsGet(c.id):null,G=H?((HS_GEAR&&HS_GEAR[H.gear])||{a:1,t:1}):null,pk=H?hsPowK(H):1;
+ const A=b.accel*S.pow*pk*(G?G.a:1)*(H&&H.rev?1.04:1),top0=tuneTop(b.accel,b.vmax,b.dragK),T=s===3?Math.min(480,clamp(Math.max(400,top0*1.25),400,430)*G.t*(1+(pk-1)*.35)):top0*S.top;
  const V=T*1.15,t=T/3.6,Vm=V/3.6,d=(A*(1-(t/Vm)*(t/Vm))-.12)/(.00045*t*t);c.accel=A;c.vmax=V;c.dragK=Math.max(.05,d);}
 function tuneTopNow(c){return Math.round(tuneTop(c.accel,c.vmax,c.dragK||1));}
 function tuneUI(){const p=$('#tunePanel');if(!p||p.hidden||!car)return;const s=tuneStage(car.id);
  $('#tuneCar').textContent=car.name;$('#tuneStats').textContent=`${psmMax(car)} PS · top speed about ${tuneTopNow(car)} km/h`;$('#tuneMoney').textContent='All upgrades are free.';
- p.querySelectorAll('[data-tst]').forEach(b=>{const k=+b.dataset.tst,S=TUNE_ST[k];b.setAttribute('aria-pressed',String(k===s));b.querySelector('.tp').textContent=k===s?'Installed':k===3?(s<2?'Needs Stage 2':'Hack · free'):k<s?'Downgrade · free':'Install · free';b.disabled=k===3&&s<2&&s!==3;});}
+ p.querySelectorAll('[data-tst]').forEach(b=>{const k=+b.dataset.tst,S=TUNE_ST[k];b.setAttribute('aria-pressed',String(k===s));b.querySelector('.tp').textContent=k===s?'Installed':k===3?(s<2?'Needs Stage 2':'Hack · free'):k<s?'Downgrade · free':'Install · free';b.disabled=k===3&&s<2&&s!==3;});hsUI();}
 function tuneSet(k){const id=car.id;TUNE.map[id]=k;try{localStorage.setItem('cabin-tune',JSON.stringify(TUNE.map));}catch(e){}tuneApply(car);if(typeof PSM!=='undefined')PSM.key=null;tuneUI();}
 function tuneBuy(k){if(!car)return;if(Math.abs(st.v)>1){toast('Stop the car first');return;}const s=tuneStage(car.id);if(k===s)return;
  if(k===3){hackOpen();return;}
@@ -3566,14 +3580,61 @@ function hackHit(){if(!HK.on)return;const ok=HK.pos>=HK.z0&&HK.pos<=HK.z1;
   hackZone();}
  else{HK.miss++;hackLog('> Checksum error ('+HK.miss+'/3)','bad');if(AU.ctx)tone2(180,.15,'square',.05);if(HK.miss>=3){HK.on=false;hackLog('> ECU locked itself. Nothing was changed. Try again.','bad');setTimeout(()=>{$('#hackBox').hidden=true;},2000);}}}
 /* a hacked engine runs hot when you sit at very high speed */
-function tuneUpdate(dt){if(!car||!st.engine||walking||EDIT.on)return;if(tuneStage(car.id)!==3)return;const kmh=Math.abs(st.v*3.6);
- if(kmh>350){TUNE.hot+=dt;if(TUNE.hot>25){TUNE.hot=0;if(!st.faults.heat&&Math.random()<.3)triggerFault('heat');}}else TUNE.hot=Math.max(0,TUNE.hot-dt*.5);}
+function tuneUpdate(dt){hsUpdate(dt);if(!car||!st.engine||walking||EDIT.on)return;if(tuneStage(car.id)!==3)return;const kmh=Math.abs(st.v*3.6);
+ const H=hsGet(car.id);if(H.cool==='race'){TUNE.hot=0;return;}const hk=Math.pow(hsPowK(H),3);
+ if(kmh>(H.bar>1.8?300:350)){TUNE.hot+=dt*hk;if(TUNE.hot>25){TUNE.hot=0;if(!st.faults.heat&&Math.random()<.3)triggerFault('heat');}}else TUNE.hot=Math.max(0,TUNE.hot-dt*.5);}
 {const p=$('#tunePanel');p.addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Space'&&HK.on){e.preventDefault();hackHit();}});p.addEventListener('keyup',e=>e.stopPropagation());
  $('#tuneBtn').addEventListener('click',()=>{$('#moreMenu').hidden=true;$('#moreBtn').setAttribute('aria-expanded',false);if(walking){toast('Get in the car first');return;}p.hidden=false;$('#hackBox').hidden=true;tuneUI();});
  $('#tuneClose').addEventListener('click',()=>{p.hidden=true;HK.on=false;});
  p.addEventListener('click',e=>{const b=e.target.closest('[data-tst]');if(b)tuneBuy(+b.dataset.tst);});
  $('#hackBtn').addEventListener('click',hackHit);
  $('#hackCancel').addEventListener('click',()=>{HK.on=false;$('#hackBox').hidden=true;});}
+
+/* ===== ECU hack settings (Stage 3 only): boost, gearing, limiter, cooling, launch, nitro, pops, anti-lag ===== */
+var HS_DEF={bar:1.4,gear:'normal',lim:0,cool:'stock',launch:true,nos:true,pops:true,rev:false};
+var HS_GEAR={short:{a:1.18,t:.86},normal:{a:1,t:1},long:{a:.9,t:1.1}};
+var HS={map:{},nosT:0,nosCD:0,lchT:0,armed:false,prevThr:0,popT:0,limT:0,chipT:0};
+try{HS.map=JSON.parse(localStorage.getItem('cabin-tune-hs')||'{}');}catch(e){}
+function hsGet(id){return Object.assign({bar:1.4,gear:"normal",lim:0,cool:"stock"},HS_DEF||{},(HS&&HS.map[id])||{});}
+function hsPowK(H){return 1+(H.bar-1.4)*.5;}
+function hsOn(){return car&&tuneStage(car.id)===3&&!walking&&!EDIT.on&&!(typeof CUT!=='undefined'&&CUT.on);}
+function hsK(){if(!hsOn())return 1;return (HS.nosT>0?1.6:1)*(HS.lchT>0?1.6:1);}
+function hsLimit(a){if(!hsOn()||a<=0)return a;const L=hsGet(car.id).lim;if(!L)return a;const k=st.v*3.6;
+ if(k>L-4){const f=clamp((L-k)/4,0,1);if(f<1&&HS.limT<=0){HS.limT=.12;if(AU.ctx)tone2(90,.06,'square',.03);}return a*f;}return a;}
+function hsSave(id,H){HS.map[id]=H;try{localStorage.setItem('cabin-tune-hs',JSON.stringify(HS.map));}catch(e){}tuneApply(car);if(typeof PSM!=='undefined')PSM.key=null;
+ $('#tuneStats').textContent=`${psmMax(car)} PS · top speed about ${tuneTopNow(car)} km/h`;}
+function hsUI(){const box=$('#hsBox');if(!box||!car)return;const on=tuneStage(car.id)===3;box.hidden=!on;if(!on)return;const H=hsGet(car.id),pk=hsPowK(H);
+ $('#hsBar').value=H.bar;$('#hsBarV').textContent=H.bar.toFixed(1)+' bar · '+(pk>=1?'+':'')+Math.round((pk-1)*100)+'%';
+ $('#hsGear').value=H.gear;$('#hsLim').value=String(H.lim);$('#hsCool').value=H.cool;
+ $('#hsLaunch').checked=H.launch;$('#hsNos').checked=H.nos;$('#hsPops').checked=H.pops;$('#hsRev').checked=H.rev;}
+function hsNos(){if(!hsOn()){return;}const H=hsGet(car.id);if(!H.nos){toast('Nitro is off. Turn it on in Tune & hack.');return;}if(!st.engine){toast('Start the engine first');return;}
+ if(HS.nosT>0)return;if(HS.nosCD>0){toast(`Nitro is refilling: ${Math.ceil(HS.nosCD)} s`);return;}
+ HS.nosT=5;HS.nosCD=20;if(AU.ctx){nburst(1.4,'bandpass',1400,.35);nburst(.5,'lowpass',300,.4);}sfx('ready');toast('🔥 NITRO!',1400);}
+function hsPops(n){for(let k=0;k<n;k++)sfx('pop',k*.065+Math.random()*.04);}
+function hsUpdate(dt){HS.nosCD=Math.max(0,HS.nosCD-(HS.nosT>0?0:dt));HS.nosT=Math.max(0,HS.nosT-dt);HS.lchT=Math.max(0,HS.lchT-dt);HS.limT=Math.max(0,HS.limT-dt);HS.popT=Math.max(0,HS.popT-dt);
+ const chip=$('#nosChip'),on=hsOn()&&hsGet(car.id).nos;
+ HS.chipT-=dt;if(HS.chipT<=0){HS.chipT=.2;chip.hidden=!on;if(on){chip.textContent=HS.nosT>0?'NOS '+Math.ceil(HS.nosT)+'s':HS.nosCD>0?'NOS '+Math.ceil(HS.nosCD)+'s':'NOS READY';chip.classList.toggle('on',HS.nosT>0);chip.classList.toggle('cd',HS.nosT<=0&&HS.nosCD>0);}}
+ if(!hsOn()||!st.engine){HS.armed=false;HS.prevThr=0;return;}
+ const H=hsGet(car.id),thr=A.thr||0,carLaunch=car.feat==='launch'&&st.feat;
+ /* launch control */
+ if(H.launch&&!carLaunch&&(st.gear==='D'||st.manual)){
+  if(Math.abs(st.v)<1&&keys.brake&&keys.gas){if(!HS.armed){HS.armed=true;toast('Launch control armed. Let go of BRAKE!');}st.rpm=Math.min(4800+Math.random()*500,st.rpm+dt*9000);if(H.pops&&HS.popT<=0&&Math.random()<dt*6){HS.popT=.25;hsPops(2);}}
+  else if(HS.armed&&!keys.brake&&keys.gas){HS.armed=false;HS.lchT=2.6;sfx('ready');toast('LAUNCH!',1200);if(H.pops)hsPops(4);}
+  else if(HS.armed&&!keys.gas)HS.armed=false;}
+ /* pops & bangs on lift-off */
+ if(H.pops&&HS.prevThr>.6&&thr<.25&&st.rpm>2600&&HS.popT<=0){HS.popT=.5;hsPops(5+Math.floor(Math.random()*5));}
+ /* anti-lag: little burbles while coasting at high rpm */
+ if(H.rev&&thr<.15&&st.rpm>3200&&Math.abs(st.v)>8&&HS.popT<=0&&Math.random()<dt*3){HS.popT=.18;hsPops(1);}
+ HS.prevThr=thr;}
+{const p=$('#tunePanel'),set=(k,v)=>{if(!car||tuneStage(car.id)!==3)return;const H=hsGet(car.id);H[k]=v;hsSave(car.id,H);hsUI();};
+ $('#hsBar').addEventListener('input',e=>set('bar',Math.round(+e.target.value*10)/10));
+ $('#hsGear').addEventListener('change',e=>set('gear',e.target.value));
+ $('#hsLim').addEventListener('change',e=>set('lim',+e.target.value));
+ $('#hsCool').addEventListener('change',e=>set('cool',e.target.value));
+ [['hsLaunch','launch'],['hsNos','nos'],['hsPops','pops'],['hsRev','rev']].forEach(([i,k])=>$('#'+i).addEventListener('change',e=>set(k,e.target.checked)));
+ $('#hsReset').addEventListener('click',()=>{if(!car)return;hsSave(car.id,Object.assign({},HS_DEF));hsUI();toast('ECU settings back to default.');});
+ $('#nosChip').addEventListener('click',e=>{e.preventDefault();hsNos();});
+ addEventListener('keydown',e=>{if(e.code!=='Tab'||e.repeat)return;if(e.target.closest&&e.target.closest('input,textarea,select,#tunePanel'))return;if(!hsOn())return;e.preventDefault();hsNos();});}
 
 if(car)tuneApply(car);
 
@@ -4125,7 +4186,7 @@ function stall(){st.engine=false;st.cranking=0;cruise=0;crashT=Math.max(crashT,.
 function manualPhysics(dt,thr,c,vmax,modeK){if(!st.manual)return 0;let a=0;const g=mGear,top=g>0?[.16,.3,.46,.63,.81,1][g-1]*vmax*1.05:8.3;
  clutchC+=((clutchIn()?0:1)-clutchC)*Math.min(1,dt*(clutchIn()?9:1.5));const cc=g===0?0:clutchC;
  const wr=g>0?Math.max(0,st.v)/top*c.redline*.95:g<0?Math.max(0,-st.v)/top*3000:0;
- if(st.engine&&g!==0&&!st.cranking){const room=Math.max(0,1-Math.pow(wr/c.redline,8)),bm=launchT>0?1.7:boostT>0?1.6:1;
+ if(st.engine&&g!==0&&!st.cranking){const room=Math.max(0,1-Math.pow(wr/c.redline,8)),bm=(launchT>0?1.7:boostT>0?1.6:1)*hsK();
   if(g>0)a+=thr*c.accel*modeK*bm*cc*room*(g===1?1.2:g===2?1.08:1);else a-=thr*3*cc*room;
   if(thr<.05&&cc>.5)a-=Math.sign(st.v)*(.6+Math.abs(st.v)*.025)*cc;
   if(cc>.5&&wr>c.redline*1.12){a-=Math.sign(st.v)*4;if(overRevT<=0){overRevT=3;sfx('grind');toast('Over-rev! That downshift was too low for this speed.',2600);}}
@@ -4293,9 +4354,9 @@ function frame(t){
  accBrk=0;if(cruise&&!(keys.gas&&!walking)){const vT=accTarget();thr=clamp((vT-st.v)*.5,0,1);if(st.v>vT+.5)accBrk=clamp((st.v-vT)*.7,0,3.5);}
  if(st.faults.throttle&&st.engine&&!walking)thr=Math.max(thr,.8);thrS+=(thr-thrS)*Math.min(1,dt*(thr>thrS?3.4:7));if(thrS<.01&&!thr)thrS=0;thr=thrS;
  if(st.hb&&thr&&st.engine&&(st.gear==='D'||st.gear==='R')){st.hb=false;toast('Parking brake released');sfx('motor');}
- if(!st.manual&&st.engine&&st.gear==='D')a+=thr*c.accel*modeK*(launchT>0?1.7:boostT>0?1.6:1)*(st.faults.oil?.6:1)*(st.faults.heat&&engTemp>110?.5:1)*(st.faults.tyre>=0?.8:1)*(st.faults.limp?.45:1)*bayPower()*(st.snow&&!c.awd?(st.tcs===false?.5:.65):1)*Math.max(0,1-Math.pow(Math.max(0,st.v)/vmax,2));
+ if(!st.manual&&st.engine&&st.gear==='D')a+=thr*c.accel*modeK*(launchT>0?1.7:boostT>0?1.6:1)*hsK()*(st.faults.oil?.6:1)*(st.faults.heat&&engTemp>110?.5:1)*(st.faults.tyre>=0?.8:1)*(st.faults.limp?.45:1)*bayPower()*(st.snow&&!c.awd?(st.tcs===false?.5:.65):1)*Math.max(0,1-Math.pow(Math.max(0,st.v)/vmax,2));
  if(!st.manual&&st.engine&&st.gear==='R')a-=thr*3*Math.max(0,1-(-st.v)/(30/3.6));
- a+=manualPhysics(dt,thr,c,vmax,modeK);
+ a+=manualPhysics(dt,thr,c,vmax,modeK);a=hsLimit(a);
  a-=Math.sign(st.v)*(.12+.00045*(c.dragK||1)*st.v*st.v);
  if(st.faults.limp&&st.v>16.7)a=Math.min(a,-.7);
  if(c.sound==='ev'&&st.engine&&!thr&&st.gear==='D')a-=Math.sign(st.v)*1.1;
