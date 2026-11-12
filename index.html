@@ -261,15 +261,19 @@ html,body{overscroll-behavior:none}canvas#c{touch-action:none}
  <div id="hsBox" hidden>
   <h4>💻 ECU settings</h4>
   <p class="sp-hint" style="margin-bottom:6px">Only on the hacked ECU. Changes apply at once.</p>
-  <div class="sp-row"><label for="hsBar">Boost pressure</label><input type="range" id="hsBar" min="1" max="2.2" step="0.1"><b id="hsBarV"></b></div>
-  <div class="sp-row"><label for="hsGear">Gearing</label><select id="hsGear"><option value="short">Short · quicker 0–200</option><option value="normal">Normal</option><option value="long">Long · higher top speed</option></select></div>
+  <div class="sp-row"><label for="hsBar">Boost pressure</label><input type="range" id="hsBar" min="1" max="3" step="0.1"><b id="hsBarV"></b></div>
+  <div class="sp-row"><label for="hsMap">Engine map</label><select id="hsMap"><option value="street">Street</option><option value="race">Race · +25% power</option><option value="insane">Insane · +60% power, very hot</option></select></div>
+  <div class="sp-row"><label for="hsGear">Gearing</label><select id="hsGear"><option value="short">Short · quicker 0–200</option><option value="normal">Normal</option><option value="long">Long · higher top speed</option><option value="vmax">Top-speed run · slow start, fastest</option></select></div>
   <div class="sp-row"><label for="hsLim">Speed limiter</label><select id="hsLim"><option value="0">Off</option><option value="250">250 km/h</option><option value="300">300 km/h</option><option value="350">350 km/h</option><option value="400">400 km/h</option></select></div>
   <div class="sp-row"><label for="hsCool">Cooling</label><select id="hsCool"><option value="stock">Stock radiator</option><option value="race">Race radiator · no overheating</option></select></div>
   <label class="hs-chk"><input type="checkbox" id="hsLaunch"> Launch control <small>hold BRAKE + GAS, let go of BRAKE</small></label>
-  <label class="hs-chk"><input type="checkbox" id="hsNos"> Nitro <small>Tab or tap NOS · 5 s, recharges in 20 s</small></label>
+  <label class="hs-chk"><input type="checkbox" id="hsNos"> Nitro <small>Tab or tap NOS</small></label>
+  <div class="sp-row"><label for="hsShot">Nitro bottle</label><select id="hsShot"><option value="std">Standard · 1.6× for 5 s</option><option value="big">Big shot · 2.2× for 8 s</option><option value="mega">Mega · 3× for 12 s</option></select></div>
+  <label class="hs-chk"><input type="checkbox" id="hsAero"> Low-drag aero kit <small>+8% top speed</small></label>
+  <label class="hs-chk"><input type="checkbox" id="hsLight"> Weight reduction <small>+15% acceleration</small></label>
   <label class="hs-chk"><input type="checkbox" id="hsPops"> Pops &amp; bangs <small>crackle when you lift off</small></label>
   <label class="hs-chk"><input type="checkbox" id="hsRev"> Anti-lag <small>keeps boost up between shifts, faster pickup</small></label>
-  <div class="sp-btns"><button class="btn" id="hsReset">Reset ECU settings</button></div>
+  <div class="sp-btns"><button class="btn call" id="hsMax">⚡ Max everything</button><button class="btn" id="hsReset">Reset</button></div>
  </div>
  <p class="sp-hint" id="tuneMoney"></p>
  <div class="sp-btns"><button class="btn" id="tuneClose">Done</button></div>
@@ -3554,7 +3558,7 @@ function tuneTop(A,vmaxKmh,d){const V=vmaxKmh/3.6;let lo=0,hi=V;for(let i=0;i<50
 function tuneApply(c){if(!c)return;if(!c._b)c._b={vmax:c.vmax,accel:c.accel,dragK:c.dragK||1};const b=c._b,s=tuneStage(c.id),S=TUNE_ST[s];
  if(!s){c.vmax=b.vmax;c.accel=b.accel;c.dragK=b.dragK;return;}
  const H=s===3?hsGet(c.id):null,G=H?((HS_GEAR&&HS_GEAR[H.gear])||{a:1,t:1}):null,pk=H?hsPowK(H):1;
- const A=b.accel*S.pow*pk*(G?G.a:1)*(H&&H.rev?1.04:1),top0=tuneTop(b.accel,b.vmax,b.dragK),T=s===3?Math.min(480,clamp(Math.max(400,top0*1.25),400,430)*G.t*(1+(pk-1)*.35)):top0*S.top;
+ const A=b.accel*S.pow*pk*(G?G.a:1)*(H&&H.rev?1.04:1)*(H&&H.light?1.15:1),top0=tuneTop(b.accel,b.vmax,b.dragK),T=s===3?Math.min(700,clamp(Math.max(400,top0*1.25),400,430)*G.t*(1+(pk-1)*.35)*(H.aero?1.08:1)):top0*S.top;
  const V=T*1.15,t=T/3.6,Vm=V/3.6,d=(A*(1-(t/Vm)*(t/Vm))-.12)/(.00045*t*t);c.accel=A;c.vmax=V;c.dragK=Math.max(.05,d);}
 function tuneTopNow(c){return Math.round(tuneTop(c.accel,c.vmax,c.dragK||1));}
 function tuneUI(){const p=$('#tunePanel');if(!p||p.hidden||!car)return;const s=tuneStage(car.id);
@@ -3582,7 +3586,7 @@ function hackHit(){if(!HK.on)return;const ok=HK.pos>=HK.z0&&HK.pos<=HK.z1;
  else{HK.miss++;hackLog('> Checksum error ('+HK.miss+'/'+HK.maxMiss+')','bad');if(AU.ctx)tone2(180,.15,'square',.05);if(HK.miss>=HK.maxMiss)hackFail('> ECU locked itself. Nothing was changed. Try again.');else hackZone();}}
 /* a hacked engine runs hot when you sit at very high speed */
 function tuneUpdate(dt){hsUpdate(dt);if(!car||!st.engine||walking||EDIT.on)return;if(tuneStage(car.id)!==3)return;const kmh=Math.abs(st.v*3.6);
- const H=hsGet(car.id);if(H.cool==='race'){TUNE.hot=0;return;}const hk=Math.pow(hsPowK(H),3);
+ const H=hsGet(car.id);if(H.cool==='race'){TUNE.hot=0;return;}const hk=Math.min(12,Math.pow(hsPowK(H),3));
  if(kmh>(H.bar>1.8?300:350)){TUNE.hot+=dt*hk;if(TUNE.hot>25){TUNE.hot=0;if(!st.faults.heat&&Math.random()<.3)triggerFault('heat');}}else TUNE.hot=Math.max(0,TUNE.hot-dt*.5);}
 {const p=$('#tunePanel');p.addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Space'&&HK.on){e.preventDefault();hackHit();}});p.addEventListener('keyup',e=>e.stopPropagation());
  $('#tuneBtn').addEventListener('click',()=>{$('#moreMenu').hidden=true;$('#moreBtn').setAttribute('aria-expanded',false);if(walking){toast('Get in the car first');return;}p.hidden=false;$('#hackBox').hidden=true;tuneUI();});
@@ -3592,14 +3596,15 @@ function tuneUpdate(dt){hsUpdate(dt);if(!car||!st.engine||walking||EDIT.on)retur
  $('#hackCancel').addEventListener('click',()=>{HK.on=false;$('#hackBox').hidden=true;});}
 
 /* ===== ECU hack settings (Stage 3 only): boost, gearing, limiter, cooling, launch, nitro, pops, anti-lag ===== */
-var HS_DEF={bar:1.4,gear:'normal',lim:0,cool:'stock',launch:true,nos:true,pops:true,rev:false};
-var HS_GEAR={short:{a:1.18,t:.86},normal:{a:1,t:1},long:{a:.9,t:1.1}};
+var HS_DEF={bar:1.4,gear:'normal',lim:0,cool:'stock',launch:true,nos:true,pops:true,rev:false,map:'street',shot:'std',aero:false,light:false};
+var HS_MAP={street:1,race:1.25,insane:1.6},HS_SHOT={std:{k:1.6,t:5,cd:20},big:{k:2.2,t:8,cd:30},mega:{k:3,t:12,cd:45}};
+var HS_GEAR={short:{a:1.18,t:.86},normal:{a:1,t:1},long:{a:.9,t:1.1},vmax:{a:.82,t:1.22}};
 var HS={map:{},nosT:0,nosCD:0,lchT:0,armed:false,prevThr:0,popT:0,limT:0,chipT:0};
 try{HS.map=JSON.parse(localStorage.getItem('cabin-tune-hs')||'{}');}catch(e){}
 function hsGet(id){return Object.assign({bar:1.4,gear:"normal",lim:0,cool:"stock"},HS_DEF||{},(HS&&HS.map[id])||{});}
-function hsPowK(H){return 1+(H.bar-1.4)*.5;}
+function hsPowK(H){return (1+(H.bar-1.4)*.5)*((HS_MAP&&HS_MAP[H.map])||1);}
 function hsOn(){return car&&tuneStage(car.id)===3&&!walking&&!EDIT.on&&!(typeof CUT!=='undefined'&&CUT.on);}
-function hsK(){if(!hsOn())return 1;return (HS.nosT>0?1.6:1)*(HS.lchT>0?1.6:1);}
+function hsK(){if(!hsOn())return 1;return (HS.nosT>0?(HS_SHOT[hsGet(car.id).shot]||HS_SHOT.std).k:1)*(HS.lchT>0?1.6:1);}
 function hsLimit(a){if(!hsOn()||a<=0)return a;const L=hsGet(car.id).lim;if(!L)return a;const k=st.v*3.6;
  if(k>L-4){const f=clamp((L-k)/4,0,1);if(f<1&&HS.limT<=0){HS.limT=.12;if(AU.ctx)tone2(90,.06,'square',.03);}return a*f;}return a;}
 function hsSave(id,H){HS.map[id]=H;try{localStorage.setItem('cabin-tune-hs',JSON.stringify(HS.map));}catch(e){}tuneApply(car);if(typeof PSM!=='undefined')PSM.key=null;
@@ -3607,10 +3612,10 @@ function hsSave(id,H){HS.map[id]=H;try{localStorage.setItem('cabin-tune-hs',JSON
 function hsUI(){const box=$('#hsBox');if(!box||!car)return;const on=tuneStage(car.id)===3;box.hidden=!on;if(!on)return;const H=hsGet(car.id),pk=hsPowK(H);
  $('#hsBar').value=H.bar;$('#hsBarV').textContent=H.bar.toFixed(1)+' bar · '+(pk>=1?'+':'')+Math.round((pk-1)*100)+'%';
  $('#hsGear').value=H.gear;$('#hsLim').value=String(H.lim);$('#hsCool').value=H.cool;
- $('#hsLaunch').checked=H.launch;$('#hsNos').checked=H.nos;$('#hsPops').checked=H.pops;$('#hsRev').checked=H.rev;}
+ $('#hsMap').value=H.map;$('#hsShot').value=H.shot;$('#hsAero').checked=H.aero;$('#hsLight').checked=H.light;$('#hsLaunch').checked=H.launch;$('#hsNos').checked=H.nos;$('#hsPops').checked=H.pops;$('#hsRev').checked=H.rev;}
 function hsNos(){if(!hsOn()){return;}const H=hsGet(car.id);if(!H.nos){toast('Nitro is off. Turn it on in Tune & hack.');return;}if(!st.engine){toast('Start the engine first');return;}
  if(HS.nosT>0)return;if(HS.nosCD>0){toast(`Nitro is refilling: ${Math.ceil(HS.nosCD)} s`);return;}
- HS.nosT=5;HS.nosCD=20;if(AU.ctx){nburst(1.4,'bandpass',1400,.35);nburst(.5,'lowpass',300,.4);}sfx('ready');toast('🔥 NITRO!',1400);}
+ {const N=HS_SHOT[H.shot]||HS_SHOT.std;HS.nosT=N.t;HS.nosCD=N.cd;}if(AU.ctx){nburst(1.4,'bandpass',1400,.35);nburst(.5,'lowpass',300,.4);}sfx('ready');toast('🔥 NITRO!',1400);}
 function hsPops(n){for(let k=0;k<n;k++)sfx('pop',k*.065+Math.random()*.04);}
 function hsUpdate(dt){HS.nosCD=Math.max(0,HS.nosCD-(HS.nosT>0?0:dt));HS.nosT=Math.max(0,HS.nosT-dt);HS.lchT=Math.max(0,HS.lchT-dt);HS.limT=Math.max(0,HS.limT-dt);HS.popT=Math.max(0,HS.popT-dt);
  const chip=$('#nosChip'),on=hsOn()&&hsGet(car.id).nos;
@@ -3632,7 +3637,9 @@ function hsUpdate(dt){HS.nosCD=Math.max(0,HS.nosCD-(HS.nosT>0?0:dt));HS.nosT=Mat
  $('#hsGear').addEventListener('change',e=>set('gear',e.target.value));
  $('#hsLim').addEventListener('change',e=>set('lim',+e.target.value));
  $('#hsCool').addEventListener('change',e=>set('cool',e.target.value));
- [['hsLaunch','launch'],['hsNos','nos'],['hsPops','pops'],['hsRev','rev']].forEach(([i,k])=>$('#'+i).addEventListener('change',e=>set(k,e.target.checked)));
+ [['hsLaunch','launch'],['hsNos','nos'],['hsPops','pops'],['hsRev','rev'],['hsAero','aero'],['hsLight','light']].forEach(([i,k])=>$('#'+i).addEventListener('change',e=>set(k,e.target.checked)));
+ $('#hsMap').addEventListener('change',e=>set('map',e.target.value));$('#hsShot').addEventListener('change',e=>set('shot',e.target.value));
+ $('#hsMax').addEventListener('click',()=>{if(!car||tuneStage(car.id)!==3)return;hsSave(car.id,Object.assign({},HS_DEF,{bar:3,map:'insane',gear:'vmax',cool:'race',shot:'mega',aero:true,light:true,rev:true}));hsUI();toast('⚡ Everything maxed. Top speed about '+tuneTopNow(car)+' km/h. Hold on.',3600);});
  $('#hsReset').addEventListener('click',()=>{if(!car)return;hsSave(car.id,Object.assign({},HS_DEF));hsUI();toast('ECU settings back to default.');});
  $('#nosChip').addEventListener('click',e=>{e.preventDefault();hsNos();});
  addEventListener('keydown',e=>{if(e.code!=='Tab'||e.repeat)return;if(e.target.closest&&e.target.closest('input,textarea,select,#tunePanel'))return;if(!hsOn())return;e.preventDefault();hsNos();});}
