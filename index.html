@@ -3532,8 +3532,8 @@ function tiltUpdate(){if(!TILT.on||!TILT.ok||walking||(typeof ptr!=='undefined'&
 
 /* ===== tuning: stages 1–2 from the shop, stage 3 by hacking the ECU (limiter off, ~400 km/h) ===== */
 var TUNE={map:{},hot:0,heatT:0};try{TUNE.map=JSON.parse(localStorage.getItem('cabin-tune')||'{}');}catch(e){}
-var TUNE_ST=[{n:'Stock',d:'Factory settings.',pow:1,top:1,price:0},{n:'Stage 1 · Sport remap',d:'Remapped fuel and ignition. A bit more punch.',pow:1.12,top:1.05,price:4000},
- {n:'Stage 2 · Turbo & exhaust',d:'Bigger turbo, freer exhaust, louder. Much faster.',pow:1.28,top:1.12,price:12000},{n:'Stage 3 · Hacked ECU',d:'Speed limiter removed, maximum boost. Around 400 km/h. Runs hot.',pow:1.55,top:0,price:25000}];
+var TUNE_ST=[{n:'Stock',d:'Factory settings.',pow:1,top:1,price:0},{n:'Stage 1 · Sport remap',d:'Remapped fuel and ignition. A bit more punch.',pow:1.12,top:1.05,price:0},
+ {n:'Stage 2 · Turbo & exhaust',d:'Bigger turbo, freer exhaust, louder. Much faster.',pow:1.28,top:1.12,price:0},{n:'Stage 3 · Hacked ECU',d:'Speed limiter removed, maximum boost. Around 400 km/h. Runs hot.',pow:1.55,top:0,price:0}];
 function tuneStage(id){return TUNE.map[id]||0;}
 function tunePow(c){return TUNE_ST[tuneStage(c.id)].pow;}
 /* steady-state top speed of the physics (Comfort mode) for given accel, vmax and drag factor */
@@ -3544,8 +3544,8 @@ function tuneApply(c){if(!c)return;if(!c._b)c._b={vmax:c.vmax,accel:c.accel,drag
  const V=T*1.15,t=T/3.6,Vm=V/3.6,d=(A*(1-(t/Vm)*(t/Vm))-.12)/(.00045*t*t);c.accel=A;c.vmax=V;c.dragK=Math.max(.05,d);}
 function tuneTopNow(c){return Math.round(tuneTop(c.accel,c.vmax,c.dragK||1));}
 function tuneUI(){const p=$('#tunePanel');if(!p||p.hidden||!car)return;const s=tuneStage(car.id);
- $('#tuneCar').textContent=car.name;$('#tuneStats').textContent=`${psmMax(car)} PS · top speed about ${tuneTopNow(car)} km/h`;$('#tuneMoney').textContent='Your money: €'+money.toLocaleString('de-DE');
- p.querySelectorAll('[data-tst]').forEach(b=>{const k=+b.dataset.tst,S=TUNE_ST[k];b.setAttribute('aria-pressed',String(k===s));b.querySelector('.tp').textContent=k===s?'Installed':k===3?(s<2?'Needs Stage 2':'Hack · €'+S.price.toLocaleString('de-DE')):k<s?'Downgrade · free':'€'+S.price.toLocaleString('de-DE');b.disabled=k===3&&s<2&&s!==3;});}
+ $('#tuneCar').textContent=car.name;$('#tuneStats').textContent=`${psmMax(car)} PS · top speed about ${tuneTopNow(car)} km/h`;$('#tuneMoney').textContent='All upgrades are free.';
+ p.querySelectorAll('[data-tst]').forEach(b=>{const k=+b.dataset.tst,S=TUNE_ST[k];b.setAttribute('aria-pressed',String(k===s));b.querySelector('.tp').textContent=k===s?'Installed':k===3?(s<2?'Needs Stage 2':'Hack · free'):k<s?'Downgrade · free':'Install · free';b.disabled=k===3&&s<2&&s!==3;});}
 function tuneSet(k){const id=car.id;TUNE.map[id]=k;try{localStorage.setItem('cabin-tune',JSON.stringify(TUNE.map));}catch(e){}tuneApply(car);if(typeof PSM!=='undefined')PSM.key=null;tuneUI();}
 function tuneBuy(k){if(!car)return;if(Math.abs(st.v)>1){toast('Stop the car first');return;}const s=tuneStage(car.id);if(k===s)return;
  if(k===3){hackOpen();return;}
