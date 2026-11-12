@@ -238,7 +238,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div id="editPanel" class="panel" hidden role="dialog" aria-label="Car edit">
  <h3>🎬 Car edit</h3>
  <p class="sp-hint">A music-video style showcase of your car on the Autobahn, about a minute long. Pick a style.</p>
- <div class="ep-list"><button class="btn" data-style="golden">🌅 Golden hour<small>Warm evening light, speed to 300 km/h</small></button><button class="btn" data-style="night">🌃 Night run<small>Headlights, streetlights and stars</small></button><button class="btn" data-style="drift">💨 Drift edit<small>Smoky drifts across the lanes</small></button></div>
+ <div class="ep-list"><button class="btn" data-style="golden">🌅 Golden hour<small>Warm evening light, speed to 300 km/h</small></button><button class="btn" data-style="night">🌃 Night run<small>Headlights, streetlights and stars</small></button><button class="btn" data-style="crash">💥 Truck crash<small>A lorry pulls out, you fly, the emergency teams close the road</small></button><button class="btn" data-style="drift">💨 Drift edit<small>Smoky drifts across the lanes</small></button></div>
  <div class="sp-btns"><button class="btn" id="editClose">Cancel</button></div>
 </div>
 <div id="spmPanel" class="panel" hidden role="dialog" aria-label="Speed music">
@@ -3238,10 +3238,80 @@ function ntUpdate(dt){if(NTK.fly){ntFly(dt);return;}
  if(along>400||along<-2200||CUT.on){ntRemove();return;}
  if(!walking&&Math.abs(lat)<1.28+.9&&along>-8.2-2.4&&along<8.2+2.4)ntHit(Math.round(kmh));}
 
+/* ===== truck-crash edit: a lorry pulls onto the lane, you hit it and fly, the driver calls 911, the emergency teams close the road ===== */
+const EDIT_XSEQ=[['est',4],['head',4],['chase',4],['gaugeA',4],['hood',4],['xmerge',6],['ximpact',4],['xfly',6],['xland',4],['xstop',4],['xcall',6],['xsiren',6],['xteams',8],['xclose',6],['xout',6]];
+function editCrashInit(){const g=new THREE.Group();scene.add(g);EDIT.cg=g;const tr=ntModel();tr.visible=false;g.add(tr);
+ const amb=new THREE.MeshBasicMaterial({color:0xffa010,toneMapped:false}),hz=[];for(const s of[-1,1]){const m=new THREE.Mesh(new THREE.SphereGeometry(.12,10,8),amb);m.position.set(s*1.05,1.25,8.06);tr.add(m);m.visible=false;hz.push(m);}
+ const hl=new THREE.PointLight(0xffa010,0,14);hl.position.set(0,1.4,9);tr.add(hl);
+ EDIT.cr={truck:tr,haz:hz,hazL:hl,impact:null,fly:null,td:0,ts:4.2,ty:0,tv:17,built:false,sir:0};}
+function editCrashBuild(){const C=EDIT.cr,g=EDIT.cg,imp=C.impact.d,F=C.F;C.built=true;
+ const pol=buildService('police'),amb=ambModel(),fire=buildService('fire');[pol,amb,fire].forEach(v=>{v.visible=false;v.rotation.y=EDIT.yaw;g.add(v);});
+ C.veh=[{g:pol,from:imp-190,to:imp-16,s:0,id:'xsiren',a:.05,b:.8},{g:amb,from:imp-230,to:imp+18,s:-4.1,id:'xteams',a:0,b:.6},{g:fire,from:imp-260,to:imp-34,s:0,id:'xteams',a:.25,b:.95}];
+ C.lights=[new THREE.PointLight(0x2a5bff,0,30),new THREE.PointLight(0xff2a2a,0,26),new THREE.PointLight(0xff2020,0,28)];C.lights.forEach(l=>g.add(l));
+ /* the truck driver, in a hi-vis vest, with a phone */
+ const d=cutWalker(g,0,0,0x2f4f2f);d.visible=false;const v=new THREE.Mesh(new THREE.BoxGeometry(.52,.4,.3),new THREE.MeshStandardMaterial({color:0xff8a1a,roughness:.6}));v.position.y=1.22;d.add(v);
+ const ph=new THREE.Mesh(new THREE.BoxGeometry(.05,.11,.02),std(0x111111,.3));ph.position.set(.17,1.66,.05);ph.visible=false;d.add(ph);const scr=new THREE.Mesh(new THREE.PlaneGeometry(.04,.08),new THREE.MeshBasicMaterial({color:0x6ad0ff,toneMapped:false}));scr.position.set(0,0,.012);ph.add(scr);
+ C.drv=d;C.phone=ph;
+ /* road closure: a row of cones across both lanes, flares, a closed sign */
+ C.cones=[];for(let k=0;k<11;k++){const c=coneModel(),p=F(imp-58,-6.3+k*1.05,0);c.position.copy(p);c.visible=false;g.add(c);C.cones.push(c);}
+ C.flares=[];for(const s of[-3.2,1.2]){const p=F(imp-63,s,.12),m=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.25,8),new THREE.MeshBasicMaterial({color:0xff3010,toneMapped:false}));m.position.copy(p);m.rotation.z=1.3;m.visible=false;g.add(m);const l=new THREE.PointLight(0xff3a10,0,10);l.position.copy(p).setY(.45);g.add(l);C.flares.push({m,l});}
+ {const cv=mkcv(512,256),x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,512,256);x.strokeStyle='#d0141a';x.lineWidth=26;x.strokeRect(13,13,486,230);x.fillStyle='#d0141a';x.font='800 92px "Chakra Petch", Arial';x.textAlign='center';x.textBaseline='middle';x.fillText('A1',256,92);x.fillStyle='#111';x.font='800 60px "Chakra Petch", Arial';x.fillText('GESPERRT',256,180);
+  const sg=new THREE.Group(),p=F(imp-61,-1,0);sg.position.copy(p);sg.rotation.y=EDIT.yaw;g.add(sg);const b=new THREE.Mesh(new THREE.PlaneGeometry(1.6,.8),new THREE.MeshBasicMaterial({map:tex(cv),side:THREE.DoubleSide}));b.position.y=1.15;sg.add(b);
+  for(const s of[-.6,.6]){const l=new THREE.Mesh(new THREE.BoxGeometry(.05,.75,.05),std(0xd0141a,.5));l.position.set(s,.38,0);sg.add(l);}sg.visible=false;C.sign=sg;}
+ g.traverse(o=>{o.userData.noHit=true;});}
+function editCrashStep(dt,id,q,t){const C=EDIT.cr;if(!C)return;const {fx,fz,rx,rz}=EDIT,F=(d,s,y)=>new THREE.Vector3(EDIT.x0+fx*d+rx*s,y,EDIT.z0+fz*d+rz*s);C.F=F;
+ const S=EDIT.seq,W=k=>S.find(x=>x.id===k),sm=W('xmerge'),si=W('ximpact');const sme=x=>x*x*(3-2*x);
+ /* the lorry pulls out from the hard shoulder into your lane */
+ if(!C.impact&&t>=sm.t0){C.truck.visible=true;const qm=clamp((t-sm.t0)/(si.t0-sm.t0),0,1);C.td=EDIT.d+140+(10.2-140)*qm;C.ts=4.2*(1-sme(clamp(qm/.75,0,1)));C.ty=EDIT.yaw+(qm<.75?.12*Math.sin(Math.PI*qm/.75):0);
+  if(!C.horn&&qm>.82){C.horn=1;if(AU.ctx){tone2(340,.7,'sawtooth',.06);tone2(420,.7,'sawtooth',.05);}}}
+ /* impact */
+ if(!C.impact&&t>=si.t0){C.impact={d:EDIT.d};C.fly={d:EDIT.d,s:0,y:.1,vd:18,vs:4.6,vy:11,rx:0,ry:EDIT.yaw,rz:0,wx:-3.4,wy:1.3,wz:2.8,b:0,rest:false};C.tv=17;EDIT.v=0;
+  $('#flash').style.opacity=1;setTimeout(()=>$('#flash').style.opacity=0,160);
+  if(AU.ctx){tone2(38,1.8,'sine',.6);nburst(1.2,'lowpass',380,.9);nburst(.6,'highpass',2500,.35);if(SPM.out)SPM.out.gain.setTargetAtTime(.02,AU.ctx.currentTime,.08);}
+  const N=120;C.deb=cutPts(N,.07,0xcfe6f2,{opacity:.85});EDIT.cg.add(C.deb);C.debV=new Float32Array(N*3);const a=C.deb.geometry.attributes.position,p0=F(EDIT.d+2.2,0,.8);
+  for(let i=0;i<N;i++){a.setXYZ(i,p0.x+(Math.random()-.5),p0.y+Math.random()*.5,p0.z+(Math.random()-.5));const sp=2+Math.random()*8,an=(Math.random()-.5)*2.6;C.debV[i*3]=(fx*Math.cos(an)+rx*Math.sin(an))*sp;C.debV[i*3+1]=1+Math.random()*5;C.debV[i*3+2]=(fz*Math.cos(an)+rz*Math.sin(an))*sp;}a.needsUpdate=true;
+  editCrashBuild();}
+ const slowK=(id==='ximpact'||id==='xfly')?.3:1,sd=dt*slowK;
+ /* the lorry keeps rolling, then brakes and puts the hazards on */
+ if(C.impact){if(['xland','xstop','xcall','xsiren','xteams','xclose','xout'].includes(id))C.tv=Math.max(0,C.tv-7*dt);C.td+=C.tv*sd;C.ty+=(EDIT.yaw-C.ty)*Math.min(1,dt*2);
+  const on=Math.floor(t*2.2)%2===0;C.haz.forEach(m=>m.visible=on);C.hazL.intensity=on?2.2:0;}
+ if(C.truck.visible){const p=F(C.td,C.ts,0);C.truck.position.copy(p);C.truck.rotation.y=C.ty;}
+ /* your car flies, tumbles, bounces and lands */
+ if(C.fly){const f=C.fly;if(!f.rest){f.vy-=9.8*sd;f.d+=f.vd*sd;f.s+=f.vs*sd;f.y+=f.vy*sd;f.rx+=f.wx*sd;f.ry+=f.wy*sd;f.rz+=f.wz*sd;
+   if(f.y<=0&&f.vy<0){f.y=0;if(f.b<1){f.b++;f.vy*=-.35;f.vd*=.45;f.vs*=.45;f.wx*=.35;f.wz*=.35;f.wy*=.4;if(AU.ctx){nburst(.6,'lowpass',420,.75);tone2(48,.5,'sine',.45);}}
+    else{f.rest=true;f.rx=Math.round(f.rx/Math.PI)*Math.PI;f.rz=Math.round(f.rz/Math.PI)*Math.PI;if(AU.ctx)nburst(.8,'lowpass',300,.6);}}}
+  const up=Math.cos(f.rx)*Math.cos(f.rz),lift=up<-.5?1.48:up<.5?.95*(1-Math.abs(up)*2)+Math.max(0,up)*0:0,p=F(f.d,f.s,f.y+(f.y<=.05||f.rest?lift:lift*.5));posX=p.x;posZ=p.z;yawCar=f.ry;carRig.position.copy(p);carRig.rotation.set(f.rx,f.ry,f.rz);st.edKmh=0;}
+ if(C.deb){const a=C.deb.geometry.attributes.position,v=C.debV;for(let i=0;i<a.count;i++){if(a.getY(i)<=.02&&v[i*3+1]<=0){v[i*3]*=.8;v[i*3+2]*=.8;}else v[i*3+1]-=9.8*sd;a.setXYZ(i,a.getX(i)+v[i*3]*sd,Math.max(.02,a.getY(i)+v[i*3+1]*sd),a.getZ(i)+v[i*3+2]*sd);if(a.getY(i)<=.02&&v[i*3+1]<0)v[i*3+1]=0;}a.needsUpdate=true;}
+ if(!C.built)return;
+ /* the truck driver climbs out, walks back and calls 911 */
+ {const c=W('xcall'),qc=clamp((t-c.t0)/c.len,0,1);C.drv.visible=t>=c.t0;if(C.drv.visible){const a=F(C.td+6,C.ts-1.7,0),b=F(C.td-3,C.ts-3.6,0),k=sme(clamp(qc/.5,0,1));C.drv.position.lerpVectors(a,b,k);C.drv.position.y=qc<.5?Math.abs(Math.sin(t*9))*.05:0;
+   const cp=carRig.position;C.drv.rotation.y=qc<.5?Math.atan2(b.x-a.x,b.z-a.z):Math.atan2(cp.x-C.drv.position.x,cp.z-C.drv.position.z);C.phone.visible=qc>.45;
+   if(qc>.45&&!C.rang){C.rang=1;if(AU.ctx){for(let k2=0;k2<3;k2++)tone2(940,.12,'sine',.05,null,now()+k2*.18);}}
+   if(qc>.6&&!C.musicBack){C.musicBack=1;if(SPM.out&&AU.ctx)SPM.out.gain.setTargetAtTime((st.sound?1:0)*SPM.vol*.6,AU.ctx.currentTime,1.2);}}}
+ /* emergency vehicles drive in with their lights on */
+ const blink=Math.floor(t*6)%2===0,b2=Math.floor(t*5+.5)%2===0;
+ C.veh.forEach((V,i)=>{const w=W(V.id);if(t<w.t0+V.a*w.len){V.g.visible=false;return;}V.g.visible=true;const qv=clamp((t-w.t0-V.a*w.len)/((V.b-V.a)*w.len),0,1),e=1-Math.pow(1-qv,3);V.g.position.copy(F(V.from+(V.to-V.from)*e,V.s,0));
+  const L=C.lights[i];L.position.copy(V.g.position).setY(2.7);L.intensity=i===0?(blink?3:0):i===1?(!blink?2.6:0):(b2?2.8:0);});
+ C.sir-=dt;if(t>=W('xsiren').t0&&id!=='xout'&&C.sir<=0){C.sir=.55;C.sirHi=!C.sirHi;if(AU.ctx)tone2(C.sirHi?960:720,.5,'triangle',.022);}
+ /* the road closure appears */
+ {const cl=W('xclose'),qc=(t-cl.t0)/cl.len;C.cones.forEach((c,k)=>c.visible=qc>k*.07);C.flares.forEach((f,k)=>{const on=qc>.55+k*.1;f.m.visible=on;f.l.intensity=on?1.6+Math.random()*1.4:0;});C.sign.visible=qc>.8;}}
+function editCrashCam(id,q,t){const C=EDIT.cr,F=C.F||((d,s,y)=>new THREE.Vector3(EDIT.x0+EDIT.fx*d+EDIT.rx*s,y,EDIT.z0+EDIT.fz*d+EDIT.rz*s)),car=carRig.position,tr=C.truck.position,imp=C.impact?C.impact.d:EDIT.d;
+ switch(id){
+  case 'xmerge':{const m=car.clone().lerp(tr,.55);m.y=1.2;return[F(C.td+26,15,8.5),m,48,.2];}
+  case 'ximpact':{return[F(imp+9,-6.5,.6),F(imp+2,0,1.1),40,.3];}
+  case 'xfly':{return[F(imp+30,-7,3.2),F(imp+9,4,2.6),50,.15];}
+  case 'xland':{const c=car.clone();c.y=.8;return[F(C.fly.d-5,C.fly.s-6.5,1.3),c,46,.3];}
+  case 'xstop':{return[F(C.td-20,-2.8,1.5),F(C.td,0,1.8),44,.2];}
+  case 'xcall':{const d=C.drv.position.clone(),cp=carRig.position,dir=new THREE.Vector3(cp.x-d.x,0,cp.z-d.z).normalize(),side=new THREE.Vector3(-dir.z,0,dir.x);const cam=d.clone().addScaledVector(dir,3.2).addScaledVector(side,1.1);cam.y=1.6;d.y=1.45;return[cam,d,38,.15];}
+  case 'xsiren':{return[F(imp-6,-2.6,.5),F(imp-40,0,.9),42,.3];}
+  case 'xteams':{const a=-.5+q*.6,R=24;const c=F(imp+2,1,0);return[new THREE.Vector3(c.x+Math.sin(EDIT.yaw+1.9+a)*R,12+q*3,c.z+Math.cos(EDIT.yaw+1.9+a)*R),c,55,0];}
+  case 'xclose':{return[F(imp-72+q*2,-4.8,.45),F(imp-50,0,.8),36+q*4,.15];}
+  default:{return[F(imp-25,-12-q*10,6+q*30),F(imp+12,0,0),55,0];}}}
+
 /* ===== car edit: a music-video style showcase — graded, speed ramps, lane change, detail shots ===== */
 const EDIT={on:false,t:0};
 const EDIT_SEQ=[['est',4],['head',4],['wheel',4],['cabin',4],['exh',4],['chase',4],['gaugeA',4],['side',4],['drift1',4],['drift2',4],['drift3',4],['screen',4],['qwheel',2],['qhood',2],['qgauge',2],['qrear',2],['orbit',6],['shifter',4],['bumper',2],['pedal',4],['shift',4],['gauge',6],['rear',4],['drone',4],['flyby',4],['hands',4],['slowOrbit',6],['slowWheel',4],['hood',4],['gaugeC',4],['crane',2],['outro',6]];
-const EDIT_STYLES={golden:{n:'🌅 Golden hour',seq:EDIT_SEQ,time:'dusk'},night:{n:'🌃 Night run',seq:EDIT_SEQ,time:'night'},drift:{n:'💨 Drift edit',seq:[['est',4],['head',4],['wheel',4],['drift1',4],['drift2',4],['drift3',4],['gaugeA',4],['side',4],['drift1',4],['drift3',4],['qwheel',2],['qrear',2],['drift2',4],['pedal',4],['shift',4],['gauge',6],['rear',4],['drone',4],['drift1',4],['drift2',4],['slowOrbit',6],['slowWheel',4],['hood',4],['crane',2],['outro',6]],time:'dusk'}};
+const EDIT_STYLES={golden:{n:'🌅 Golden hour',seq:EDIT_SEQ,time:'dusk'},night:{n:'🌃 Night run',seq:EDIT_SEQ,time:'night'},crash:{n:'💥 Truck crash',seq:EDIT_XSEQ,time:'dusk'},drift:{n:'💨 Drift edit',seq:[['est',4],['head',4],['wheel',4],['drift1',4],['drift2',4],['drift3',4],['gaugeA',4],['side',4],['drift1',4],['drift3',4],['qwheel',2],['qrear',2],['drift2',4],['pedal',4],['shift',4],['gauge',6],['rear',4],['drone',4],['drift1',4],['drift2',4],['slowOrbit',6],['slowWheel',4],['hood',4],['crane',2],['outro',6]],time:'dusk'}};
 function editNoiseURL(){if(EDIT.grainURL)return EDIT.grainURL;const c=mkcv(192,192),x=c.getContext('2d'),d=x.createImageData(192,192);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255;}x.putImageData(d,0,0);return EDIT.grainURL=c.toDataURL();}
 function editStart(style){if(EDIT.on||CUT.on||NTK.fly||!P)return;const ES=EDIT_STYLES[style]||EDIT_STYLES.golden;EDIT.style=style||'golden';if(walking){toast('Get in the car first');return;}initAudio();
  const rp=roadPose(posX,posZ,yawCar),a1=posX>-53&&posX<-27,a7=posX<-56&&Math.abs(posZ-ZX)<13,onRoad=a1||a7||Math.abs(posX)<6,drive=onRoad&&!trkZone(posX,posZ)&&!cityZone(posX,posZ);
@@ -3261,11 +3331,12 @@ function editStart(style){if(EDIT.on||CUT.on||NTK.fly||!P)return;const ES=EDIT_S
   const r0=(P.bounds?P.bounds.rear/(P.zScale||1):2.5)+.1;for(const s of[-1,1]){const c=new THREE.Mesh(new THREE.ConeGeometry(.07,.42,10),fm);c.rotation.x=Math.PI/2;c.position.set(s*.42,.27,r0+.22);fl.add(c);const c2=new THREE.Mesh(new THREE.ConeGeometry(.035,.2,8),fm2);c2.rotation.x=Math.PI/2;c2.position.set(s*.42,.27,r0+.08);fl.add(c2);}
   fl.visible=false;(P.group||carRig).add(fl);EDIT.flames=fl;const fw=new THREE.PointLight(0xffe2c4,0,1.6);fw.position.set(-.45,.62,-.62);(P.group||carRig).add(fw);EDIT.footL=fw;}
  {const sm=cutPts(160,1.6,0xe2e2e2,{opacity:.42});sm.material.toneMapped=true;{const c2=mkcv(64,64),x2=c2.getContext('2d'),gr=x2.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.45,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');x2.fillStyle=gr;x2.fillRect(0,0,64,64);sm.material.map=new THREE.CanvasTexture(c2);sm.material.needsUpdate=true;}scene.add(sm);EDIT.smoke=sm;EDIT.smAge=new Float32Array(160).fill(9);EDIT.smI=0;EDIT.v3=new THREE.Vector3();EDIT.dph=0;EDIT.slip=0;EDIT.sq=0;}
+ EDIT.cr=null;if(EDIT.style==='crash')editCrashInit();
  const o=$('#cut');o.hidden=false;o.style.background='rgba(0,0,0,1)';o.classList.remove('bars');void o.offsetWidth;o.classList.add('bars','edit');
  let gr=$('#grain');if(!gr){gr=document.createElement('div');gr.id='grain';o.prepend(gr);}gr.style.backgroundImage=`url(${editNoiseURL()})`;
  $('#ui').classList.add('cine');cutCap('');scene.add(camera);}
 function editEnd(){if(!EDIT.on)return;EDIT.on=false;const o=$('#cut');o.hidden=true;o.style.background='rgba(0,0,0,1)';o.classList.remove('bars','edit');$('#ui').classList.remove('cine');canvas.style.filter='';
- if(EDIT.footL&&EDIT.footL.parent){EDIT.footL.parent.remove(EDIT.footL);EDIT.footL=null;}if(EDIT.flames){if(EDIT.flames.parent)EDIT.flames.parent.remove(EDIT.flames);disposeGroup(EDIT.flames);EDIT.flames=null;}if(EDIT.smoke){scene.remove(EDIT.smoke);EDIT.smoke.geometry.dispose();if(EDIT.smoke.material.map)EDIT.smoke.material.map.dispose();EDIT.smoke.material.dispose();EDIT.smoke=null;}
+ if(EDIT.cg){scene.remove(EDIT.cg);disposeGroup(EDIT.cg);EDIT.cg=null;EDIT.cr=null;}if(EDIT.footL&&EDIT.footL.parent){EDIT.footL.parent.remove(EDIT.footL);EDIT.footL=null;}if(EDIT.flames){if(EDIT.flames.parent)EDIT.flames.parent.remove(EDIT.flames);disposeGroup(EDIT.flames);EDIT.flames=null;}if(EDIT.smoke){scene.remove(EDIT.smoke);EDIT.smoke.geometry.dispose();if(EDIT.smoke.material.map)EDIT.smoke.material.map.dispose();EDIT.smoke.material.dispose();EDIT.smoke=null;}
  if(EDIT.fov0){camera.fov=EDIT.fov0;camera.updateProjectionMatrix();}if(AU.master&&EDIT.vol!=null)AU.master.gain.value=EDIT.vol;spmStop(2.5);
  if(st.time!==EDIT.time0){st.time=EDIT.time0;applyTime();}st.lights=EDIT.lights0;st.edKmh=null;st.edFoot=null;st.edHand=0;st.edShift=null;st.belt=EDIT.belt0;gearNum=1;
  st.traffic=EDIT.tr0!==false;applyTraffic();quality=EDIT.q0;qualAuto=EDIT.qa0;applyQuality();
@@ -3277,14 +3348,14 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
  /* speed ramps in and out of slow motion */
  const slowShot=id==='slowOrbit'||id==='slowWheel';EDIT.ts+=((slowShot?.28:1)-EDIT.ts)*Math.min(1,dt*3);const ds=dt*EDIT.ts;
  /* the car drives itself: cruise, build up, flat out */
- const VT={est:14,head:14,grille:14,wheel:14,cabin:14,exh:14,chase:30,side:30,qwheel:42,qhood:42,qrear:42,qdrone:42,orbit:55,bumper:58,gauge:86,outro:80,gaugeA:42,screen:42,qgauge:55,shifter:58,drift1:28,drift2:28,drift3:28,pedal:64,shift:70},vT=!EDIT.drive?0:(VT[id]!=null?VT[id]:84),v0=EDIT.v;EDIT.v+=(vT-EDIT.v)*Math.min(1,ds*(id==='gauge'?.95:.6));EDIT.acc=(EDIT.v-v0)/Math.max(1e-4,ds);EDIT.d+=EDIT.v*ds;
+ const VT={est:14,head:14,grille:14,wheel:14,cabin:14,exh:14,chase:30,side:30,qwheel:42,qhood:42,qrear:42,qdrone:42,orbit:55,bumper:58,gauge:86,outro:80,gaugeA:42,screen:42,qgauge:55,shifter:58,drift1:28,drift2:28,drift3:28,pedal:64,shift:70,xmerge:55,ximpact:0,xfly:0,xland:0,xstop:0,xcall:0,xsiren:0,xteams:0,xclose:0,xout:0},vT=!EDIT.drive?0:(VT[id]!=null?VT[id]:84),v0=EDIT.v;EDIT.v+=(vT-EDIT.v)*Math.min(1,ds*(id==='gauge'?.95:.6));EDIT.acc=(EDIT.v-v0)/Math.max(1e-4,ds);EDIT.d+=EDIT.v*ds;
  /* lane change over and back */
  const drift=id.startsWith('drift');if(drift)EDIT.dph+=ds*1.25;let latT=EDIT.alt&&['drone','flyby','hands','mirror','slowOrbit','slowWheel'].includes(id)?EDIT.alt:0;if(drift)latT=EDIT.alt/2+(EDIT.alt?1.5:1)*Math.sin(EDIT.dph);
  const la=(latT-EDIT.lat)*(drift?7:2.2)-EDIT.latV*(drift?4:2.6);EDIT.latV+=la*ds;EDIT.lat+=EDIT.latV*ds;
  const {fx,fz,rx,rz}=EDIT;posX=EDIT.x0+fx*EDIT.d+rx*EDIT.lat;posZ=EDIT.z0+fz*EDIT.d+rz*EDIT.lat;const hd=EDIT.v>1?Math.atan2(EDIT.latV,EDIT.v):0;EDIT.slip+=((drift?-hd*9:0)-EDIT.slip)*Math.min(1,ds*3);yawCar=EDIT.yaw-hd+EDIT.slip;lastPZ=posZ;st.v=0;
  /* body: squat under power, roll in the lane change */
  EDIT.pitch+=(clamp(-EDIT.acc*.006,-.03,.03)-EDIT.pitch)*Math.min(1,ds*4);EDIT.roll+=(clamp(-la*.02,-.04,.04)-EDIT.roll)*Math.min(1,ds*4);
- carRig.position.set(posX,0,posZ);carRig.rotation.set(EDIT.pitch,yawCar,EDIT.roll);
+ carRig.position.set(posX,0,posZ);carRig.rotation.set(EDIT.pitch,yawCar,EDIT.roll);if(EDIT.cr)editCrashStep(dt,id,q,t);
  if(P&&P.wheels)P.wheels.forEach(w=>{w.sp.rotation.x-=EDIT.v*ds/w.r*(drift&&!w.front?1.6:1);if(w.front)w.S.rotation.y=-EDIT.slip*.8;});
  /* drift: tyre smoke from the rear wheels and a squeal */
  if(EDIT.smoke){const a=EDIT.smoke.geometry.attributes.position,ag=EDIT.smAge,v3=EDIT.v3;if(drift&&Math.abs(EDIT.slip)>.08&&P&&P.wheels){P.wheels.forEach(w=>{if(w.front)return;w.sp.getWorldPosition(v3);for(let k=0;k<2;k++){const i=EDIT.smI=(EDIT.smI+1)%a.count;a.setXYZ(i,v3.x+(Math.random()-.5)*.5,.3,v3.z+(Math.random()-.5)*.5);ag[i]=0;}});
@@ -3299,12 +3370,12 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;if(typeof EA!=='undefined'&&
  if(EDIT.flames){const pop=(id==='exh'&&Math.sin(u*9)>.5)||id==='qrear'||(EDIT.acc<-1&&Math.random()<.2);EDIT.flames.visible=pop&&Math.random()<.7;if(EDIT.flames.visible){EDIT.flames.scale.set(1,1,.6+Math.random()*.8);if(Math.random()<.12&&AU.ctx)nburst(.04,'bandpass',700,.1);}}
  /* cuts */
  if(si!==EDIT.shot){EDIT.shot=si;EDIT.co=null;EDIT.fix=null;EDIT.flash=si>0&&(S.len<EDIT.beat*3||id==='orbit'||id==='slowOrbit'||id==='bumper')?1:0;if(EDIT.flash&&AU.ctx)nburst(.12,'lowpass',160,.2);
-  const cap={gauge:'',est:'Cabin Garage presents',orbit:car.name,slowOrbit:car.engine||car.blurb||'',outro:car.name+' · '+(car.kind||'')}[id];cutCap(cap||'');}
+  const cap={xmerge:'A lorry pulls onto the Autobahn…',xcall:'Truck driver: “911? There’s been a crash on the A1!”',xsiren:'Police are first on the scene.',xteams:'Ambulance and fire crews arrive.',xclose:'The A1 is closed in both lanes.',xout:'Drive safe.',gauge:'',est:'Cabin Garage presents',orbit:car.name,slowOrbit:car.engine||car.blurb||'',outro:car.name+' · '+(car.kind||'')}[id];cutCap(cap||'');}
  EDIT.flash=Math.max(0,EDIT.flash-dt*5);
  /* camera */
  const P2=(along,side,y)=>new THREE.Vector3(posX-fx*along+rx*side,y,posZ-fz*along+rz*side),C=new THREE.Vector3(posX,.65,posZ);
  let cp,lk,fov=50,shake=0,lag=false;
- switch(id){
+ if(id[0]==='x'&&EDIT.cr){const r=editCrashCam(id,q,t);cp=r[0];lk=r[1];fov=r[2];shake=r[3]||0;}else switch(id){
   case 'est':{if(!EDIT.fix)EDIT.fix=P2(-90,-9,4.5);cp=EDIT.fix.clone();cp.y-=q*1.2;lk=C;fov=32-q*8;break;}
   case 'head':{cp=P2(-2.9-q*.3,-1.3,.75);lk=P2(-2.3,-.6,.72);fov=34;shake=.3;break;}
   case 'grille':{cp=P2(-3.6+q*.6,.15,.65);lk=P2(-2.4,0,.62);fov=30;shake=.3;break;}
