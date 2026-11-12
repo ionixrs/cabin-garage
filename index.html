@@ -255,7 +255,7 @@ html,body{overscroll-behavior:none}canvas#c{touch-action:none}
   <button class="btn" data-tst="0">Stock<small>Factory settings.</small><span class="tp"></span></button>
   <button class="btn" data-tst="1">Stage 1 · Sport remap<small>Remapped fuel and ignition, a bit more punch.</small><span class="tp"></span></button>
   <button class="btn" data-tst="2">Stage 2 · Turbo &amp; exhaust<small>Bigger turbo, freer exhaust, louder and much faster.</small><span class="tp"></span></button>
-  <button class="btn" data-tst="3">💻 Stage 3 · Hack the ECU<small>Crack the ECU in 5 locks against the clock: around 400 km/h. Runs hot at full speed.</small><span class="tp"></span></button>
+  <button class="btn" data-tst="3">💻 Stage 3 · Hack the ECU<small>Crack the ECU in 4 locks against the clock: around 400 km/h. Runs hot at full speed.</small><span class="tp"></span></button>
  </div>
  <div id="hackBox" hidden><div id="hackLog"></div><div id="hackTime"></div><div id="hackBar"><div id="hackZone"></div><div id="hackMark"></div></div><div class="sp-btns"><button class="btn" id="hackCancel">Unplug</button><button class="btn call" id="hackBtn">BYPASS (Space)</button></div></div>
  <div id="hsBox" hidden>
@@ -3567,19 +3567,19 @@ function tuneBuy(k){if(!car)return;if(Math.abs(st.v)>1){toast('Stop the car firs
  const price=TUNE_ST[k].price;if(money<price){toast(`Not enough money: ${TUNE_ST[k].n} costs €${price.toLocaleString('de-DE')}.`,3000);return;}
  addMoney(-price,'tune');tuneSet(k);sfx('ready');toast(`🔧 ${TUNE_ST[k].n} installed. Top speed about ${tuneTopNow(car)} km/h.`,3600);}
 /* ECU hack minigame: hit BYPASS while the marker is in the green window, 3 times */
-var HK={on:false,pos:0,dir:1,spd:1,hits:0,miss:0,z0:40,z1:54,zw:12,zd:1,raf:0,last:0,time:0,need:5,maxMiss:2};
+var HK={on:false,pos:0,dir:1,spd:.85,hits:0,miss:0,z0:40,z1:54,zw:15,zd:1,raf:0,last:0,time:0,need:4,maxMiss:4};
 function hackLog(t,cls){const l=$('#hackLog'),d=document.createElement('div');d.textContent=t;if(cls)d.className=cls;l.appendChild(d);l.scrollTop=l.scrollHeight;}
-function hackZone(){const w=[12,10,9,8,7.5][HK.hits]||7.5;HK.zw=w;HK.z0=8+Math.random()*(84-w);HK.z1=HK.z0+w;HK.zd=Math.random()<.5?-1:1;const z=$('#hackZone');z.style.left=HK.z0+'%';z.style.width=w+'%';}
+function hackZone(){const w=[15,13,12,11][HK.hits]||11;HK.zw=w;HK.z0=8+Math.random()*(84-w);HK.z1=HK.z0+w;HK.zd=Math.random()<.5?-1:1;const z=$('#hackZone');z.style.left=HK.z0+'%';z.style.width=w+'%';}
 function hackFail(msg){HK.on=false;hackLog(msg,'bad');if(AU.ctx)tone2(120,.4,'sawtooth',.06);$('#hackTime').textContent='LOCKED';setTimeout(()=>{$('#hackBox').hidden=true;},2200);}
 function hackOpen(){if(money<TUNE_ST[3].price){toast(`Not enough money: the ECU hack costs €${TUNE_ST[3].price.toLocaleString('de-DE')}.`,3000);return;}
- $('#hackBox').hidden=false;$('#hackLog').innerHTML='';Object.assign(HK,{on:true,pos:0,dir:1,spd:1,hits:0,miss:0,time:28,last:performance.now()});hackZone();
- hackLog('> Connecting laptop to OBD port…');hackLog('> ECU found: '+car.name.toUpperCase()+' · firmware locked');hackLog('> Press BYPASS when the marker is in the green window: 5 locks, 28 seconds.');hackLog('> Only 2 mistakes allowed. The window starts moving after lock 2.');
- cancelAnimationFrame(HK.raf);const loop=n=>{if(!HK.on)return;const dt=Math.min(.05,(n-HK.last)/1000);HK.last=n;HK.pos+=HK.dir*HK.spd*100*dt;if(HK.pos>100){HK.pos=100;HK.dir=-1;}if(HK.pos<0){HK.pos=0;HK.dir=1;}$('#hackMark').style.left=HK.pos+'%';if(HK.hits>=2){HK.z0+=HK.zd*(6+HK.hits*3)*dt;if(HK.z0<3){HK.z0=3;HK.zd=1;}if(HK.z0>97-HK.zw){HK.z0=97-HK.zw;HK.zd=-1;}HK.z1=HK.z0+HK.zw;$('#hackZone').style.left=HK.z0+'%';}HK.time-=dt;$('#hackTime').textContent='Lock '+(HK.hits+1)+' of '+HK.need+' · trace in '+Math.max(0,HK.time).toFixed(1)+' s · mistakes '+HK.miss+'/'+HK.maxMiss;if(HK.time<=0){hackFail('> TRACE COMPLETE. The ECU kicked you out. Try again.');return;}HK.raf=requestAnimationFrame(loop);};HK.raf=requestAnimationFrame(loop);}
+ $('#hackBox').hidden=false;$('#hackLog').innerHTML='';Object.assign(HK,{on:true,pos:0,dir:1,spd:.85,hits:0,miss:0,time:45,last:performance.now()});hackZone();
+ hackLog('> Connecting laptop to OBD port…');hackLog('> ECU found: '+car.name.toUpperCase()+' · firmware locked');hackLog('> Press BYPASS when the marker is in the green window: 4 locks, 45 seconds.');hackLog('> 4 mistakes allowed. The window drifts slowly on the last two locks.');
+ cancelAnimationFrame(HK.raf);const loop=n=>{if(!HK.on)return;const dt=Math.min(.05,(n-HK.last)/1000);HK.last=n;HK.pos+=HK.dir*HK.spd*100*dt;if(HK.pos>100){HK.pos=100;HK.dir=-1;}if(HK.pos<0){HK.pos=0;HK.dir=1;}$('#hackMark').style.left=HK.pos+'%';if(HK.hits>=2){HK.z0+=HK.zd*4*dt;if(HK.z0<3){HK.z0=3;HK.zd=1;}if(HK.z0>97-HK.zw){HK.z0=97-HK.zw;HK.zd=-1;}HK.z1=HK.z0+HK.zw;$('#hackZone').style.left=HK.z0+'%';}HK.time-=dt;$('#hackTime').textContent='Lock '+(HK.hits+1)+' of '+HK.need+' · trace in '+Math.max(0,HK.time).toFixed(1)+' s · mistakes '+HK.miss+'/'+HK.maxMiss;if(HK.time<=0){hackFail('> TRACE COMPLETE. The ECU kicked you out. Try again.');return;}HK.raf=requestAnimationFrame(loop);};HK.raf=requestAnimationFrame(loop);}
 function hackHit(){if(!HK.on)return;const ok=HK.pos>=HK.z0&&HK.pos<=HK.z1;
- if(ok){HK.hits++;sfx('click');hackLog(['> Bypassing checksum… OK','> Cracking seed key… OK','> Disabling immobiliser check… OK','> Patching speed limiter… OK','> Flashing STAGE-3 map… OK'][HK.hits-1],'ok');HK.spd=[1,1.15,1.3,1.5,1.7][HK.hits]||1.7;
+ if(ok){HK.hits++;sfx('click');hackLog(['> Bypassing checksum… OK','> Cracking seed key… OK','> Patching speed limiter… OK','> Flashing STAGE-3 map… OK'][HK.hits-1],'ok');HK.spd=[.85,1,1.15,1.3][HK.hits]||1.3;
   if(HK.hits>=HK.need){HK.on=false;$('#hackTime').textContent='UNLOCKED';addMoney(-TUNE_ST[3].price,'tune');tuneSet(3);hackLog('> ECU UNLOCKED. Limiter removed. Top speed about '+tuneTopNow(car)+' km/h.','ok');sfx('ready');toast('💻 ECU hacked! Speed limiter removed. Watch the engine temperature.',4200);setTimeout(()=>{$('#hackBox').hidden=true;},2400);return;}
   hackZone();}
- else{HK.miss++;HK.time-=3;hackLog('> Checksum error ('+HK.miss+'/'+HK.maxMiss+') · 3 s lost','bad');if(AU.ctx)tone2(180,.15,'square',.05);if(HK.miss>=HK.maxMiss)hackFail('> ECU locked itself. Nothing was changed. Try again.');else hackZone();}}
+ else{HK.miss++;hackLog('> Checksum error ('+HK.miss+'/'+HK.maxMiss+')','bad');if(AU.ctx)tone2(180,.15,'square',.05);if(HK.miss>=HK.maxMiss)hackFail('> ECU locked itself. Nothing was changed. Try again.');else hackZone();}}
 /* a hacked engine runs hot when you sit at very high speed */
 function tuneUpdate(dt){hsUpdate(dt);if(!car||!st.engine||walking||EDIT.on)return;if(tuneStage(car.id)!==3)return;const kmh=Math.abs(st.v*3.6);
  const H=hsGet(car.id);if(H.cool==='race'){TUNE.hot=0;return;}const hk=Math.pow(hsPowK(H),3);
