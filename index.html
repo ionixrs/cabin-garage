@@ -3611,7 +3611,7 @@ function tuneApply0(c){if(!c)return;if(!c._b)c._b={vmax:c.vmax,accel:c.accel,dra
  const H=s===3?hsGet(c.id):null,G=H?((HS_GEAR&&HS_GEAR[H.gear])||{a:1,t:1}):null,pk=H?hsPowK(H):1;
  const A=b.accel*S.pow*pk*(G?G.a:1)*(H&&H.rev?1.04:1)*(H&&H.light?1.15:1),top0=tuneTop(b.accel,b.vmax,b.dragK),T=s===3?Math.min(700,clamp(Math.max(400,top0*1.25),400,430)*G.t*(1+(pk-1)*.35)*(H.aero?1.08:1)):top0*S.top;
  const V=T*1.15,t=T/3.6,Vm=V/3.6,d=(A*(1-(t/Vm)*(t/Vm))-.12)/(.00045*t*t);c.accel=A;c.vmax=V;c.dragK=Math.max(.05,d);}
-function tuneTopNow(c){if(typeof HYP!=='undefined'&&HYP&&HYP.on)return 5000;return Math.round(tuneTop(c.accel,c.vmax,c.dragK||1));}
+function tuneTopNow(c){if(typeof HYP!=='undefined'&&HYP&&HYP.on)return 1000;return Math.round(tuneTop(c.accel,c.vmax,c.dragK||1));}
 function tuneUI(){const p=$('#tunePanel');if(!p||p.hidden||!car)return;const s=tuneStage(car.id);
  $('#tuneCar').textContent=car.name;$('#tuneStats').textContent=`${psmMax(car)} PS · top speed about ${tuneTopNow(car)} km/h`;$('#tuneMoney').textContent='All upgrades are free.';
  p.querySelectorAll('[data-tst]').forEach(b=>{const k=+b.dataset.tst,S=TUNE_ST[k];b.setAttribute('aria-pressed',String(k===s));b.querySelector('.tp').textContent=k===s?'Installed':k===3?(s<2?'Needs Stage 2':'Hack · free'):k<s?'Downgrade · free':'Install · free';b.disabled=k===3&&s<2&&s!==3;});$('#tuneWing').checked=!!HYP.wing[car.id];hsUI();}
@@ -3696,14 +3696,14 @@ function hsUpdate(dt){HS.nosCD=Math.max(0,HS.nosCD-(HS.nosT>0?0:dt));HS.nosT=Mat
  $('#nosChip').addEventListener('click',e=>{e.preventDefault();hsNos();});
  addEventListener('keydown',e=>{if(e.code!=='Tab'||e.repeat)return;if(e.target.closest&&e.target.closest('input,textarea,select,#tunePanel'))return;if(!hsOn())return;e.preventDefault();hsNos();});}
 
-/* ===== hyper mode: hold START/STOP for 3 s to unlock 5000 km/h. Without a spoiler the car takes off at very high speed ===== */
+/* ===== hyper mode: hold START/STOP for 3 s to unlock 1000 km/h. Without a spoiler the car takes off at very high speed ===== */
 var HYP={on:false,skip:false,h:0,vy:0,pitch:0,warn:0,wing:{}};
 try{HYP.on=localStorage.getItem('cabin-hyper')==='1';HYP.wing=JSON.parse(localStorage.getItem('cabin-wing')||'{}');}catch(e){}
 function hypK(v){return 1+v/60;}
-function hypApply(c){const A=Math.max(c.accel,30),T=5000,V=T*1.15,t=T/3.6,Vm=V/3.6,d=(A*hypK(t)*(1-(t/Vm)*(t/Vm))-.12)/(.00045*t*t);c.accel=A;c.vmax=V;c.dragK=Math.max(.02,d);}
+function hypApply(c){const A=Math.max(c.accel,22),T=1000,V=T*1.15,t=T/3.6,Vm=V/3.6,d=(A*hypK(t)*(1-(t/Vm)*(t/Vm))-.12)/(.00045*t*t);c.accel=A;c.vmax=V;c.dragK=Math.max(.02,d);}
 function hypToggle(){HYP.on=!HYP.on;try{localStorage.setItem('cabin-hyper',HYP.on?'1':'0');}catch(e){}if(car)tuneApply(car);if(typeof PSM!=='undefined')PSM.key=null;
  $('#startBtn').classList.toggle('hyper',HYP.on);initAudio();sfx('ready');if(HYP.on&&AU.ctx){tone2(220,.5,'sawtooth',.06);tone2(440,.7,'sawtooth',.05);tone2(880,.9,'sawtooth',.04);}
- toast(HYP.on?'🚀 HYPER MODE unlocked: 5000 km/h. Without a spoiler the car takes off above 800 km/h!':'Hyper mode off. Back to normal top speed.',5200);tuneUI();}
+ toast(HYP.on?'🚀 HYPER MODE unlocked: 1000 km/h. Without a spoiler the car takes off above 800 km/h!':'Hyper mode off. Back to normal top speed.',5200);tuneUI();}
 function hypHasWing(){return !!(P&&P.wing)||!!(car&&car.spoiler==='wing')||!!(car&&HYP.wing[car.id]);}
 /* lift-off: above 800 km/h a car with no spoiler makes more lift than it weighs */
 function hypLift(dt){const kmh=Math.abs(st.v)*3.6,can=car&&!walking&&!EDIT.on&&!(typeof CUT!=='undefined'&&CUT.on)&&!hypHasWing();
