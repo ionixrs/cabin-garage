@@ -3349,8 +3349,8 @@ function editCrashMiss(F,t){const C=EDIT.cr;C.missed=true;C.tv=17;if(AU.ctx){nbu
 function editCrashStep(dt,id,q,t){const C=EDIT.cr;if(!C)return;const {fx,fz,rx,rz}=EDIT,F=(d,s,y)=>new THREE.Vector3(EDIT.x0+fx*d+rx*s,y,EDIT.z0+fz*d+rz*s);C.F=F;
  const S=EDIT.seq,W=k=>S.find(x=>x.id===k),sm=W('xmerge'),si=W('ximpact');const sme=x=>x*x*(3-2*x);
  /* you can swerve in the last seconds: ← / A or → / D */
- {const pv=W('xpov');if(!C.impact&&!C.missed&&t>=pv.t0-.4&&t<si.t0){if(!C.prompt){C.prompt=1;cutCap('⚠ SWERVE!  ← or →');const cc=$('#cutCap');cc.classList.add('swerve');if(AU.ctx)tone2(1200,.12,'square',.05);}
-   if(!EDIT.dodge&&(keys.left||keys.right)){EDIT.dodge=keys.left?-4.1:4.0;cutCap(keys.left?'⬅ Swerving left!':'Swerving right ➡');if(AU.ctx){nburst(.5,'bandpass',1200,.12);}}}}
+ {const pv=W('xpov'),kd=keys.left||keys.right;if(!C.impact&&!C.missed&&t<si.t0-1.2)C.held=kd;if(!C.impact&&!C.missed&&t>=si.t0-1.2&&t<si.t0){if(C.held&&!kd)C.held=false;if(!C.prompt){C.prompt=1;cutCap('⚠ SWERVE!  ← or →');const cc=$('#cutCap');cc.classList.add('swerve');if(AU.ctx)tone2(1200,.12,'square',.05);}
+   if(!EDIT.dodge&&kd&&!C.held){EDIT.dodge=keys.left?-4.1:4.0;cutCap(keys.left?'⬅ Swerving left!':'Swerving right ➡');if(AU.ctx){nburst(.5,'bandpass',1200,.12);}}}}
  /* the lorry pulls out from the hard shoulder into your lane while you close in at 300 km/h */
  if(!C.impact&&!C.missed&&t>=sm.t0){C.truck.visible=true;const qm=clamp((t-sm.t0)/(si.t0-sm.t0),0,1);C.td=EDIT.d+330+(10.2-330)*qm;C.ts=4.2*(1-sme(clamp(qm/.6,0,1)));C.ty=EDIT.yaw+(qm<.6?.12*Math.sin(Math.PI*qm/.6):0);
   if(!C.horn&&qm>.86){C.horn=1;if(AU.ctx){tone2(340,.8,'sawtooth',.07);tone2(420,.8,'sawtooth',.06);nburst(.9,'bandpass',1400,.08);}}}
@@ -3460,7 +3460,7 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;
  const VT={est:14,head:14,grille:14,wheel:14,cabin:14,exh:14,chase:30,side:30,qwheel:42,qhood:42,qrear:42,qdrone:42,orbit:55,bumper:58,gauge:86,outro:80,gaugeA:42,screen:42,qgauge:55,shifter:58,drift1:28,drift2:28,drift3:28,pedal:64,shift:70,xmerge:86,xpov:86,xmiss:86,xmiss2:86,xout2:84,ximpact:0,xfly:0,xside:0,xwreck:0,xland:0,xstop:0,xcall:0,xsiren:0,xteams:0,xclose:0,xout:0},vT=!EDIT.drive?0:(VT[id]!=null?VT[id]:84),v0=EDIT.v;EDIT.v+=(vT-EDIT.v)*Math.min(1,ds*(id==='gauge'?.95:.6));EDIT.acc=(EDIT.v-v0)/Math.max(1e-4,ds);EDIT.d+=EDIT.v*ds;
  /* lane change over and back */
  const drift=id.startsWith('drift');if(drift)EDIT.dph+=ds*1.25;let latT=EDIT.alt&&['drone','flyby','hands','mirror','slowOrbit','slowWheel'].includes(id)?EDIT.alt:0;if(EDIT.dodge)latT=EDIT.dodge;if(drift)latT=EDIT.alt/2+(EDIT.alt?1.5:1)*Math.sin(EDIT.dph);
- const la=(latT-EDIT.lat)*(drift?7:EDIT.dodge?9:2.2)-EDIT.latV*(drift?4:EDIT.dodge?5:2.6);EDIT.latV+=la*ds;EDIT.lat+=EDIT.latV*ds;
+ const la=(latT-EDIT.lat)*(drift?7:EDIT.dodge?20:2.2)-EDIT.latV*(drift?4:EDIT.dodge?8:2.6);EDIT.latV+=la*ds;EDIT.lat+=EDIT.latV*ds;
  const {fx,fz,rx,rz}=EDIT;posX=EDIT.x0+fx*EDIT.d+rx*EDIT.lat;posZ=EDIT.z0+fz*EDIT.d+rz*EDIT.lat;const hd=EDIT.v>1?Math.atan2(EDIT.latV,EDIT.v):0;EDIT.slip+=((drift?-hd*9:0)-EDIT.slip)*Math.min(1,ds*3);yawCar=EDIT.yaw-hd+EDIT.slip;lastPZ=posZ;st.v=0;
  /* body: squat under power, roll in the lane change */
  EDIT.pitch+=(clamp(-EDIT.acc*.006,-.03,.03)-EDIT.pitch)*Math.min(1,ds*4);EDIT.roll+=(clamp(-la*.02,-.04,.04)-EDIT.roll)*Math.min(1,ds*4);
@@ -3481,7 +3481,7 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;
  if(EDIT.flames){const pop=(id==='exh'&&Math.sin(u*9)>.5)||id==='qrear'||(EDIT.acc<-1&&Math.random()<.2);EDIT.flames.visible=pop&&Math.random()<.7;if(EDIT.flames.visible){EDIT.flames.scale.set(1,1,.6+Math.random()*.8);if(Math.random()<.12&&AU.ctx)nburst(.04,'bandpass',700,.1);}}
  /* cuts */
  if(si!==EDIT.shot){EDIT.shot=si;EDIT.co=null;EDIT.fix=null;EDIT.flash=si>0&&(S.len<EDIT.beat*3||id==='orbit'||id==='slowOrbit'||id==='bumper')?1:0;if(EDIT.flash&&AU.ctx)nburst(.12,'lowpass',160,.2);
-  const cap={xpov:EDIT.dodge?(EDIT.dodge<0?'⬅ Swerving left!':'Swerving right ➡'):'⚠ SWERVE!  ← or →',xmerge:'A lorry pulls out without looking…',xcall:'Truck driver: “911? There’s been a crash on the A1!”',xsiren:'Police are first on the scene.',xteams:'Ambulances, fire engines and a rescue helicopter arrive.',xclose:'The A1 is closed in both lanes.',xout:'Drive safe.',xmiss:'',xmiss2:'Close call!',xout2:'Close call. Drive safe.',gauge:'',est:'Cabin Garage presents',orbit:car.name,slowOrbit:car.engine||car.blurb||'',outro:car.name+' · '+(car.kind||'')}[id];cutCap(cap||'');}
+  const cap={xpov:EDIT.dodge?(EDIT.dodge<0?'⬅ Swerving left!':'Swerving right ➡'):'',xmerge:'A lorry pulls out without looking…',xcall:'Truck driver: “911? There’s been a crash on the A1!”',xsiren:'Police are first on the scene.',xteams:'Ambulances, fire engines and a rescue helicopter arrive.',xclose:'The A1 is closed in both lanes.',xout:'Drive safe.',xmiss:'',xmiss2:'Close call!',xout2:'Close call. Drive safe.',gauge:'',est:'Cabin Garage presents',orbit:car.name,slowOrbit:car.engine||car.blurb||'',outro:car.name+' · '+(car.kind||'')}[id];cutCap(cap||'');}
  EDIT.flash=Math.max(0,EDIT.flash-dt*5);
  /* camera */
  const P2=(along,side,y)=>new THREE.Vector3(posX-fx*along+rx*side,y,posZ-fz*along+rz*side),C=new THREE.Vector3(posX,.65,posZ);
