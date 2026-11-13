@@ -285,7 +285,7 @@ html,body{overscroll-behavior:none}canvas#c{touch-action:none}
  <textarea id="sugText" maxlength="240" rows="3" placeholder="What should be added or changed?" aria-label="Your suggestion"></textarea>
  <div class="sp-btns" style="margin-top:6px;align-items:center"><small id="sugCount" style="margin-right:auto;opacity:.7">0/240</small><button class="btn call" id="sugAdd">Add</button></div>
  <div id="sugList"></div>
- <p class="sp-hint" id="sugNote" style="margin:10px 0 0">Saved on this device only.</p>
+ <p class="sp-hint" id="sugNote" style="margin:10px 0 0">Connecting to the shared list…</p>
  <div class="sp-btns"><button class="btn" id="sugCopy">Copy all</button><button class="btn" id="sugClose">Done</button></div>
 </div>
 <div id="editPanel" class="panel" hidden role="dialog" aria-label="Car edit">
@@ -3729,22 +3729,24 @@ function wingSync(){if(!car||!P||!P.group||!P.bounds)return;const g=P.group,want
   toast(e.target.checked?'🪽 Big rear spoiler fitted. The car stays on the ground.':(P&&P.wing?'Spoiler removed. This car still has its own active wing.':'Spoiler removed. Above 800 km/h the car will take off.'),3200);});}
 
 /* ===== suggestions box: saved in this browser, wiped every Monday ===== */
-var SUG={week:'',items:[]},SUGR={on:false,items:[],busy:false};
+var SUG={week:'',items:[]},SUGR={on:false,state:'loading',items:[],busy:false};
+var SUG_API=/(^|\.)cabin-garage-oz2i\.vercel\.app$/.test(location.hostname)?'api/suggestions':'https://cabin-garage-oz2i.vercel.app/api/suggestions';
 /* shared list: the site's own /api/suggestions (only on the Vercel site, and only once its database is connected); otherwise this device's list */
-function sugFetch(){return fetch('api/suggestions',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{if(!j||!j.ok||!Array.isArray(j.items))throw 0;SUGR.on=true;SUGR.items=j.items;}).catch(()=>{SUGR.on=false;}).then(()=>{if(!$('#sugPanel').hidden)sugUI();});}
+function sugFetch(){SUGR.state=SUGR.on?'on':'loading';return fetch(SUG_API,{cache:'no-store',mode:'cors'}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{if(!j||!j.ok||!Array.isArray(j.items))throw 0;SUGR.on=true;SUGR.state='on';SUGR.items=j.items;}).catch(()=>{SUGR.on=false;SUGR.state='off';}).then(()=>{if(!$('#sugPanel').hidden)sugUI();});}
 function sugList(){return SUGR.on?SUGR.items:SUG.items;}
 function sugMonday(d){const m=new Date(d.getFullYear(),d.getMonth(),d.getDate());m.setDate(m.getDate()-((m.getDay()+6)%7));return m;}
 function sugKey(d){const m=sugMonday(d);return m.getFullYear()+'-'+(m.getMonth()+1)+'-'+m.getDate();}
 function sugLoad(){try{const o=JSON.parse(localStorage.getItem('cabin-sugg')||'null');if(o&&Array.isArray(o.items))SUG=o;}catch(e){}const k=sugKey(new Date());if(SUG.week!==k){SUG={week:k,items:[]};sugSave();}}
 function sugSave(){try{localStorage.setItem('cabin-sugg',JSON.stringify(SUG));}catch(e){}}
 function sugUI(){sugLoad();const l=$('#sugList');l.innerHTML='';const next=sugMonday(new Date());next.setDate(next.getDate()+7);const days=Math.max(1,Math.ceil((next-new Date())/864e5));
- const L=sugList();$('#sugNote').textContent=SUGR.on?'🌍 Shared: everyone who plays can read these. Be kind.':'Saved on this device only.';
+ const L=sugList();{const n=$('#sugNote');if(SUGR.state==='on')n.textContent='🌍 Shared: everyone who plays can read these. Be kind.';else if(SUGR.state==='loading')n.textContent='Connecting to the shared list…';else{n.textContent='';n.append('⚠ Can\'t reach the shared list from here, so these are only on this device. To post for everyone, play at ');const a=document.createElement('a');a.href='https://cabin-garage-oz2i.vercel.app';a.target='_blank';a.rel='noopener';a.textContent='cabin-garage-oz2i.vercel.app';a.style.color='var(--accent)';n.append(a,' ');const r=document.createElement('button');r.className='btn';r.textContent='Retry';r.style.cssText='padding:2px 8px;margin-left:4px';r.addEventListener('click',()=>{SUGR.state='loading';sugUI();sugFetch();});n.append(r);}}
  $('#sugInfo').textContent=L.length+' this week · the list is wiped on Monday ('+(days===1?'tomorrow or sooner':'in '+days+' days')+').';
  if(!L.length){const e=document.createElement('p');e.className='sp-hint';e.textContent='No suggestions yet. What should be added to the game?';l.appendChild(e);}
  L.forEach((it,i)=>{const r=document.createElement('div');r.className='sug-it';const t=document.createElement('span');t.textContent=it.t;const s=document.createElement('small');s.textContent=new Date(it.ts).toLocaleDateString(undefined,{weekday:'short',hour:'2-digit',minute:'2-digit'});const b=document.createElement('button');b.className='btn';b.textContent='✕';b.setAttribute('aria-label','Delete suggestion');b.addEventListener('click',()=>{SUG.items.splice(i,1);sugSave();sugUI();});if(SUGR.on)r.append(t,s);else r.append(t,s,b);l.appendChild(r);});
  $('#sugCount').textContent=$('#sugText').value.length+'/240';}
 function sugAdd(){const ta=$('#sugText'),v=ta.value.trim().replace(/\s+/g,' ');if(!v){toast('Type a suggestion first.');return;}
- if(SUGR.on){if(SUGR.busy)return;SUGR.busy=true;fetch('api/suggestions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({t:v.slice(0,240)})}).then(r=>r.json().then(j=>({s:r.status,j}))).then(({s,j})=>{if(s===429){toast('Slow down: too many suggestions in one hour.',3000);return;}if(!j||!j.ok)throw 0;SUGR.items=j.items;ta.value='';sugUI();sfx('click');toast('💡 Suggestion sent to everyone.',1800);}).catch(()=>toast('Could not send it. Check your internet and try again.',3000)).then(()=>{SUGR.busy=false;});return;}
+ if(SUGR.state==='loading'){toast('Still connecting to the shared list, try again in a second.',2200);return;}
+ if(SUGR.on){if(SUGR.busy)return;SUGR.busy=true;fetch(SUG_API,{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({t:v.slice(0,240)})}).then(r=>r.json().then(j=>({s:r.status,j}))).then(({s,j})=>{if(s===429){toast('Slow down: too many suggestions in one hour.',3000);return;}if(!j||!j.ok)throw 0;SUGR.items=j.items;ta.value='';sugUI();sfx('click');toast('💡 Suggestion sent to everyone.',1800);}).catch(()=>toast('Could not send it. Check your internet and try again.',3000)).then(()=>{SUGR.busy=false;});return;}
  sugLoad();if(SUG.items.length>=50){toast('The list is full (50). Delete one first.');return;}
  SUG.items.unshift({t:v.slice(0,240),ts:Date.now()});sugSave();ta.value='';sugUI();sfx('click');toast('💡 Suggestion added.',1600);}
 {const p=$('#sugPanel');['keydown','keyup','keypress'].forEach(ev=>p.addEventListener(ev,e=>e.stopPropagation()));
