@@ -58,9 +58,9 @@ module.exports = async (req, res) => {
     if (op === 'create') {
       if (await limited(req, 'lc:', CREATE_PER_HOUR, 3600)) return res.status(429).json({ ok: false, error: 'slow-down' });
       for (let i = 0; i < 6; i++) {
-        const code = rand(5, ABC), host = 'h' + rand(10, 'abcdefghijklmnopqrstuvwxyz0123456789');
-        const [ok] = await redis([['SET', 'lob:' + code, JSON.stringify({ host, ts: Date.now() }), 'EX', LOBBY_TTL, 'NX']]);
-        if (ok === 'OK') return res.status(200).json({ ok: true, code, me: host });
+        const code = rand(5, ABC), host = 'h' + rand(10, 'abcdefghijklmnopqrstuvwxyz0123456789'), key = rand(24, 'abcdefghijklmnopqrstuvwxyz0123456789');
+        const [ok] = await redis([['SET', 'lob:' + code, JSON.stringify({ host, key, ts: Date.now() }), 'EX', LOBBY_TTL, 'NX']]);
+        if (ok === 'OK') return res.status(200).json({ ok: true, code, me: host, key });
       }
       return res.status(500).json({ ok: false, error: 'busy' });
     }
@@ -85,6 +85,20 @@ module.exports = async (req, res) => {
       const [, , , alive] = await redis([['RPUSH', k, s], ['LTRIM', k, -40, -1], ['EXPIRE', k, MSG_TTL], ['EXPIRE', 'lob:' + code, LOBBY_TTL]]);
       if (!alive) return res.status(404).json({ ok: false, error: 'no-lobby' });
       return res.status(200).json({ ok: true });
+    }
+
+    // hand the lobby to another player: whoever holds the owner key can become the owner (the game shares it with members)
+    if (op === 'sethost' || op === 'rekey') {
+      const code = cleanCode(body.code), me = cleanId(body.me), key = String(body.key || '');
+      const [raw] = await redis([['GET', 'lob:' + code]]);
+      if (!raw) return res.status(404).json({ ok: false, error: 'no-lobby' });
+      let lob = {}; try { lob = JSON.parse(raw); } catch (e) {}
+      if (!lob.key || key !== lob.key) return res.status(403).json({ ok: false, error: 'not-owner' });
+      if (op === 'rekey' && lob.host !== me) return res.status(403).json({ ok: false, error: 'not-owner' });
+      lob.host = me;
+      if (op === 'rekey') lob.key = rand(24, 'abcdefghijklmnopqrstuvwxyz0123456789');
+      await redis([['SET', 'lob:' + code, JSON.stringify(lob), 'EX', LOBBY_TTL]]);
+      return res.status(200).json({ ok: true, key: lob.key });
     }
 
     if (op === 'close') {
