@@ -3728,6 +3728,62 @@ function wingSync(){if(!car||!P||!P.group||!P.bounds)return;const g=P.group,want
  $('#tuneWing').addEventListener('change',e=>{if(!car)return;if(car.truck){e.target.checked=false;toast('No spoiler for trucks.');return;}HYP.wing[car.id]=e.target.checked;try{localStorage.setItem('cabin-wing',JSON.stringify(HYP.wing));}catch(x){}wingSync();
   toast(e.target.checked?'🪽 Big rear spoiler fitted. The car stays on the ground.':(P&&P.wing?'Spoiler removed. This car still has its own active wing.':'Spoiler removed. Above 800 km/h the car will take off.'),3200);});}
 
+/* bad-word filter (same as the server's): swear words masked, slurs blocked */
+var SUGF=(()=>{const MASK = [
+  'fuck', 'fuk', 'fck', 'shit', 'bitch', 'bastard', 'asshole', 'arsehole', 'dick', 'cock', 'pussy', 'cunt', 'wank', 'twat',
+  'slut', 'whore', 'bollock', 'prick', 'damn', 'crap', 'piss', 'dildo', 'porn', 'boob', 'tits', 'penis', 'vagina', 'motherf',
+  'scheiss', 'scheis', 'scheiße', 'arschloch', 'arsch', 'fotze', 'hure', 'wichser', 'wixer', 'wichs', 'ficken', 'fick', 'schlampe',
+  'hurensohn', 'missgeburt', 'bastard', 'pimmel', 'schwanz', 'titten', 'kacke', 'depp', 'idiot', 'spast', 'vollidiot'
+];
+const BLOCK = [
+  'nigger', 'nigga', 'negro', 'neger', 'faggot', 'fagot', 'fag', 'retard', 'tranny', 'kike', 'chink', 'spic', 'wetback',
+  'gook', 'coon', 'paki', 'raghead', 'kys', 'killyourself', 'heil', 'hitler', 'nazi', 'kanake', 'zigeuner', 'schwuchtel',
+  'judensau', 'untermensch', 'rape', 'rapist', 'vergewaltig'
+];
+// innocent words that happen to contain a bad one
+const ALLOW = ['scunthorpe', 'shiitake', 'cocktail', 'cockpit', 'peacock', 'hancock', 'cockerel', 'grape', 'drape', 'scrape', 'trapez', 'rapeseed', 'therapist', 'montenegro', 'mongoose', 'prickly', 'prickle', 'shitake', 'penistone', 'arsenal', 'matchbox', 'cumulus', 'document', 'circumst', 'scrap', 'crapaud', 'hellcat', 'nazareth', 'spice', 'spicy', 'despicable'];
+// short words that are only bad on their own (so "class" or "Dickens" stay fine)
+const EXACT = new Set(['ass', 'arse', 'fag', 'kys', 'cum', 'tit', 'hoe', 'sau', 'dick', 'cock', 'heil', 'paki', 'coon', 'spic', 'gook', 'crap', 'damn', 'piss', 'arsch', 'depp', 'fick']);
+
+const LEET = { '0': 'o', '1': 'i', '!': 'i', '|': 'i', '3': 'e', '4': 'a', '@': 'a', '5': 's', '$': 's', '7': 't', '+': 't', '8': 'b', '9': 'g', 'ß': 'ss', 'ä': 'a', 'ö': 'o', 'ü': 'u', '€': 'e' };
+function norm(w) {
+  let s = w.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '');
+  s = s.replace(/[0-9!|@$+€ß]/g, c => LEET[c] || c).replace(/[^a-z]/g, '');
+  return s.replace(/(.)\1{2,}/g, '$1$1');
+}
+const squash = s => s.replace(/(.)\1+/g, '$1');
+function hit(n, list) {
+  for (const a of ALLOW) if (n.includes(a)) n = n.split(a).join(' ');
+  const q = squash(n);
+  for (const b of list) {
+    const bq = squash(norm(b));
+    const sq = n !== q; // only fold doubled letters when the word had them ("fuuuck"), so "niger" doesn't turn into a slur
+    if (EXACT.has(b)) { if (n.trim() === b || n === b + 's' || (sq && (q === bq || q === bq + 's'))) return true; continue; }
+    if (n.includes(b) || (sq && q.includes(bq))) return true;
+  }
+  return false;
+}
+function check(text) {
+  const words = String(text).split(/(\s+)/);
+  // also catch words split up with dots or spaces: "f u c k", "n.i.g.g.e.r"
+  const spaced = String(text).match(/\b(?:\w[\s._-]){2,}\w\b/g) || [];
+  if (spaced.some(s => hit(norm(s), BLOCK))) return { blocked: true, text: '' };
+  let masked = false;
+  const out = words.map(w => {
+    if (/^\s+$/.test(w) || !w) return w;
+    const n = norm(w);
+    if (!n) return w;
+    if (hit(n, BLOCK)) { masked = 'block'; return w; }
+    if (hit(n, MASK)) { masked = true; return w.replace(/[^\s]/g, (c, i) => (i === 0 ? c : '*')); }
+    return w;
+  });
+  if (masked === 'block') return { blocked: true, text: '' };
+  for (const s of spaced) if (hit(norm(s), MASK)) { masked = true; }
+  let t = out.join('');
+  for (const s of spaced) if (hit(norm(s), MASK)) t = t.replace(s, s[0] + s.slice(1).replace(/\S/g, '*'));
+  return { blocked: false, text: t, masked: !!masked };
+}
+return {check};})();
 /* ===== suggestions box: saved in this browser, wiped every Monday ===== */
 var SUG={week:'',items:[]},SUGR={on:false,state:'loading',items:[],busy:false};
 var SUG_API=/(^|\.)cabin-garage-oz2i\.vercel\.app$/.test(location.hostname)?'api/suggestions':'https://cabin-garage-oz2i.vercel.app/api/suggestions';
@@ -3745,10 +3801,11 @@ function sugUI(){sugLoad();const l=$('#sugList');l.innerHTML='';const next=sugMo
  L.forEach((it,i)=>{const r=document.createElement('div');r.className='sug-it';const t=document.createElement('span');t.textContent=it.t;const s=document.createElement('small');s.textContent=new Date(it.ts).toLocaleDateString(undefined,{weekday:'short',hour:'2-digit',minute:'2-digit'});const b=document.createElement('button');b.className='btn';b.textContent='✕';b.setAttribute('aria-label','Delete suggestion');b.addEventListener('click',()=>{SUG.items.splice(i,1);sugSave();sugUI();});if(SUGR.on)r.append(t,s);else r.append(t,s,b);l.appendChild(r);});
  $('#sugCount').textContent=$('#sugText').value.length+'/240';}
 function sugAdd(){const ta=$('#sugText'),v=ta.value.trim().replace(/\s+/g,' ');if(!v){toast('Type a suggestion first.');return;}
+ {const fc=SUGF.check(v);if(fc.blocked){toast('🚫 That suggestion has words that aren\'t allowed. Please keep it friendly.',3400);return;}}
  if(SUGR.state==='loading'){toast('Still connecting to the shared list, try again in a second.',2200);return;}
- if(SUGR.on){if(SUGR.busy)return;SUGR.busy=true;fetch(SUG_API,{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({t:v.slice(0,240)})}).then(r=>r.json().then(j=>({s:r.status,j}))).then(({s,j})=>{if(s===429){toast('Slow down: too many suggestions in one hour.',3000);return;}if(!j||!j.ok)throw 0;SUGR.items=j.items;ta.value='';sugUI();sfx('click');toast('💡 Suggestion sent to everyone.',1800);}).catch(()=>toast('Could not send it. Check your internet and try again.',3000)).then(()=>{SUGR.busy=false;});return;}
+ if(SUGR.on){if(SUGR.busy)return;SUGR.busy=true;fetch(SUG_API,{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({t:v.slice(0,240)})}).then(r=>r.json().then(j=>({s:r.status,j}))).then(({s,j})=>{if(s===429){toast('Slow down: too many suggestions in one hour.',3000);return;}if(s===422){toast('🚫 That suggestion has words that aren\'t allowed. Please keep it friendly.',3400);return;}if(!j||!j.ok)throw 0;SUGR.items=j.items;ta.value='';sugUI();sfx('click');toast(j.masked?'💡 Sent. Some words were starred out.':'💡 Suggestion sent to everyone.',2200);}).catch(()=>toast('Could not send it. Check your internet and try again.',3000)).then(()=>{SUGR.busy=false;});return;}
  sugLoad();if(SUG.items.length>=50){toast('The list is full (50). Delete one first.');return;}
- SUG.items.unshift({t:v.slice(0,240),ts:Date.now()});sugSave();ta.value='';sugUI();sfx('click');toast('💡 Suggestion added.',1600);}
+ const fc=SUGF.check(v.slice(0,240));SUG.items.unshift({t:fc.text,ts:Date.now()});sugSave();ta.value='';sugUI();sfx('click');toast(fc.masked?'💡 Added. Some words were starred out.':'💡 Suggestion added.',2000);}
 {const p=$('#sugPanel');['keydown','keyup','keypress'].forEach(ev=>p.addEventListener(ev,e=>e.stopPropagation()));
  $('#sugBtn').addEventListener('click',()=>{$('#moreMenu').hidden=true;$('#moreBtn').setAttribute('aria-expanded',false);p.hidden=false;sugUI();sugFetch();});
  $('#sugClose').addEventListener('click',()=>{p.hidden=true;});

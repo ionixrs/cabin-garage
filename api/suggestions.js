@@ -2,6 +2,7 @@
 // Storage: Upstash Redis over REST (add it in Vercel: Storage -> Upstash for Redis -> connect to this project).
 // The list lives under one key per week (Monday to Sunday, Europe/Zurich), so it starts empty every Monday.
 const crypto = require('crypto');
+const { check } = require('./_filter.js');
 
 const URL_ = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -23,7 +24,7 @@ async function redis(cmds) {
 
 function parse(list) {
   const out = [];
-  for (const s of list || []) { try { const o = JSON.parse(s); if (o && typeof o.t === 'string') out.push({ t: o.t, ts: +o.ts || 0 }); } catch (e) {} }
+  for (const s of list || []) { try { const o = JSON.parse(s); if (o && typeof o.t === 'string') { const f = check(o.t); if (!f.blocked) out.push({ t: f.text, ts: +o.ts || 0 }); } } catch (e) {} }
   return out;
 }
 
@@ -47,12 +48,14 @@ module.exports = async (req, res) => {
       if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
       const t = String((body && body.t) || '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, MAX_LEN);
       if (!t) return res.status(400).json({ ok: false, error: 'empty' });
+      const f = check(t);
+      if (f.blocked) return res.status(422).json({ ok: false, error: 'blocked' });
       const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'x';
       const rl = 'rl:' + crypto.createHash('sha256').update(ip).digest('hex').slice(0, 24);
       const [n] = await redis([['INCR', rl], ['EXPIRE', rl, 3600, 'NX']]);
       if (n > PER_HOUR) return res.status(429).json({ ok: false, error: 'slow-down' });
-      const out = await redis([['LPUSH', key, JSON.stringify({ t, ts: Date.now() })], ['LTRIM', key, 0, MAX_ITEMS - 1], ['EXPIRE', key, 9 * 86400], ['LRANGE', key, 0, MAX_ITEMS - 1]]);
-      return res.status(200).json({ ok: true, week, items: parse(out[3]) });
+      const out = await redis([['LPUSH', key, JSON.stringify({ t: f.text, ts: Date.now() })], ['LTRIM', key, 0, MAX_ITEMS - 1], ['EXPIRE', key, 9 * 86400], ['LRANGE', key, 0, MAX_ITEMS - 1]]);
+      return res.status(200).json({ ok: true, week, masked: !!f.masked, items: parse(out[3]) });
     }
     res.setHeader('Allow', 'GET, POST');
     return res.status(405).json({ ok: false, error: 'method' });
