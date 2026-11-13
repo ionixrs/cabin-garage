@@ -469,7 +469,26 @@ const CARS=[
   ui:{accent:'#c9a227',onText:'#1a1405'}});
  mk('strada',{id:'vierling-w16',name:'Vierling W16 Hyper',kind:'Hypercar',blurb:'8.0L quad-turbo W16 · 1,500 hp · 440 km/h',engine:'8.0 L quad-turbo W16, 1500 hp, all-wheel drive, 0-100 km/h in 2.4 s',
   awd:true,paint:0x10233f,leather2:0x1d3557,stitch:'#5fb0ff',ambient:'#5fb0ff',caliper:0x5fb0ff,rimCol:0x2a2d33,sound:'v12',vmax:500,dragK:.49,accel:15,redline:7100,
-  cl:{ring:'#5fb0ff',accent:'#5fb0ff'},ui:{accent:'#5fb0ff',onText:'#04101f'}});}
+  cl:{ring:'#5fb0ff',accent:'#5fb0ff'},ui:{accent:'#5fb0ff',onText:'#04101f'}});
+ /* Italian-style supercars (made-up brands) */
+ mk('strada',{id:'tempesta-furia',brand:'tempesta',name:'Tempesta Furia V12',kind:'Italian V12 supercar',blurb:'6.5L V12 · 780 hp · scissor-door wedge · 355 km/h',engine:'6.5 L naturally aspirated V12, 780 hp, all-wheel drive, 0-100 km/h in 2.8 s',
+  awd:true,spoiler:'wing',paint:0xb4e02a,leather2:0x2a3310,stitch:'#b4e02a',ambient:'#b4e02a',caliper:0xb4e02a,rimCol:0x1a1b1e,spokes:10,exhausts:4,sound:'v12',vmax:398,dragK:.6,accel:13.5,redline:8700,lift:-.13,
+  cl:{ring:'#b4e02a',accent:'#b4e02a',needle:'#b4e02a'},ui:{accent:'#b4e02a',onText:'#0c1202'}});
+ mk('strada',{id:'tempesta-lampo',brand:'tempesta',feat:'loud',name:'Tempesta Lampo V10',kind:'Italian V10 supercar',blurb:'5.2L V10 · 640 hp · screaming sport exhaust',engine:'5.2 L naturally aspirated V10, 640 hp, all-wheel drive, 0-100 km/h in 2.9 s',
+  awd:true,paint:0xff7a1a,leather2:0x3a1d08,stitch:'#ff7a1a',ambient:'#ff7a1a',caliper:0x111111,rimCol:0x1a1b1e,spokes:5,exhausts:4,sound:'v10',vmax:364,dragK:.63,accel:12,redline:8500,lift:-.12,
+  cl:{ring:'#ff7a1a',accent:'#ff7a1a',needle:'#ff7a1a'},ui:{accent:'#ff7a1a',onText:'#1a0a00'}});
+ mk('lindhofr6',{id:'tempesta-ruspa',brand:'tempesta',name:'Tempesta Ruspa',kind:'Italian super SUV',blurb:'4.0L twin-turbo V8 · 666 hp · the fast family car',engine:'4.0 L twin-turbo V8, 666 hp, all-wheel drive, 0-100 km/h in 3.3 s',
+  paint:0xf2c200,stitch:'#f2c200',ambient:'#f2c200',caliper:0xf2c200,rimCol:0x1a1b1e,exhausts:4,lift:.14,wr:.4,vmax:342,dragK:.65,accel:11,
+  cl:{needle:'#f2c200',accent:'#f2c200'},ui:{accent:'#f2c200',onText:'#1a1500'}});
+ mk('ironhorse',{id:'rosalba-12',brand:'rosalba',name:'Rosalba 12 Superveloce',kind:'Italian V12 grand tourer',blurb:'6.5L front-engine V12 · 830 hp · revs to 9,500 rpm',engine:'6.5 L naturally aspirated V12, 830 hp, rear-wheel drive, 0-100 km/h in 2.9 s',
+  paint:0xc1121f,leather:0x6b3a1f,leather2:0x8a4f2a,stitch:'#f1e3c8',ambient:'#ff3b30',caliper:0xf2c200,spokes:5,exhausts:4,sound:'v12',vmax:381,dragK:.63,accel:13,redline:9500,
+  cl:{ring:'#f2c200',accent:'#f2c200',needle:'#ff3b30'},ui:{accent:'#e23b2e',onText:'#ffffff'}});
+ mk('strada',{id:'rosalba-sf',brand:'rosalba',feat:'launch',name:'Rosalba SF Stradale',kind:'Italian hybrid hypercar',blurb:'4.0L twin-turbo V8 + three e-motors · 1,000 hp',engine:'4.0 L twin-turbo V8 hybrid, 1000 hp, all-wheel drive, 0-100 km/h in 2.5 s',
+  awd:true,activeWing:true,spoiler:null,paint:0xd0101c,leather2:0x4a0f12,stitch:'#f2c200',ambient:'#ff3b30',caliper:0xf2c200,rimCol:0x25262a,spokes:10,exhausts:2,sound:'v8',vmax:381,dragK:.7,accel:14.5,redline:8000,lift:-.12,
+  cl:{ring:'#f2c200',accent:'#f2c200'},ui:{accent:'#e23b2e',onText:'#ffffff'}});
+ /* the slowest cars are no longer offered in the car bar (their data stays for traffic and stolen cars) */
+ for(const id of['wendtk','pico','haven','spider']){const c=CARS.find(x=>x.id===id);if(c)c.hidden=true;}
+}
 const FEATS={launch:{n:'Launch control',d:'Stop in D, hold BRAKE and GAS, then let go of BRAKE. The rear wing rises above 110 km/h.'},
  hud:{n:'Head-up display',d:'Projects speed, limit and directions onto the windscreen.'},
  drift:{n:'Drift mode',d:'Loosens the rear end so the car slides through corners.'},
@@ -543,6 +562,8 @@ function logoCanvas(id,S=256){const c=mkcv(S,S),x=c.getContext('2d'),m=S/2;
   case'vierling':disc('#101215');poly([[0,-.36],[.36,0],[0,.36],[-.36,0]],'#c9ced6');poly([[0,-.28],[.28,0],[0,.28],[-.28,0]],'#101215');T('V','#ff2d2d',S*.3,m+S*.02,'800');break;
   case'wendt':{x.beginPath();const r=S*.18;x.moveTo(S*.1+r,S*.1);x.arcTo(S*.9,S*.1,S*.9,S*.9,r);x.arcTo(S*.9,S*.9,S*.1,S*.9,r);x.arcTo(S*.1,S*.9,S*.1,S*.1,r);x.arcTo(S*.1,S*.1,S*.9,S*.1,r);x.closePath();x.fillStyle='#0f8c8c';x.fill();T('w','#ffffff',S*.56,m-S*.05,'800');x.fillStyle='#ffd166';x.beginPath();x.arc(m+S*.25,m-S*.22,S*.05,0,7);x.fill();break;}
   case'bergmann':{poly([[0,-.42],[.37,-.21],[.37,.21],[0,.42],[-.37,.21],[-.37,-.21]],'#2f3a26');poly([[-.28,.12],[-.1,-.14],[0,-.02],[.12,-.2],[.3,.12]],'#e7e2d0');T('B','#ff7a1a',S*.2,m+S*.25,'800');break;}
+  case'tempesta':{poly([[-.36,-.4],[.36,-.4],[.36,.1],[0,.44],[-.36,.1]],'#0d0d0f');poly([[-.3,-.34],[.3,-.34],[.3,.07],[0,.36],[-.3,.07]],'#c9a227');poly([[-.26,-.3],[.26,-.3],[.26,.05],[0,.31],[-.26,.05]],'#0d0d0f');poly([[.06,-.26],[-.14,.02],[-.01,.02],[-.08,.24],[.15,-.06],[.02,-.06]],'#f2c200');break;}
+  case'rosalba':{disc('#7a0c14');ring('#f1e3c8',S*.045);x.fillStyle='#1f8a3a';x.fillRect(m-S*.2,S*.2,S*.133,S*.05);x.fillStyle='#f4f4f4';x.fillRect(m-S*.067,S*.2,S*.134,S*.05);x.fillStyle='#d0101c';x.fillRect(m+S*.067,S*.2,S*.133,S*.05);T('R','#f1e3c8',S*.42,m+S*.07,'italic 700','Georgia, serif');break;}
   default:disc('#333');T('?','#fff',S*.4);}
  return c;}
 const logoURLs={};const logoURL=c=>logoURLs[c.brand||c.id]||(logoURLs[c.brand||c.id]=logoCanvas(c.brand||c.id,96).toDataURL());
@@ -567,7 +588,7 @@ function setGlow(root,h){root&&root.traverse(m=>{if(m.userData.glow)m.userData.g
 
 /* ================= CABIN BUILDER ================= */
 const DZ=-.8,DL=1.35;
-const BODY={kessler9:'coupe','nordring-c':'coupe',ironhorse:'coupe',strada:'coupe',nordring:'saloon',aurelia:'saloon',vierlingk:'saloon',vierlingr5:'saloon',lindhofr6:'estate',wendtk:'estate',volt:'hatch',pico:'hatch','kessler-gt':'coupe','vierling-h3':'hatch','nordring-t':'estate','lindhof-eq':'saloon','vierling-w16':'coupe'};
+const BODY={kessler9:'coupe','nordring-c':'coupe',ironhorse:'coupe',strada:'coupe',nordring:'saloon',aurelia:'saloon',vierlingk:'saloon',vierlingr5:'saloon',lindhofr6:'estate',wendtk:'estate',volt:'hatch',pico:'hatch','kessler-gt':'coupe','vierling-h3':'hatch','nordring-t':'estate','lindhof-eq':'saloon','vierling-w16':'coupe','tempesta-furia':'coupe','tempesta-lampo':'coupe','tempesta-ruspa':'estate','rosalba-12':'coupe','rosalba-sf':'coupe'};
 function bodyStyle(c,rY){const b=BODY[c.id];if(!b||c.convertible||c.seats!==4)return null;const zR=2.2+(c.trunkLen||.6)*.7;
  const o=b==='coupe'?{sS:1.3,zT:zR-.1,yT:.99}:b==='saloon'?{sS:1.68,zT:2.6,yT:.99}:b==='estate'?{sS:zR-.42,zT:zR-.05,yT:1.1}:{sS:1.62,zT:zR-.04,yT:1.06};o.b=b;o.rY=rY;o.y=z=>z<=o.sS?rY:rY+(o.yT-rY)*Math.min(1,(z-o.sS)/(o.zT-o.sS));return o;}
 const CARZ=.82;
@@ -934,7 +955,7 @@ function buildCar(c){
  add(badge(c,.045),0,.8,zFront+.003).rotation.y=Math.PI;
  add(badge(c,.045),0,.86,zRear+.006);
  if(c.sound!=='ev'){const n=c.exhausts||2,xs=n===4?[-.52,-.4,.4,.52]:c.retro?[.45]:[-.45,.45];P.flames=[];xs.forEach(ex=>{add(cyl(.045,.05,.14,M.chrome,16),ex,.28,zRear-.01).rotation.x=Math.PI/2;add(cyl(.036,.036,.02,std(0x050505,1),16),ex,.28,zRear+.062).rotation.x=Math.PI/2;const fl=add(new THREE.Mesh(new THREE.ConeGeometry(.05,.3,10),new THREE.MeshBasicMaterial({color:0xff7a1a,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false})),ex,.28,zRear+.22);fl.rotation.x=Math.PI/2;fl.visible=false;fl.userData.noHit=true;P.flames.push(fl);});}
- if(c.spoiler||c.id==='strada'||c.id==='vierling-w16')add(rbox(1.0,.06,.12,.02,blk),0,.3,zRear+.03);
+ if(c.spoiler||c.id==='strada'||c.id==='vierling-w16'||c.brand==='tempesta')add(rbox(1.0,.06,.12,.02,blk),0,.3,zRear+.03);
  if(c.spoiler==='lip')add(rbox(1.3,.025,.1,.01,M.paint),0,.035,zRear-lidZ-.06,TP);
  if(c.spoiler==='wing'){add(rbox(1.4,.03,.22,.012,TX?std(0xffffff,.22,.25,{map:TX.carbon}):blk),0,.2,zRear-lidZ-.15,TP);for(const s of[-1,1])add(rbox(.03,.17,.06,.01,blk),s*.45,.09,zRear-lidZ-.15,TP);}
  if(c.scoop){add(rbox(.5,.07,hl*.5,.03,M.paint),0,.03,-hl*.45,HP);add(rbox(.3,.03,.02,.008,blk),0,.045,-hl*.7,HP);}
@@ -3452,7 +3473,7 @@ function editStart(style){if(EDIT.on||CUT.on||NTK.fly||!P)return;const ES=EDIT_S
  const yaw=drive?rp.yaw:yawCar,fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=-fz,rz=fx,x0=drive?rp.x:posX,z0=drive?rp.z:posZ;
  let alt=0;if(drive&&a1){for(const s of[4.1,-4.1]){const x=x0+rx*s,z=z0+rz*s;if(x>-53&&x<-27&&onSurface(x,z)){alt=s;break;}}}
  const beat=SPM.src==='file'&&SPM.hasFile?.6:60/118;
- Object.assign(EDIT,{dodge:0,lastG:0,liftT:0,shifted:0,stomp:0,on:true,t:0,shot:-1,d:0,v:0,ts:1,lat:0,latV:0,drive,alt,x0,z0,yaw,fx,fz,rx,rz,fov0:camera.fov,ry:Math.random()*6.28,vol:null,beat,co:null,fix:null,time0:st.time,lights0:st.lights,acc:0,pitch:0,roll:0,flash:0});
+ Object.assign(EDIT,{sw:0,dodge:0,lastG:0,liftT:0,shifted:0,stomp:0,on:true,t:0,shot:-1,d:0,v:0,ts:1,lat:0,latV:0,drive,alt,x0,z0,yaw,fx,fz,rx,rz,fov0:camera.fov,ry:Math.random()*6.28,vol:null,beat,co:null,fix:null,time0:st.time,lights0:st.lights,acc:0,pitch:0,roll:0,flash:0});
  const SEQ=ES.seq,nb=SEQ.reduce((a,x)=>a+x[1],0);if(SPM.src==='file'&&SPM.hasFile)EDIT.beat=.52;const bt=EDIT.beat;let b=0;EDIT.seq=SEQ.map(([id,n])=>{const s={id,t0:b*bt,len:n*bt};b+=n;return s;});EDIT.dur=b*bt+1.2;
  EDIT.w0={rain:st.rain,fog:st.fog,snow:st.snow};{const wr=!!ES.rain;if(st.time!==ES.time||st.rain!==wr||st.fog||st.snow){st.time=ES.time;st.rain=wr;st.fog=false;st.snow=false;applyTime();if(typeof applySnowLook==='function')applySnowLook();}}st.lights=2;st.engine=true;st.hb=false;st.v=0;cruise=0;st.gear='D';EDIT.belt0=st.belt;st.belt=true;
  EDIT.tr0=st.traffic;st.traffic=false;applyTraffic();if(typeof ntRemove==='function')ntRemove();
@@ -3491,7 +3512,8 @@ function editStep(dt){if(!EDIT.on)return;EDIT.t+=dt;
  /* body: squat under power, roll in the lane change */
  EDIT.pitch+=(clamp(-EDIT.acc*.006,-.03,.03)-EDIT.pitch)*Math.min(1,ds*4);EDIT.roll+=(clamp(-la*.02,-.04,.04)-EDIT.roll)*Math.min(1,ds*4);
  carRig.position.set(posX,0,posZ);carRig.rotation.set(EDIT.pitch,yawCar,EDIT.roll);if(EDIT.cr)editCrashStep(dt,id,q,t);
- if(P&&P.wheels)P.wheels.forEach(w=>{w.sp.rotation.x-=EDIT.v*ds/w.r*(drift&&!w.front?1.6:1);if(w.front)w.S.rotation.y=-EDIT.slip*.8;});
+ if(P&&P.wheels)P.wheels.forEach(w=>{w.sp.rotation.x-=EDIT.v*ds/w.r*(drift&&!w.front?1.6:1);if(w.front)w.S.rotation.y=(EDIT.sw||0)*.55;});
+ {const tgt=clamp(-EDIT.slip*1.45-(EDIT.v>1?Math.atan2(EDIT.latV,EDIT.v):0)*5+(EDIT.v>3?Math.sin(EDIT.t*1.7)*.035+Math.sin(EDIT.t*.63+1)*.03+Math.sin(EDIT.t*4.3)*.01:0),-1,1);EDIT.sw=(EDIT.sw||0)+(tgt-(EDIT.sw||0))*Math.min(1,ds*8);if(P&&P.wheel&&!(EDIT.cr&&EDIT.cr.impact)){P.wheel.rotation.z=EDIT.sw*2.3;updateDriver();}}
  /* drift: tyre smoke from the rear wheels and a squeal */
  if(EDIT.smoke){const a=EDIT.smoke.geometry.attributes.position,ag=EDIT.smAge,v3=EDIT.v3;if(drift&&Math.abs(EDIT.slip)>.08&&P&&P.wheels){P.wheels.forEach(w=>{if(w.front)return;w.sp.getWorldPosition(v3);for(let k=0;k<2;k++){const i=EDIT.smI=(EDIT.smI+1)%a.count;a.setXYZ(i,v3.x+(Math.random()-.5)*.5,.3,v3.z+(Math.random()-.5)*.5);ag[i]=0;}});
    EDIT.sq-=dt;if(EDIT.sq<=0&&AU.ctx){EDIT.sq=.16;nburst(.24,'bandpass',1000+Math.random()*500,.05);}}
@@ -4395,7 +4417,7 @@ function drawBigMap(){const cv=$('#bmCv'),r=cv.getBoundingClientRect();if(r.widt
  $('#bmZin').onclick=()=>{BM.s=clamp(BM.s*1.6,.02,3);drawBigMap();};$('#bmZout').onclick=()=>{BM.s=clamp(BM.s/1.6,.02,3);drawBigMap();};$('#bmFollow').onclick=()=>{BM.follow=!BM.follow;$('#bmFollow').setAttribute('aria-pressed',BM.follow);drawBigMap();};
  $('#bmClear').onclick=()=>{nav.dest=null;nav.route=null;renderDestList();drawBigMap();toast('Route cleared');};$('#mapBtn').onclick=()=>{initAudio();toggleBigMap();};}
 function hideHint(){const h=$('#hint');h.style.opacity=0;setTimeout(()=>{h.hidden=true;},650);}
-const carNav=$('#cars');CARS.forEach(c=>{const b=document.createElement('button');b.className='car';b.dataset.id=c.id;b.innerHTML=`<img src="${logoURL(c)}" alt="" width="24" height="24"><span><b>${c.name}</b><small>${c.kind}</small></span>`;b.onclick=()=>selectCar(c.id);carNav.appendChild(b);});
+const carNav=$('#cars');CARS.filter(c=>!c.hidden).forEach(c=>{const b=document.createElement('button');b.className='car';b.dataset.id=c.id;b.innerHTML=`<img src="${logoURL(c)}" alt="" width="24" height="24"><span><b>${c.name}</b><small>${c.kind}</small></span>`;b.onclick=()=>selectCar(c.id);carNav.appendChild(b);});
 
 /* ================= LOOP ================= */
 const ease=(k,t,r,dt)=>{A[k]+=(t-A[k])*(1-Math.exp(-r*dt));};
