@@ -3339,6 +3339,58 @@ function cmCreditsUI(){const L=$('#credList');if(!L||L.childElementCount)return;
   if(car&&typeof selectCar==='function'){const keep={x:posX,z:posZ,yaw:yawCar,eng:st.engine};selectCar(null,car);posX=keep.x;posZ=keep.z;yawCar=keep.yaw;}toast(CMC.on?'Real car bodies on.':'Real car bodies off (lighter on slow devices).',2600);});}
 if(P&&car)cmAttach(P,car);
 
+/* ===== voices: a cast of characters using the device's built-in voices, each with its own voice, pitch and speed ===== */
+var VOX={cast:{
+ nav:{lang:'en-GB',pitch:1,rate:1.02,pref:['Serena','Kate','Stephanie','Martha','Google UK English Female','Microsoft Libby','Microsoft Sonia','Samantha']},
+ car:{lang:'en-US',pitch:1.12,rate:1.0,pref:['Samantha','Ava','Allison','Google US English','Microsoft Aria','Microsoft Jenny']},
+ co:{lang:'en-GB',pitch:.95,rate:1.12,pref:['Daniel','Arthur','Oliver','Google UK English Male','Microsoft Ryan','Microsoft George']},
+ dj:{lang:'en-US',pitch:1.2,rate:1.16,pref:['Fred','Tom','Alex','Evan','Microsoft Guy','Microsoft Davis','Google US English']},
+ cop:{lang:'en-AU',pitch:.78,rate:.94,pref:['Lee','Gordon','Karen','Google UK English Male','Microsoft William','Daniel']},
+ race:{lang:'en-US',pitch:1.05,rate:1.22,pref:['Aaron','Nathan','Alex','Microsoft Christopher','Google US English']},
+ pass:{lang:'en-IE',pitch:1.08,rate:1.05,pref:['Moira','Tessa','Fiona','Veena','Microsoft Emily','Google UK English Female']},
+ de:{lang:'de-DE',pitch:1,rate:1.02,pref:['Anna','Markus','Petra','Yannick','Google Deutsch','Microsoft Katja']}},
+ cool:{},last:{},speedStep:0,fuelWarn:false,tickets:null,hp:null,race:null,radio:null,engine:null,job:null,hyper:null,edit:null,t:0};
+function voxVoice(c){const vs=window.speechSynthesis?speechSynthesis.getVoices():[];if(!vs.length)return null;
+ for(const n of c.pref){const v=vs.find(q=>q.name&&q.name.indexOf(n)===0);if(v)return v;}
+ return vs.find(q=>q.lang===c.lang)||vs.find(q=>q.lang&&q.lang.slice(0,2)===c.lang.slice(0,2))||null;}
+/* who: a character; lines: one line or a list to pick from; key+gap: don't repeat that kind of line too often */
+function vox(who,lines,key,gap){try{if(!st.sound||!VOICE.on||!window.speechSynthesis)return;const now=performance.now()/1000;
+ if(key){if(VOX.cool[key]&&now<VOX.cool[key])return;VOX.cool[key]=now+(gap||20);}
+ if(speechSynthesis.pending&&who!=='race')return;
+ const c=VOX.cast[who]||VOX.cast.nav,list=Array.isArray(lines)?lines:[lines];let t=list[Math.floor(Math.random()*list.length)];if(list.length>1&&t===VOX.last[key||who])t=list[(list.indexOf(t)+1)%list.length];VOX.last[key||who]=t;
+ const u=new SpeechSynthesisUtterance(t);u.lang=c.lang;u.pitch=c.pitch;u.rate=c.rate;u.volume=.95;const v=voxVoice(c);if(v)u.voice=v;speechSynthesis.speak(u);}catch(e){}}
+function voxHour(){const h=(typeof st.time==='string')?({dawn:7,day:13,dusk:19,night:23}[st.time]||13):new Date().getHours();return h<11?'Good morning':h<17?'Good afternoon':h<22?'Good evening':'Good night';}
+/* watch the game and react: no changes to the game's own code needed */
+function voxTick(dt){VOX.t+=dt;if(VOX.t<.25)return;VOX.t=0;if(typeof EDIT!=='undefined'&&EDIT.on){VOX.edit=1;return;}
+ const kmh=Math.abs(st.v)*3.6;
+ /* engine start: the car greets you */
+ if(VOX.engine!==null&&st.engine&&!VOX.engine&&car&&!walking)vox('car',[voxHour()+'. '+car.name+' ready.','Systems check complete. Have a good drive.','Welcome back. All systems normal.',car.name+'. Drive mode '+(st.mode||'comfort')+'.'],'eng',25);
+ VOX.engine=st.engine;
+ /* the co-driver reacts to speed */
+ const steps=[120,200,300,400,600,1000],lvl=steps.filter(s=>kmh>=s).length;
+ if(lvl>VOX.speedStep&&!walking){const s=steps[lvl-1],L={120:['Okay, we are moving.','Nice and smooth.'],200:['Two hundred! Eyes on the road.','Two hundred. Keep it steady.','Now we are flying.'],300:['Three hundred! This thing is quick!','Three hundred kilometres an hour. Unreal.','Hold on tight!'],400:['Four hundred! Are you serious?','This is insane!'],600:['Six hundred! We are basically a plane.','The trees are just a blur now.'],1000:['One thousand kilometres an hour! Legend!','We just broke the sound barrier of fun!']}[s];vox('co',L,'spd'+s,40);}
+ VOX.speedStep=kmh<80?0:Math.max(Math.min(VOX.speedStep,lvl),lvl);
+ /* speed tickets and red lights */
+ if(VOX.tickets!=null&&st.tickets>VOX.tickets)vox('cop',['Speed camera. That will be a fine, driver.','Flash! Smile for the camera.','You have been caught on camera. Slow down.','Ticket issued. Please mind the limit.'],'tix',8);
+ VOX.tickets=st.tickets;
+ /* fuel */
+ const f=st.fuel!=null?st.fuel:(typeof fuel!=='undefined'?fuel:1);if(f<.12&&!VOX.fuelWarn&&!walking){VOX.fuelWarn=true;vox('car',['Fuel level low. Please refuel soon.','Range is getting short. Find a petrol station.'],'fuel',90);}else if(f>.2)VOX.fuelWarn=false;
+ /* crashes: whoever is in the passenger seat complains */
+ if(typeof hp!=='undefined'){if(VOX.hp!=null&&hp<VOX.hp-6)vox(JOB&&JOB.cur?'pass':'co',['Ouch! Watch it!','Whoa! Are you okay?','That is going to leave a mark.','My coffee! Everywhere!','Careful! I want to get there in one piece.'],'crash',6);VOX.hp=hp;}
+ /* radio switched on: the DJ says hi */
+ if(VOX.radio!=null&&st.radio&&!VOX.radio){const S=typeof STATIONS!=='undefined'&&STATIONS[st.station];vox('dj',['You are listening to '+(S?S.name:'the radio')+'. Turn it up!','Good vibes only on '+(S?S.name:'the radio')+'. Here is the next one!','Traffic is moving, the music is loud. Let us go!'],'dj',30);}
+ VOX.radio=st.radio;
+ /* taxi and delivery jobs */
+ const jc=JOB&&JOB.cur?JOB.cur.stage:null;if(jc!==VOX.job){if(jc==='pickup')vox('nav',['New job accepted. Head to the pickup point.','Job accepted. I have set the route.'],'job',5);
+  else if(jc==='drop'||jc==='deliver')vox('pass',['Hi! Thanks for picking me up.','Hello! Please hurry, I am late.','Hey, nice car! Let us go.','Good to see you. No rush, but also, rush.'],'pass',10);
+  else if(VOX.job&&!jc)vox('pass',['Thanks for the ride!','Perfect, that was quick. Thank you!','Keep the change!'],'passBye',10);VOX.job=jc;}
+ /* races */
+ const R=typeof TRK!=='undefined'&&TRK.race;const rp=R?R.phase:null;if(rp!==VOX.race){if(rp==='lights')vox('race',['Drivers ready. Watch the lights.','Here we go. Lights are coming on.'],'rl',3);else if(rp==='go')vox('race',['Go go go!','Lights out and away we go!'],'rg',3);else if(rp==='done')vox('race',['Chequered flag! What a race!','Across the line! Race over.'],'rd',3);VOX.race=rp;}
+ /* hyper mode */
+ if(typeof HYP!=='undefined'){if(VOX.hyper!=null&&HYP.on&&!VOX.hyper)vox('car',['Hyper mode unlocked. Top speed one thousand kilometres an hour. Good luck.'],'hyp',5);if(HYP.h>2&&!VOX.fly){VOX.fly=1;vox('co',['We are flying! Literally!','Uh oh. The wheels are off the ground!'],'fly',15);}if(HYP.h<=0)VOX.fly=0;VOX.hyper=HYP.on;}
+ VOX.edit=0;}
+if(window.speechSynthesis){try{speechSynthesis.getVoices();speechSynthesis.addEventListener&&speechSynthesis.addEventListener('voiceschanged',()=>speechSynthesis.getVoices());}catch(e){}}
+
 function trkUpdate(dt){TRK.clock+=dt;const inT=trkZone(walking?walker.x:posX,walking?walker.z:posZ);if(TRK.g)TRK.g.visible=inT;if(inT&&!TRK.built)trkBuild();const box=$('#lapBox');
  if(!inT||!TRK.built){if(box&&!box.hidden)box.hidden=true;if(TRK.ghost)TRK.ghost.visible=false;TRK.ai.forEach(a=>a.g.visible=false);return;}
  if(box)box.hidden=false;const N=TRK.S.length,q=walking?null:trkQuery(posX,posZ);
@@ -4213,7 +4265,7 @@ const STATS={t:0,km:0,top:0,earned:0,jobs:0};try{const sv=JSON.parse(localStorag
 function mobWalls(out){for(const g of MOB){if(!g.visible)continue;const p=g.position;if(Math.abs(p.z-posZ)<20&&Math.abs(p.x-posX)<10)out.push([p.x-.85,p.x+.85,p.z-1.35,p.z+1.35]);}}
 /* ===== voice: navigation directions and Verkehrsfunk (traffic radio) ===== */
 const VOICE={on:true,instr:null,stage:-1};try{VOICE.on=localStorage.getItem('cabin-voice')!=='0';}catch(e){}
-function say(text,lang='en-GB',rate=1.03){try{if(!st.sound||!VOICE.on||!window.speechSynthesis)return;const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=rate;u.volume=.95;const vs=speechSynthesis.getVoices(),v=vs.find(q=>q.lang===lang)||vs.find(q=>q.lang&&q.lang.slice(0,2)===lang.slice(0,2));if(v)u.voice=v;speechSynthesis.speak(u);}catch(e){}}
+function say(text,lang='en-GB',rate=1.03){try{if(!st.sound||!VOICE.on||!window.speechSynthesis)return;const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=rate;u.volume=.95;const vs=speechSynthesis.getVoices(),v=vs.find(q=>q.lang===lang)||vs.find(q=>q.lang&&q.lang.slice(0,2)===lang.slice(0,2));const vv=typeof VOX!=='undefined'&&voxVoice(VOX.cast[lang.slice(0,2)==='de'?'de':'nav']);if(vv)u.voice=vv;else if(v)u.voice=v;speechSynthesis.speak(u);}catch(e){}}
 function radio(textDe){sfx('chime');setTimeout(()=>say('Verkehrsfunk. '+textDe,'de-DE',1),500);}
 function toggleVoice(){VOICE.on=!VOICE.on;try{localStorage.setItem('cabin-voice',VOICE.on?'1':'0');}catch(e){}if(!VOICE.on&&window.speechSynthesis)speechSynthesis.cancel();const b=$('#voiceBtn');if(b){b.setAttribute('aria-pressed',VOICE.on);b.textContent='Voice: '+(VOICE.on?'on':'off');}toast('Voice guidance and traffic radio '+(VOICE.on?'on':'off'),1800);if(VOICE.on)say('Voice guidance on.');}
 function navVoice(pr){if(!pr||!pr.instr){VOICE.instr=null;return;}const d=pr.idist,low=pr.instr.charAt(0).toLowerCase()+pr.instr.slice(1);
@@ -5036,7 +5088,7 @@ function frame(t){
  {const kk=Math.max(0,Math.floor((-posZ-300)/1000));rampSets.forEach((g,i)=>{const zA=-300-1000*(kk+i);g.position.z=zA;g.visible=!rampSuppressed(zA);drawExitBoards(g,kk+i);});fwyG.position.z=Math.round(posZ/18)*18;
   const kr=Math.max(0,Math.floor((-posZ-350)/700)),kf=Math.max(0,Math.floor((-posZ-650)/900));roadCams.forEach((g,i)=>{g.position.set(6.4,0,-350-700*(kr+i));g.userData.ck=['r',kr+i];g.visible=camOn('r',kr+i);});fwCams.forEach((g,i)=>{g.position.set(-29.2,0,-650-900*(kf+i));g.userData.ck=['f',kf+i];g.visible=camOn('f',kf+i);});
   camFlashT=Math.max(0,camFlashT-dt);[...roadCams,...fwCams].forEach(g=>g.userData.flash.emissiveIntensity=camFlashT>0?8:0);
-  limitFree=false;if(posX<-24&&posX>-52){const gl=gantryLimit(posZ+5);limitFree=gl===0;limit=limitFree?250:gl;}if(!walking&&Math.abs(posZ-ZX)<12&&posX<-56){const al=a7Limit(posX);limitFree=al===0;limit=limitFree?250:al;}if(cityZone(posX,posZ))limit=50;if(trkZone(posX,posZ)){limitFree=true;limit=250;}checkCams();lastPZ=posZ;updateServices(dt,t);updateFleeing(dt);updateParked(dt);updateDirtWash(dt,t);beltFrame(dt);{const need=st.engine&&!st.belt&&!walking&&Math.abs(st.v)*3.6>8;if(need){P.beltDur=(P.beltDur||0)+dt;P.beltT=(P.beltT||0)+dt;if(P.beltT>(P.beltDur>20?.6:1.3)){P.beltT=0;sfx('belt');if(P.beltDur<1.5)toast('Fasten your seatbelt! Press - or click the belt or the red buckle.',3000);}}else{P.beltDur=0;P.beltT=1.3;}}updateJam(dt,t);updateAutobahn(dt,t);updateNav(dt);updateCity(dt,t);updateA7(dt);updateHazards(dt,t);updateJamDetour(dt);updateSnow(dt,t);updateAutoEv(dt);updateAch(dt);updateTunBau(dt,t);updateRest(dt);updateA7Jam(dt,t);updateSlipEv(dt);updatePdc(dt);updateLkaBadge(dt);updateBlis(dt);updateSys(dt);updateSkids(dt);updateTrains(dt);updateJobs(dt);drawMinimap(dt);updateDyn(dt);updateMobile(dt);updateA7Signs();updateBorder(dt);borderPatrol(dt,t);updateA7X(dt,t);trkUpdate(dt);mpUpdate(dt);psmUpdate(dt);bayUpdate(dt,t);spmUpdate(dt);tiltUpdate();tuneUpdate(dt);updateBlitzer(dt);if(aebHazAuto&&!aebAct){aebHazT+=dt;if(st.v>4&&aebHazT>3){st.hazard=false;aebHazAuto=false;}}else aebHazT=0;phoneT+=dt;if(phoneT>.5){phoneT=0;renderPhone();}}
+  limitFree=false;if(posX<-24&&posX>-52){const gl=gantryLimit(posZ+5);limitFree=gl===0;limit=limitFree?250:gl;}if(!walking&&Math.abs(posZ-ZX)<12&&posX<-56){const al=a7Limit(posX);limitFree=al===0;limit=limitFree?250:al;}if(cityZone(posX,posZ))limit=50;if(trkZone(posX,posZ)){limitFree=true;limit=250;}checkCams();lastPZ=posZ;updateServices(dt,t);updateFleeing(dt);updateParked(dt);updateDirtWash(dt,t);beltFrame(dt);{const need=st.engine&&!st.belt&&!walking&&Math.abs(st.v)*3.6>8;if(need){P.beltDur=(P.beltDur||0)+dt;P.beltT=(P.beltT||0)+dt;if(P.beltT>(P.beltDur>20?.6:1.3)){P.beltT=0;sfx('belt');if(P.beltDur<1.5)toast('Fasten your seatbelt! Press - or click the belt or the red buckle.',3000);}}else{P.beltDur=0;P.beltT=1.3;}}updateJam(dt,t);updateAutobahn(dt,t);updateNav(dt);updateCity(dt,t);updateA7(dt);updateHazards(dt,t);updateJamDetour(dt);updateSnow(dt,t);updateAutoEv(dt);updateAch(dt);updateTunBau(dt,t);updateRest(dt);updateA7Jam(dt,t);updateSlipEv(dt);updatePdc(dt);updateLkaBadge(dt);updateBlis(dt);updateSys(dt);updateSkids(dt);updateTrains(dt);updateJobs(dt);drawMinimap(dt);updateDyn(dt);updateMobile(dt);updateA7Signs();updateBorder(dt);borderPatrol(dt,t);updateA7X(dt,t);trkUpdate(dt);mpUpdate(dt);voxTick(dt);psmUpdate(dt);bayUpdate(dt,t);spmUpdate(dt);tiltUpdate();tuneUpdate(dt);updateBlitzer(dt);if(aebHazAuto&&!aebAct){aebHazT+=dt;if(st.v>4&&aebHazT>3){st.hazard=false;aebHazAuto=false;}}else aebHazT=0;phoneT+=dt;if(phoneT>.5){phoneT=0;renderPhone();}}
  if(st.rain){const p=rainGeo.attributes.position.array;for(let i=0;i<NR;i++){p[i*3+1]-=dt*20;if(p[i*3+1]<0)p[i*3+1]+=20;}rainGeo.attributes.position.needsUpdate=true;rain.position.set(posX,0,posZ);}
  const sd=sun.userData.dir||new THREE.Vector3(0,1,0);sun.target.position.set(posX,1,posZ);sun.position.set(posX+sd.x*120,1+sd.y*120,posZ+sd.z*120);
  /* audio */
