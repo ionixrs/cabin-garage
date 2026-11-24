@@ -3536,7 +3536,7 @@ function rgTrafficStep(dt){for(const a of RG.ai){const R=RG.roads[a.ri];
 /* ---------- each frame ---------- */
 function rgUpdate(dt){const x=walking?walker.x:posX,z=walking?walker.z:posZ,inZ=rgZone(x,z);if(inZ&&!RG.built)rgBuild();if(!RG.built)return;RG.g.visible=inZ;RG.inside=inZ;if(!inZ)return;
  const night=st.time==='night'||st.time==='dusk';if(RG.lampMat)RG.lampMat.emissiveIntensity=night?2.2:0;RG.winMat.forEach(m=>m.emissiveIntensity=night?1.1:0);
- rgTrafficStep(dt);if(walking)return;
+ rgTrafficStep(dt);rgPoliceStep(dt);if(walking)return;
  const q=rgQuery(posX,posZ),kmh=Math.abs(st.v)*3.6;if(q){if(q.r!==RG.lastRoad){RG.lastRoad=q.r;if(q.r.limit<900)limit=q.r.limit;}}
  /* splash into the lake */
  if(rgInLake(posX,posZ)){st.v*=Math.pow(.25,dt);if(!RG.wet){RG.wet=1;toast('💦 Splash! You drove into the lake.',2400);sfx('thunk');}}else RG.wet=0;
@@ -3552,12 +3552,15 @@ function rgMini(dt){RG.mmT-=dt;if(RG.mmT>0)return;RG.mmT=.12;const cv=$('#mmCv')
  x.save();x.clearRect(0,0,W,H);x.beginPath();x.arc(W/2,H/2,Math.min(W,H)/2,0,7);x.clip();x.translate(W/2,H/2);x.rotate(yaw);rgDraw(x,s,0,0,px,pz,2);
  for(const a of RG.ai){if(!a.g.visible)continue;x.fillStyle='#fff';x.fillRect((a.g.position.x-px)*s-2,(a.g.position.z-pz)*s-2,4,4);}
  if(typeof MP!=='undefined'&&MP.on)for(const p of MP.peers.values()){if(!p.seen)continue;x.fillStyle='#4fc3f7';x.beginPath();x.arc((p.x-px)*s,(p.z-pz)*s,4,0,7);x.fill();}
+ if(nav.route){x.strokeStyle='#2f8cff';x.lineWidth=4;x.lineJoin='round';x.beginPath();nav.route.forEach((q,i)=>{const X=(q.x-px)*s,Z=(q.z-pz)*s;i?x.lineTo(X,Z):x.moveTo(X,Z);});x.stroke();}
  x.restore();x.fillStyle='#ff3b30';x.beginPath();x.moveTo(W/2,H/2-8);x.lineTo(W/2+6,H/2+6);x.lineTo(W/2,H/2+3);x.lineTo(W/2-6,H/2+6);x.closePath();x.fill();}
 function rgBig(){const cv=$('#bmCv'),r=cv.getBoundingClientRect();if(r.width<10)return;const k=Math.min(2,devicePixelRatio||1),W=Math.round(r.width*k),H=Math.round(r.height*k);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
- const x=cv.getContext('2d'),s=Math.min(W,H)/(RG.half*2+200);x.save();x.clearRect(0,0,W,H);rgDraw(x,s,W/2,H/2,RG.cx,RG.cz,1.5);
- x.fillStyle='#fff';x.font=Math.round(13*k)+'px system-ui';x.textAlign='center';const lab=(t,X,Z)=>{x.fillText(t,W/2+(X-RG.cx)*s,H/2+(Z-RG.cz)*s);};
- lab('Downtown',RG.cx,RG.cz-360);lab('Lake & beach',RG.lake.x,RG.lake.z+RG.lake.rz+50);lab('Airport',(RG.runway.x0+RG.runway.x1)/2,RG.runway.z+50);lab('Industrial park',RG.cx+700,RG.cz-640);lab('Gas',RG.gas.x,RG.gas.z+60);lab('Village',RG.cx+500,RG.cz-1560);lab('Forest',RG.cx-760,RG.cz-760);
- const px=walking?walker.x:posX,pz=walking?walker.z:posZ;x.translate(W/2+(px-RG.cx)*s,H/2+(pz-RG.cz)*s);x.rotate(-(walking?camYaw:yawCar));x.fillStyle='#ff3b30';x.beginPath();x.moveTo(0,-10*k);x.lineTo(7*k,7*k);x.lineTo(0,3*k);x.lineTo(-7*k,7*k);x.closePath();x.fill();x.restore();}
+ const px=walking?walker.x:posX,pz=walking?walker.z:posZ;if(BM.follow){BM.cx=px;BM.cz=pz;}const x=cv.getContext('2d'),s=BM.s*k,M=(wx,wz)=>[W/2+(wx-BM.cx)*s,H/2+(wz-BM.cz)*s];x.save();x.clearRect(0,0,W,H);rgDraw(x,s,W/2,H/2,BM.cx,BM.cz,1.5);
+ if(nav.route){x.strokeStyle='#2f8cff';x.lineWidth=Math.max(3*k,6*s);x.lineJoin='round';x.beginPath();nav.route.forEach((q,i)=>{const m=M(q.x,q.z);i?x.lineTo(m[0],m[1]):x.moveTo(m[0],m[1]);});x.stroke();}
+ if(nav.dest){const m=M(nav.dest.x,nav.dest.z);x.fillStyle='#ff3b30';x.beginPath();x.arc(m[0],m[1]-10*k,7*k,0,7);x.fill();x.beginPath();x.moveTo(m[0]-5*k,m[1]-7*k);x.lineTo(m[0],m[1]);x.lineTo(m[0]+5*k,m[1]-7*k);x.fill();}
+ x.fillStyle='#fff';x.strokeStyle='rgba(0,0,0,.6)';x.lineWidth=3*k;x.font='600 '+Math.round(12*k)+'px system-ui';x.textAlign='center';for(const q of rgPlaces()){const m=M(q.x,q.z);if(m[0]<-60||m[1]<-30||m[0]>W+60||m[1]>H+30)continue;x.fillRect(m[0]-2*k,m[1]-2*k,4*k,4*k);x.strokeText(q.n,m[0],m[1]-6*k);x.fillText(q.n,m[0],m[1]-6*k);}
+ if(typeof MP!=='undefined'&&MP.on)for(const q of MP.peers.values()){if(!q.seen)continue;const m=M(q.x,q.z);x.fillStyle='#4fc3f7';x.beginPath();x.arc(m[0],m[1],5*k,0,7);x.fill();}
+ const me=M(px,pz);x.translate(me[0],me[1]);x.rotate(-(walking?camYaw:yawCar));x.fillStyle='#ff3b30';x.beginPath();x.moveTo(0,-10*k);x.lineTo(7*k,7*k);x.lineTo(0,3*k);x.lineTo(-7*k,7*k);x.closePath();x.fill();x.restore();}
 /* ---------- getting there ---------- */
 function rgToggle(){if(walking){toast('Get in your car first');return;}const fd=$('#fade');if(fd)fd.style.opacity=1;st.v=0;cruise=0;spinRate=0;
  setTimeout(()=>{if(rgZone(posX,posZ)){posX=2;posZ=-20;yawCar=0;toast('Back on the Autobahn.',2400);}else{rgBuild();const R=RG.roads[0],i=Math.floor(R.pts.length*.25),p=R.pts[i],q=R.pts[i+1];const tx=q[0]-p[0],tz=q[1]-p[1],L=Math.hypot(tx,tz);posX=p[0]+(-tz/L)*-6.5;posZ=p[1]+(tx/L)*-6.5;yawCar=Math.atan2(-tx,-tz);limit=130;
@@ -3568,6 +3571,79 @@ function rgToggle(){if(walking){toast('Get in your car first');return;}const fd=
  const _dm=drawMinimap;drawMinimap=function(dt){if(RG.built&&rgZone(walking?walker.x:posX,walking?walker.z:posZ))return rgMini(dt);return _dm(dt);};
  const _bm=drawBigMap;drawBigMap=function(){if(RG.built&&rgZone(walking?walker.x:posX,walking?walker.z:posZ))return rgBig();return _bm();};
  $('#rgBtn').addEventListener('click',()=>{$('#moreMenu').hidden=true;$('#moreBtn').setAttribute('aria-expanded',false);rgToggle();});}
+
+/* ===== Lake Valley: places, sat-nav routing over the valley roads, jobs and police ===== */
+function rgIn(){return rgZone(walking?walker.x:posX,walking?walker.z:posZ);}
+function rgPlaces(){if(!RG.roads.length)rgDesign();const cx=RG.cx,cz=RG.cz,L=RG.lake,rw=RG.runway,ctry=RG.roads[1],near=(x,z)=>{let b=ctry.pts[0],bd=1e9;for(const p of ctry.pts){const d=Math.hypot(p[0]-x,p[1]-z);if(d<bd){bd=d;b=p;}}return b;};
+ const vil=near(cx+450,cz-1500),lod=near(cx-1100,cz-1100),farm=near(cx+1100,cz+1100);
+ return[{n:'Downtown · Main Road',x:cx,z:cz},{n:'City Hall · Bank Road',x:cx+150,z:cz+100},{n:'Market Road',x:cx-150,z:cz-100},{n:'Central Park',x:cx-100,z:cz-150},
+  {n:'Lake beach',x:L.x+L.rx+40,z:cz+300},{n:'Airport terminal',x:rw.x0-30,z:rw.z},{n:'Cabin Motors dealer',x:cx+780,z:cz-500},{n:'Warehouse district',x:cx+560,z:cz-500},
+  {n:'Gas station',x:RG.gas.x,z:RG.gas.z+21},{n:'Oakfield village',x:vil[0],z:vil[1]},{n:'Forest lodge',x:lod[0],z:lod[1]},{n:'Southfield farm',x:farm[0],z:farm[1]},
+  {n:'North gate',x:cx,z:cz-1100},{n:'South gate',x:cx,z:cz+1100},{n:'West gate',x:cx-1100,z:cz}];}
+/* ---------- road graph ---------- */
+var RGN=null;
+function rgGraph(){if(RGN)return RGN;if(!RG.roads.length)rgDesign();const N=[],adj=[],grid=new Map(),C=12;
+ RG.roads.forEach((R,ri)=>{const base=N.length;R.pts.forEach(p=>{const i=N.length;N.push({x:p[0],z:p[1],r:ri});adj.push([]);const k=Math.floor(p[0]/C)+','+Math.floor(p[1]/C);let l=grid.get(k);if(!l)grid.set(k,l=[]);l.push(i);});
+  const n=R.pts.length;for(let i=0;i<n-(R.closed?0:1);i++){const a=base+i,b=base+(i+1)%n,d=Math.hypot(N[a].x-N[b].x,N[a].z-N[b].z);adj[a].push([b,d]);adj[b].push([a,d]);}});
+ /* junctions: points of different roads that touch */
+ N.forEach((p,i)=>{const gx=Math.floor(p.x/C),gz=Math.floor(p.z/C),w=RG.roads[p.r].w/2;for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){const l=grid.get((gx+dx)+','+(gz+dz));if(!l)continue;for(const j of l){if(j<=i||N[j].r===p.r)continue;const d=Math.hypot(N[j].x-p.x,N[j].z-p.z);if(d<Math.max(w,RG.roads[N[j].r].w/2)+3){adj[i].push([j,d+2]);adj[j].push([i,d+2]);}}}});
+ RGN={N,adj,grid,C};return RGN;}
+function rgNearest(x,z){const G=rgGraph();let b=0,bd=1e18;const gx=Math.floor(x/G.C),gz=Math.floor(z/G.C);for(let r=1;r<40&&bd===1e18;r+=4)for(let dx=-r;dx<=r;dx++)for(let dz=-r;dz<=r;dz++){const l=G.grid.get((gx+dx)+','+(gz+dz));if(!l)continue;for(const i of l){const d=(G.N[i].x-x)**2+(G.N[i].z-z)**2;if(d<bd){bd=d;b=i;}}}
+ if(bd===1e18)G.N.forEach((p,i)=>{const d=(p.x-x)**2+(p.z-z)**2;if(d<bd){bd=d;b=i;}});return b;}
+function rgPathFind(a,b){const G=rgGraph(),n=G.N.length,dist=new Float64Array(n).fill(Infinity),prev=new Int32Array(n).fill(-1),H=[[0,a]];dist[a]=0;
+ const push=(d,i)=>{H.push([d,i]);let c=H.length-1;while(c>0){const p=(c-1)>>1;if(H[p][0]<=H[c][0])break;[H[p],H[c]]=[H[c],H[p]];c=p;}};
+ const pop=()=>{const t=H[0],l=H.pop();if(H.length){H[0]=l;let c=0;for(;;){const L2=c*2+1,R2=L2+1;let m=c;if(L2<H.length&&H[L2][0]<H[m][0])m=L2;if(R2<H.length&&H[R2][0]<H[m][0])m=R2;if(m===c)break;[H[m],H[c]]=[H[c],H[m]];c=m;}}return t;};
+ H.length=0;push(0,a);while(H.length){const [d,i]=pop();if(i===b)break;if(d>dist[i])continue;for(const [j,w] of G.adj[i]){const sp=RG.roads[G.N[j].r].type==='hw'?.7:RG.roads[G.N[j].r].type==='runway'?3:1,nd=d+w*sp;if(nd<dist[j]){dist[j]=nd;prev[j]=i;push(nd,j);}}}
+ if(!isFinite(dist[b]))return null;const P=[];for(let i=b;i>=0;i=prev[i])P.push(i);return P.reverse();}
+/* turn the node path into route points with spoken instructions at each change of road */
+function rgRoute(d){const G=rgGraph(),a=rgNearest(posX,posZ),b=rgNearest(d.x,d.z),P=rgPathFind(a,b);if(!P)return null;const R=[NN(posX,posZ)];
+ for(let k=1;k<P.length;k++){const p=G.N[P[k]],q=G.N[P[k-1]];if(p.r!==q.r){const r0=RG.roads[q.r],r1=RG.roads[p.r];let k0=Math.max(0,k-4),k2=Math.min(P.length-1,k+4);
+   const ax=G.N[P[k]].x-G.N[P[k0]].x,az=G.N[P[k]].z-G.N[P[k0]].z,bx=G.N[P[k2]].x-G.N[P[k]].x,bz=G.N[P[k2]].z-G.N[P[k]].z,cr=ax*bz-az*bx,dt=ax*bx+az*bz,ang=Math.atan2(cr,dt);
+   const side=ang>0?'right':'left',name=r1.name;let say;
+   if(r1.type==='hw')say='Join the '+name;else if(r0.type==='hw')say='Take the exit '+side+' onto '+name;else if(Math.abs(ang)<.45)say='Continue onto '+name;else say='Turn '+side+' onto '+name;
+   if(Math.hypot(p.x-R[R.length-1].x,p.z-R[R.length-1].z)>25||!R[R.length-1].say)R.push(NN(p.x,p.z,say));}
+  else if(k%6===0)R.push(NN(p.x,p.z));}
+ R.push(NN(d.x,d.z,'Arrive at '+d.name));return R;}
+/* ---------- police ---------- */
+var RGP={cops:[],chase:null,trail:[],trailT:0,sirT:0,notice:0};
+function rgPoliceInit(){if(RGP.cops.length||!RG.built)return;const spots=[[0,.1,4.4],[0,.6,-4.4],[2,.5,4],[4,.4,-4]];
+ spots.forEach(([ri,f,lane],i)=>{const g=trafficCar(0,'#f4f6f8');const bar=new THREE.Group(),bl=new THREE.Mesh(new THREE.BoxGeometry(.5,.18,.3),new THREE.MeshBasicMaterial({color:0x1565ff})),rd=new THREE.Mesh(new THREE.BoxGeometry(.5,.18,.3),new THREE.MeshBasicMaterial({color:0xff1744}));bl.position.x=-.3;rd.position.x=.3;bar.add(bl,rd);
+  const top=new THREE.Box3().setFromObject(g).max.y;bar.position.y=top+.1;g.add(bar);const stripe=new THREE.Mesh(new THREE.BoxGeometry(2.02,.25,3.2),new THREE.MeshBasicMaterial({color:0x1b5e20}));stripe.position.y=.75;g.add(stripe);
+  RG.g.add(g);const R=RG.roads[ri];RGP.cops.push({g,bl,rd,ri,s:R.len*f,lane,dir:lane>0?1:-1,v:22,mode:'patrol',x:0,z:0,yaw:0,cool:0,trailI:0});});}
+function rgPoliceStep(dt){if(!RG.built)return;rgPoliceInit();const kmh=Math.abs(st.v)*3.6,q0=walking?null:rgQuery(posX,posZ),lim=q0&&q0.r.limit<900?q0.r.limit:(RG.lastRoad&&RG.lastRoad.limit<900?RG.lastRoad.limit:130),now=performance.now()/1000;
+ /* breadcrumbs of where you drove, so a chasing car follows real roads */
+ RGP.trailT-=dt;if(RGP.trailT<=0&&!walking){RGP.trailT=.2;RGP.trail.push([posX,posZ]);if(RGP.trail.length>600)RGP.trail.shift();}
+ for(const c of RGP.cops){const flash=Math.floor(now*6)%2;c.bl.material.color.setHex(c.mode==='chase'?(flash?0x1565ff:0x02133d):0x0d2a66);c.rd.material.color.setHex(c.mode==='chase'?(flash?0x330008:0xff1744):0x4a0a14);
+  if(c.mode==='patrol'){const R=RG.roads[c.ri];c.s+=c.dir*c.v*dt;if(!R.closed&&(c.s<=0||c.s>=R.len)){c.dir*=-1;c.lane*=-1;c.s=Math.max(0,Math.min(R.len,c.s));}const p=rgAt(R,c.s);c.x=p.x-p.tz*c.lane;c.z=p.z+p.tx*c.lane;c.yaw=Math.atan2(p.tx*c.dir,p.tz*c.dir);
+   /* spotted you? */
+   const d=Math.hypot(posX-c.x,posZ-c.z);if(!walking&&!RGP.chase&&d<140&&(kmh>lim+35||(car&&car.stolen&&d<60))&&now>RGP.notice){RGP.chase={c,t:0,stopT:0,lostT:0};c.mode='chase';c.trailI=Math.max(0,RGP.trail.length-1-Math.round(d/8));c.v=Math.abs(st.v)+6;
+    toast(car&&car.stolen?'🚨 Police! They recognised the stolen car. Pull over!':'🚨 Police! '+Math.round(kmh)+' km/h in a '+lim+' zone. Pull over and stop!',4200);if(typeof vox==='function')vox('cop',['Police! Pull over now!','This is the police. Stop the car!','Pull over to the side of the road!'],'copgo',5);}}
+  else if(c.mode==='chase'){const C=RGP.chase;C.t+=dt;const d=Math.hypot(posX-c.x,posZ-c.z);
+   /* drive along your trail, faster when far behind */
+   const want=d>60?Math.abs(st.v)+14:Math.max(Math.abs(st.v)+3,8);c.v+=(Math.min(95,want)-c.v)*Math.min(1,dt*1.5);let move=c.v*dt;
+   while(move>0&&c.trailI<RGP.trail.length){const t=RGP.trail[c.trailI],dx=t[0]-c.x,dz=t[1]-c.z,L=Math.hypot(dx,dz);if(L<=move){c.x=t[0];c.z=t[1];move-=L;c.trailI++;}else{c.x+=dx/L*move;c.z+=dz/L*move;c.yaw=Math.atan2(dx,dz);move=0;}}
+   if(c.trailI>=RGP.trail.length&&d>4){const dx=posX-c.x,dz=posZ-c.z,L=Math.hypot(dx,dz)||1;c.x+=dx/L*Math.min(move,L-4);c.z+=dz/L*Math.min(move,L-4);c.yaw=Math.atan2(dx,dz);}
+   /* siren */
+   RGP.sirT-=dt;if(RGP.sirT<=0&&d<260&&AU.ctx){RGP.sirT=.55;const hi=Math.floor(now*1.8)%2;tone2(hi?960:720,.5,'sawtooth',.03*Math.max(.2,1-d/260));}
+   /* pulled over, got away, or gave up */
+   if(kmh<3&&d<30){C.stopT+=dt;if(C.stopT>2.2){const fine=car&&car.stolen?800:Math.min(600,80+Math.round(Math.max(0,kmh)*0)+Math.round((C.top||0)*2));st.tickets++;if(typeof addMoney==='function')addMoney(-Math.min(money,fine));toast(car&&car.stolen?'👮 Officer: "This car was reported stolen." You are fined €'+fine+'.':'👮 Officer: "You were going way too fast." Fine: €'+fine+'. Drive safe.',5200);if(typeof vox==='function')vox('cop',['Licence and registration, please. That is a fine.','You were going far too fast. Here is your ticket.'],'copstop',5);rgPoliceEnd(c,30);continue;}}else C.stopT=0;
+   C.top=Math.max(C.top||0,kmh);
+   if(d>420){C.lostT+=dt;if(C.lostT>8){toast('😎 You lost the police.',3000);if(typeof vox==='function')vox('co',['We lost them! Nice driving.','They are gone. Phew.'],'lost',10);rgPoliceEnd(c,45);continue;}}else C.lostT=0;
+   if(C.t>120){toast('The police gave up the chase.',2600);rgPoliceEnd(c,45);continue;}
+   if(d<3.2&&!c.cool&&Math.abs(st.v)>4){crashT=Math.min(1,Math.abs(st.v)/16);sfx('crash');st.v*=.55;c.cool=1;}if(c.cool)c.cool=Math.max(0,c.cool-dt);}
+  c.g.position.set(c.x,0,c.z);c.g.rotation.y=c.yaw;c.g.visible=Math.hypot(posX-c.x,posZ-c.z)<650;}}
+function rgPoliceEnd(c,gap){c.mode='patrol';RGP.chase=null;RGP.notice=performance.now()/1000+gap;/* back to the nearest point of its road */const R=RG.roads[c.ri];let bs=0,bd=1e9;for(let s=0;s<R.len;s+=10){const p=rgAt(R,s),d=Math.hypot(p.x-c.x,p.z-c.z);if(d<bd){bd=d;bs=s;}}c.s=bs;c.v=22;}
+/* ---------- hooks into the game's sat-nav, map and jobs ---------- */
+{const _br=buildRoute;buildRoute=function(){const d=nav.dest;if(d&&rgZone(posX,posZ)&&rgZone(d.x,d.z)){const R=rgRoute(d);if(R){nav.route=R;return;}}return _br.apply(this,arguments);};
+ const _rd=renderDestList;renderDestList=function(){if(!rgIn())return _rd.apply(this,arguments);const px=walking?walker.x:posX,pz=walking?walker.z:posZ;
+  const L=rgPlaces().map(p=>Object.assign({},p,{d:Math.hypot(p.x-px,p.z-pz)})).sort((a,b)=>a.d-b.d);parked.forEach(e=>{if(rgZone(e.x,e.z))L.push({n:'Parked · '+e.cfg.name,d:Math.hypot(e.x-px,e.z-pz),x:e.x-3,z:e.z});});BM.list=L;
+  $('#bmDest').innerHTML=L.map((q,i)=>`<button class="dest${nav.dest&&nav.dest.name===q.n?' on':''}" data-i="${i}"><b>${q.n}</b><small>${(q.d/1000).toFixed(1)} km</small></button>`).join('');
+  document.querySelectorAll('[data-ropt]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ropt===nav.opt));};
+ const _jp=jobPlaces;jobPlaces=function(){return rgIn()?rgPlaces():_jp.apply(this,arguments);};
+ const _mo=makeOffers;makeOffers=function(){if(!rgIn())return _mo.apply(this,arguments);const P2=rgPlaces(),pick=a=>a[Math.floor(Math.random()*a.length)],O=[];
+  for(let i=0;i<4;i++){const type=i%2?'parcel':'taxi';let a=pick(P2),b=pick(P2),tries=0;while((b===a||Math.hypot(a.x-b.x,a.z-b.z)<700)&&tries++<30)b=pick(P2);
+   const km=Math.hypot(a.x-b.x,a.z-b.z)*1.3/1000,pay=Math.round((type==='taxi'?16:12)+km*(type==='taxi'?9:11));
+   O.push({type,n:type==='taxi'?`Taxi for ${pick(NAMES)}`:'Parcel delivery',d:`${a.n} → ${b.n} · about ${km.toFixed(1)} km`,a,b,pay,stage:'pickup'});}JOB.offers=O;};}
 
 function trkUpdate(dt){TRK.clock+=dt;const inT=trkZone(walking?walker.x:posX,walking?walker.z:posZ);if(TRK.g)TRK.g.visible=inT;if(inT&&!TRK.built)trkBuild();const box=$('#lapBox');
  if(!inT||!TRK.built){if(box&&!box.hidden)box.hidden=true;if(TRK.ghost)TRK.ghost.visible=false;TRK.ai.forEach(a=>a.g.visible=false);return;}
