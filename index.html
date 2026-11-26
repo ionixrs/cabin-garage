@@ -3207,7 +3207,7 @@ function mpBuild(p){if(p.g){scene.remove(p.g);try{disposeGroup(p.g);}catch(e){}p
  hitMeshes=hitMeshes.filter(m=>!set.has(m));RP.group.traverse(o=>{o.userData.noHit=true;delete o.userData.hit;});
  const k=cfg.truck?1:CARZ;RP.group.scale.z=k;G.add(RP.group);
  if(p.paint||p.rim)RP.group.traverse(o=>{const m=o.material;if(!m||!m.userData||!m.color)return;if(p.paint&&m.userData.isPaint)m.color.set(lin(parseInt(p.paint.slice(1),16)));if(p.rim&&m.userData.isRim)m.color.set(lin(parseInt(p.rim.slice(1),16)));});
- const tag=mpTag(p.name);tag.position.y=cfg.truck?4.9:2.3;G.add(tag);G.userData.lift=cfg.lift||0;scene.add(G);p.g=G;p.tag=tag;p.key=p.car+p.paint+p.rim+p.name;p.truck=!!cfg.truck;}
+ p.RP=RP;const tag=mpTag(p.name);tag.position.y=cfg.truck?4.9:2.3;G.add(tag);G.userData.lift=cfg.lift||0;scene.add(G);p.g=G;p.tag=tag;p.key=p.car+p.paint+p.rim+p.name;p.truck=!!cfg.truck;}
 function mpRemovePeer(id){const p=MP.peers.get(id);if(!p)return;if(p.g){scene.remove(p.g);try{disposeGroup(p.g);}catch(e){}}MP.peers.delete(id);}
 /* tell everyone where I am, 12 times a second (and once a second from a background tab, so friends aren't dropped) */
 function mpSendState(){MP.sendT=1/12;MP.lastSend=performance.now();if(!MP.conns.size)return;const R=TRK.race,prog=R&&R.mp?trkProgress():-1;
@@ -3221,7 +3221,7 @@ function mpUpdate(dt){if(!MP.on)return;const now=performance.now();
   if(!p.g||p.key!==p.car+p.paint+p.rim+p.name)mpBuild(p);if(!p.g)continue;
   const lead=Math.min(age,.35),px=p.tx-Math.sin(p.tyaw)*p.v*lead,pz=p.tz-Math.cos(p.tyaw)*p.v*lead,d=Math.hypot(px-p.x,pz-p.z);
   if(d>40){p.x=px;p.z=pz;p.yaw=p.tyaw;}else{const k=Math.min(1,dt*10);p.x+=(px-p.x)*k;p.z+=(pz-p.z)*k;p.yaw=lerpAngle(p.yaw,p.tyaw,k);}p.h+=(p.th-p.h)*Math.min(1,dt*8);
-  p.g.visible=age<15;p.g.position.set(p.x,p.g.userData.lift+p.h,p.z);p.g.rotation.y=p.yaw;
+  p.g.visible=age<15;p.g.position.set(p.x,p.g.userData.lift+p.h,p.z);p.g.rotation.y=p.yaw;if(p.RP&&p.RP.wheels){const sp=p.v*dt;p.RP.wheels.forEach(w=>{if(w.sp)w.sp.rotation.x-=sp/(w.r||.33);});cmWheelsFollow(p.RP);cmLights(p.RP,false);}
   /* bump into each other */
   if(!walking&&!p.w&&p.g.visible&&!(EDIT&&EDIT.on)){const dx=posX-p.x,dz=posZ-p.z,dd=Math.hypot(dx,dz),R=p.truck||car.truck?4.2:2.9;if(dd<R&&dd>.01&&Math.abs((HYP.h||0)-p.h)<1.5){const push=(R-dd)*.6;posX+=dx/dd*push;posZ+=dz/dd*push;
     if(MP.bumpT<=0){const im=Math.abs(st.v-p.v*Math.cos(p.yaw-yawCar));if(im>3){crashT=Math.min(1,im/16);sfx(im>12?'crash':'thunk');st.v*=.75;}MP.bumpT=.6;}}}}
@@ -3275,6 +3275,42 @@ function mpUI(){const on=!!MP.code;$('#mpOff').hidden=on;$('#mpOn').hidden=!on;i
  try{const jc=new URLSearchParams(location.search).get('join');if(jc){const c=jc.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,5);setTimeout(()=>{open();$('#mpCode').value=c;mpNote('Joining your friend\'s lobby <b>'+c+'</b>…');mpJoin(c);},1200);}}catch(e){}}
 var CM_FRONT={"kessler9":1,"kessler-gt":1,"nordring":1,"nordring-c":0,"nordring-t":0,"aurelia":1,"ironhorse":1,"lindhof-eq":1,"lindhofr6":1,"vierlingk":0,"vierling-h3":1,"vierlingr5":1,"strada":1,"vierling-w16":1,"volt":0,"ridgeback":1,"tempesta-furia":0,"tempesta-lampo":1,"tempesta-ruspa":0,"rosalba-12":1,"rosalba-sf":1};
 var CM_CREDITS=[["kessler9","Porsche 911 (930) Turbo 1975","Lexyc16","CC Attribution","https://sketchfab.com/3d-models/none-de1ffd344c41481892511f7fd332c136"],["kessler-gt","Porsche 911 GT3","ChevroletSS","CC Attribution","https://sketchfab.com/3d-models/none-78d5c47ab2554c2592b7e499179a0792"],["nordring","AUDI RS7 Free | Low Poly","Black Snow","CC Attribution","https://sketchfab.com/3d-models/none-d54df8dbc0904a3980d0dd1a8095caf8"],["nordring-c","2020 Audi TT RS Coupe (Type 8S)","DisneyCars","CC Attribution","https://sketchfab.com/3d-models/none-9e73c96ee379447f8ff4e0123a30ae15"],["nordring-t","2020 Audi RS 6 Avant (C8)","DisneyCars","CC Attribution","https://sketchfab.com/3d-models/none-134938388d1a4993a518ef26f373ff10"],["aurelia","BMW 7-series (F01)","Black Snow","CC Attribution","https://sketchfab.com/3d-models/none-0806c39847ae42e5996917f50527dda0"],["ironhorse","2010 Mercedes SLS AMG","Dave Love SketchFab","CC Attribution","https://sketchfab.com/3d-models/none-fa3fd5eeea674f37bb03283f2c53d563"],["lindhof-eq","Volvo Polestar One K.S edition","3D Cars Studio","CC Attribution","https://sketchfab.com/3d-models/none-b59764e454d54f73a6b745408f56cd3f"],["lindhofr6","Fairheaven SW '84 - Low poly model","Daniel Zhabotinsky","CC Attribution","https://sketchfab.com/3d-models/none-aa0becb6e854422596cac6b21bf79787"],["vierlingk","BMW E34 [stance style]","Myedsu","CC Attribution","https://sketchfab.com/3d-models/none-ffe1a3a1bcb34e0bb80f1aa41c9edb46"],["vierling-h3","Low Poly Car - BMW E30 1985 White","ROH3D","CC Attribution","https://sketchfab.com/3d-models/none-9dea494b447e442fafbddfc7eccbf158"],["vierlingr5","Mercedes 190E EVO 1982 3D Model Free","Betier Models","CC Attribution","https://sketchfab.com/3d-models/none-15e5576f4b724f2db357165caed3492b"],["strada","Mclaren P1 | www.vecarz.com","vecarz","CC Attribution","https://sketchfab.com/3d-models/none-adae2edc721e4ce7b31c1d06a581e30a"],["vierling-w16","Koenigsegg One:1","iSteven","CC Attribution","https://sketchfab.com/3d-models/none-b4e5a4c5fa5d4d45acd6715d3325254f"],["volt","2013 Suzuki WagonR","BHP3D","CC Attribution","https://sketchfab.com/3d-models/none-71112627f42342099ff95b59e7532663"],["ridgeback","Mercedes Benz G-class W263","Lexyc16","CC Attribution","https://sketchfab.com/3d-models/none-1a2a52b16cad4e618af347461817895c"],["tempesta-furia","Lamborghini Countach lp500s - Special 500k views","SDC PERFORMANCE™️","CC Attribution","https://sketchfab.com/3d-models/none-32e9ee8d129e4c2992e1753b4fc3094c"],["tempesta-lampo","Lamborghini Gallardo 2010","Artem P","CC Attribution","https://sketchfab.com/3d-models/none-ff0eb2242d0e42eb8b7034b4db639e56"],["tempesta-ruspa","2023 Audi RS Q8","DisneyCars","CC Attribution","https://sketchfab.com/3d-models/none-c30b4a6ec479473a814d030da10e97a8"],["rosalba-12","Ferrari 288 GTO","Randomness","CC Attribution","https://sketchfab.com/3d-models/none-e83da098149746b5a3ba6f1661645b09"],["rosalba-sf","2023 Ferrari SF90 XX Stradale","Ddiaz Design","CC Attribution","https://sketchfab.com/3d-models/none-2c80c667232544649328cf3589921bcd"]];
+/* ===== make the model's own wheels turn and steer: find the wheel parts near each of the game's wheels,
+   split meshes that hold all four wheels, and hang each wheel on a pivot that copies the game's wheel ===== */
+function cmVerts(m,cb){const p=m.geometry.attributes.position,A=p.array,nf=p.normalized?(A instanceof Int16Array?32767:A instanceof Int8Array?127:A instanceof Uint16Array?65535:A instanceof Uint8Array?255:1):1,v=CMC.v;
+ for(let i=0;i<p.count;i++){v.set(p.getX(i)/nf,p.getY(i)/nf,p.getZ(i)/nf).applyMatrix4(m.matrixWorld);cb(v,i);}}
+function cmWheelRig(Pobj,wrap){if(!Pobj.wheels||Pobj.wheels.length<4)return[];Pobj.group.updateMatrixWorld(true);
+ const seeds=Pobj.wheels.map(w=>{const s=(w.S||w.sp).getWorldPosition(new THREE.Vector3());return{w,x:s.x,y:s.y,z:s.z,r:w.r||.33,meshes:[]};});
+ /* the car's own axes in the world, so "near a wheel" means along and across the car */
+ const q=new THREE.Quaternion();Pobj.group.getWorldQuaternion(q);const ax=new THREE.Vector3(1,0,0).applyQuaternion(q),az=new THREE.Vector3(0,0,1).applyQuaternion(q);
+ const rel=(v,s)=>{const dx=v.x-s.x,dz=v.z-s.z;return[Math.abs(dx*ax.x+dz*ax.z),Math.abs(dx*az.x+dz*az.z),v.y-s.y];};
+ const near=(v)=>{let b=-1,bd=1e9;seeds.forEach((s,i)=>{const [a,l,h]=rel(v,s);if(a<.95&&l<1.15&&h<s.r+.4){const d=a*a+l*l;if(d<bd){bd=d;b=i;}}});return b;};
+ const meshes=[];wrap.traverse(m=>{if(m.isMesh&&m.geometry&&m.geometry.attributes.position)meshes.push(m);});
+ for(const m of meshes){const p=m.geometry.attributes.position;if(p.count<8)continue;let hit=0,n=0;const cnt=new Array(seeds.length).fill(0),st=Math.max(1,Math.floor(p.count/400));
+  cmVerts(m,(v,i)=>{if(i%st)return;n++;const k=near(v);if(k>=0){hit++;cnt[k]++;}});
+  if(hit/n<.93)continue;const used=cnt.filter(c=>c>0).length;
+  if(used===1){seeds[cnt.findIndex(c=>c>0)].meshes.push(m);continue;}
+  /* one mesh with several wheels in it: cut it up by wheel */
+  const g=m.geometry;if(g.groups&&g.groups.length>1)continue;const idx=g.index,tri=Math.floor((idx?idx.count:g.attributes.position.count)/3),vi=(t,k)=>idx?idx.getX(t*3+k):t*3+k,owner=new Int16Array(tri).fill(-1),c=new THREE.Vector3();
+  const wp=new Float32Array(g.attributes.position.count*3);cmVerts(m,(v,i)=>{wp[i*3]=v.x;wp[i*3+1]=v.y;wp[i*3+2]=v.z;});
+  for(let t=0;t<tri;t++){const a=vi(t,0),b2=vi(t,1),d2=vi(t,2);c.set((wp[a*3]+wp[b2*3]+wp[d2*3])/3,(wp[a*3+1]+wp[b2*3+1]+wp[d2*3+1])/3,(wp[a*3+2]+wp[b2*3+2]+wp[d2*3+2])/3);let b=0,bd=1e9;seeds.forEach((s2,si)=>{const [a1,l1]=rel(c,s2),d=a1*a1+l1*l1;if(d<bd){bd=d;b=si;}});owner[t]=b;}
+  const comp=(at,i,k)=>k===0?at.getX(i):k===1?at.getY(i):k===2?at.getZ(i):at.getW(i);
+  seeds.forEach((s2,si)=>{let n2=0;for(let t=0;t<tri;t++)if(owner[t]===si)n2++;if(!n2)return;const geo=new THREE.BufferGeometry();
+   for(const name in g.attributes){const at=g.attributes[name],is=at.itemSize,arr=new at.array.constructor(n2*3*is);let o=0;for(let t=0;t<tri;t++){if(owner[t]!==si)continue;for(let k=0;k<3;k++){const v=vi(t,k);for(let q2=0;q2<is;q2++)arr[o++]=comp(at,v,q2);}}geo.setAttribute(name,new THREE.BufferAttribute(arr,is,at.normalized));}
+   const part=new THREE.Mesh(geo,m.material);part.position.copy(m.position);part.quaternion.copy(m.quaternion);part.scale.copy(m.scale);part.frustumCulled=false;part.userData.noHit=true;m.parent.add(part);part.updateMatrixWorld(true);s2.meshes.push(part);});
+  m.parent.remove(m);}
+ /* hang each wheel on a pivot at its own centre */
+ const rigs=[];for(const s of seeds){if(!s.meshes.length)continue;const b=new THREE.Box3();s.meshes.forEach(m=>{m.updateMatrixWorld(true);cmVerts(m,v=>b.expandByPoint(v));});const cen=b.getCenter(new THREE.Vector3());
+  const pv=new THREE.Group();pv.rotation.order='YXZ';wrap.add(pv);wrap.updateMatrixWorld(true);pv.position.copy(wrap.worldToLocal(cen.clone()));pv.updateMatrixWorld(true);s.meshes.forEach(m=>pv.attach(m));rigs.push({pv,w:s.w});}
+ return rigs;}
+/* every frame: copy the game's wheel spin and steering onto the model's wheels */
+function cmWheelsFollow(Pobj){const c=Pobj&&Pobj.cm;if(!c||!c.rigs)return;for(const r of c.rigs){r.pv.rotation.x=r.w.sp?r.w.sp.rotation.x:0;r.pv.rotation.y=r.w.S?r.w.S.rotation.y:0;}}
+/* lights on the model: headlights and tail lights glow when the lights are on, brighter red when braking */
+function cmLights(Pobj,brake){const c=Pobj&&Pobj.cm;if(!c)return;if(!c.lamps){c.lamps=[];c.model.forEach(m=>(Array.isArray(m.material)?m.material:[m.material]).forEach(mt=>{const n=(mt.name||'')+' '+(m.name||'');let k=null;
+   if(/tail|rear.?l|brake|stop.?l|back.?l/i.test(n))k='tail';else if(/head.?l|headlamp|front.?l|hl_|_hl|drl/i.test(n))k='head';if(k&&mt.emissive&&!c.lamps.some(x=>x.mt===mt)){c.lamps.push({mt,k,e0:mt.emissive.clone(),i0:mt.emissiveIntensity});}}));}
+ const on=st.lights>0||st.time==='night';const key=(on?1:0)+'|'+(brake?1:0);if(key===c.lampKey)return;c.lampKey=key;
+ for(const L of c.lamps){if(L.k==='head'){if(on){L.mt.emissive.setHex(0xfff3d6);L.mt.emissiveIntensity=1.6;}else{L.mt.emissive.copy(L.e0);L.mt.emissiveIntensity=L.i0;}}
+  else{if(on||brake){L.mt.emissive.setHex(0xff1a1a);L.mt.emissiveIntensity=brake?2.4:.9;}else{L.mt.emissive.copy(L.e0);L.mt.emissiveIntensity=L.i0;}}}}
 /* ===== real car bodies: 3D models from Sketchfab (CC Attribution, see Credits), fitted over each car.
    Inside the car you still see the game's own working cabin; from outside you see the model. ===== */
 var CM_BASE=/(^|\.)cabin-garage-oz2i\.vercel\.app$/.test(location.hostname)||/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&location.port==='3000'?'models/':'https://cabin-garage-oz2i.vercel.app/models/';
@@ -3307,7 +3343,7 @@ function cmAttach(Pobj,cfg){if(!CMC.on||!Pobj||!cfg||cfg.truck||CM_FRONT[cfg.id]
    else if(/plate|number/i.test(n)&&!/manufacturer/i.test(n)){const t=tex(plate('CG '+(cfg.name||'').slice(0,2).toUpperCase()+' 2026'));t.flipY=false;mt.map=t;if(mt.color)mt.color.set(0xffffff);mt.needsUpdate=true;}});});
   const drv=new Set();if(Pobj.drv&&Pobj.drv.D)Pobj.drv.D.traverse(m=>drv.add(m));const tagged=[];Pobj.group.traverse(m=>{if(m.isMesh&&m.userData.cmProc)tagged.push(m);});
   const proc=tagged.length?tagged:[];if(!tagged.length)Pobj.group.traverse(m=>{if(m.isMesh&&!drv.has(m))proc.push(m);});
-  Pobj.group.add(wrap);Pobj.cm={wrap,proc,model:[],ext:null,mode:null,cfg};wrap.traverse(m=>{if(m.isMesh)Pobj.cm.model.push(m);});
+  Pobj.group.add(wrap);let rigs=[];try{rigs=cmWheelRig(Pobj,wrap);}catch(e){rigs=[];}Pobj.cm={wrap,proc,model:[],ext:null,mode:null,cfg,rigs};wrap.traverse(m=>{if(m.isMesh)Pobj.cm.model.push(m);});
   cmPaint(Pobj);cmMode(Pobj,Pobj===P?'player':'static');}).catch(()=>{});}
 /* the driver and anything added after the car was built stay visible in both views */
 function cmMode(Pobj,mode){const c=Pobj&&Pobj.cm;if(!c||c.mode===mode)return;c.mode=mode;
@@ -3316,11 +3352,12 @@ function cmMode(Pobj,mode){const c=Pobj&&Pobj.cm;if(!c||c.mode===mode)return;c.m
 function cmPaint(Pobj){const c=Pobj&&Pobj.cm;if(!c)return;const cu=(typeof CUST!=='undefined'&&CUST[c.cfg.id])||{};if(!cu.paint)return;const col=lin(parseInt(cu.paint.slice(1),16));
  c.model.forEach(m=>(Array.isArray(m.material)?m.material:[m.material]).forEach(mt=>{if(/paint|carpaint|body_?col/i.test(mt.name||'')&&mt.color){mt.color.copy(col);if(mt.map&&/paint/i.test(mt.name)){mt.map=null;}mt.needsUpdate=true;}}));}
 /* each frame: inside the cabin show the working interior, outside show the real body */
-function cmShell(){if(!P||!P.cm||P.cm.mode!=='player'){camera.layers.enable(1);camera.layers.disable(2);return;}
+function cmShell(){if(P&&P.cm){cmWheelsFollow(P);cmLights(P,!!(keys.brake&&st.v>.5));}if(!P||!P.cm||P.cm.mode!=='player'){camera.layers.enable(1);camera.layers.disable(2);return;}
  const c=P.cm,v=CMC.v.copy(camera.getWorldPosition(CMC.v));P.group.worldToLocal(v);
  if(!c.box){const bb=new THREE.Box3();c.proc.forEach(m=>{if(m.geometry){if(!m.geometry.boundingBox)m.geometry.computeBoundingBox();}});P.group.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(P.group.matrixWorld).invert();c.proc.forEach(m=>{if(!m.geometry||!m.geometry.boundingBox)return;const bx=m.geometry.boundingBox.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv,m.matrixWorld));bb.union(bx);});c.box=bb;}
  const B=c.box,kz=P.group.scale.z||1,fr=P.bounds.front/kz,re=P.bounds.rear/kz,L=re-fr,hw=(B.max.x-B.min.x)/2,
-  inside=!walking&&Math.abs(v.x)<hw*.8&&v.y<B.max.y-.03&&v.y>B.min.y&&((v.z-fr)/L)>.3&&((v.z-fr)/L)<.9;
+  opened=['doorL','doorR','hood','trunk','flap','rearFold','winL','winR'].some(k=>(A[k]||0)>.02)||!!(A.liftH>.02),
+  inside=opened||!walking&&Math.abs(v.x)<hw*.8&&v.y<B.max.y-.03&&v.y>B.min.y&&((v.z-fr)/L)>.3&&((v.z-fr)/L)<.9;
  const ext=!inside;if(ext!==c.ext){c.ext=ext;}
  if(ext){camera.layers.enable(2);camera.layers.disable(1);}else{camera.layers.enable(1);camera.layers.disable(2);}}
 /* the click ray and the mirror cameras always see the working interior */
