@@ -3285,20 +3285,25 @@ function cmWheelRig(Pobj,wrap){if(!Pobj.wheels||Pobj.wheels.length<4)return[];Po
  const q=new THREE.Quaternion();Pobj.group.getWorldQuaternion(q);const ax=new THREE.Vector3(1,0,0).applyQuaternion(q),az=new THREE.Vector3(0,0,1).applyQuaternion(q);
  const rel=(v,s)=>{const dx=v.x-s.x,dz=v.z-s.z;return[Math.abs(dx*ax.x+dz*ax.z),Math.abs(dx*az.x+dz*az.z),v.y-s.y];};
  const near=(v)=>{let b=-1,bd=1e9;seeds.forEach((s,i)=>{const [a,l,h]=rel(v,s);if(a<.95&&l<1.15&&h<s.r+.4){const d=a*a+l*l;if(d<bd){bd=d;b=i;}}});return b;};
+ const extOf=()=>({a0:1e9,a1:-1e9,l0:1e9,l1:-1e9,h0:1e9,h1:-1e9}),grow=(E,v)=>{const A2=v.x*ax.x+v.z*ax.z,L2=v.x*az.x+v.z*az.z;if(A2<E.a0)E.a0=A2;if(A2>E.a1)E.a1=A2;if(L2<E.l0)E.l0=L2;if(L2>E.l1)E.l1=L2;if(v.y<E.h0)E.h0=v.y;if(v.y>E.h1)E.h1=v.y;},
+  round=E=>{const a=E.a1-E.a0,l=E.l1-E.l0,h=E.h1-E.h0,mx=Math.max(l,h);return mx>.3&&mx<1.15&&Math.min(l,h)/mx>.72&&a<.6;};
  const meshes=[];wrap.traverse(m=>{if(m.isMesh&&m.geometry&&m.geometry.attributes.position)meshes.push(m);});
  for(const m of meshes){const p=m.geometry.attributes.position;if(p.count<8)continue;let hit=0,n=0;const cnt=new Array(seeds.length).fill(0),st=Math.max(1,Math.floor(p.count/400));
   cmVerts(m,(v,i)=>{if(i%st)return;n++;const k=near(v);if(k>=0){hit++;cnt[k]++;}});
   if(hit/n<.93)continue;const used=cnt.filter(c=>c>0).length;
-  if(used===1){seeds[cnt.findIndex(c=>c>0)].meshes.push(m);continue;}
+  if(used===1){const E=extOf();cmVerts(m,v=>grow(E,v));if(round(E))seeds[cnt.findIndex(c=>c>0)].meshes.push(m);continue;}
   /* one mesh with several wheels in it: cut it up by wheel */
   const g=m.geometry;if(g.groups&&g.groups.length>1)continue;const idx=g.index,tri=Math.floor((idx?idx.count:g.attributes.position.count)/3),vi=(t,k)=>idx?idx.getX(t*3+k):t*3+k,owner=new Int16Array(tri).fill(-1),c=new THREE.Vector3();
   const wp=new Float32Array(g.attributes.position.count*3);cmVerts(m,(v,i)=>{wp[i*3]=v.x;wp[i*3+1]=v.y;wp[i*3+2]=v.z;});
   for(let t=0;t<tri;t++){const a=vi(t,0),b2=vi(t,1),d2=vi(t,2);c.set((wp[a*3]+wp[b2*3]+wp[d2*3])/3,(wp[a*3+1]+wp[b2*3+1]+wp[d2*3+1])/3,(wp[a*3+2]+wp[b2*3+2]+wp[d2*3+2])/3);let b=0,bd=1e9;seeds.forEach((s2,si)=>{const [a1,l1]=rel(c,s2),d=a1*a1+l1*l1;if(d<bd){bd=d;b=si;}});owner[t]=b;}
+  {const Es=seeds.map(()=>null);for(let t=0;t<tri;t++){const o=owner[t];if(!Es[o])Es[o]=extOf();for(let k=0;k<3;k++){const v=vi(t,k);c.set(wp[v*3],wp[v*3+1],wp[v*3+2]);grow(Es[o],c);}}if(Es.some(E=>E&&!round(E)))continue;}
   const comp=(at,i,k)=>k===0?at.getX(i):k===1?at.getY(i):k===2?at.getZ(i):at.getW(i);
   seeds.forEach((s2,si)=>{let n2=0;for(let t=0;t<tri;t++)if(owner[t]===si)n2++;if(!n2)return;const geo=new THREE.BufferGeometry();
    for(const name in g.attributes){const at=g.attributes[name],is=at.itemSize,arr=new at.array.constructor(n2*3*is);let o=0;for(let t=0;t<tri;t++){if(owner[t]!==si)continue;for(let k=0;k<3;k++){const v=vi(t,k);for(let q2=0;q2<is;q2++)arr[o++]=comp(at,v,q2);}}geo.setAttribute(name,new THREE.BufferAttribute(arr,is,at.normalized));}
    const part=new THREE.Mesh(geo,m.material);part.position.copy(m.position);part.quaternion.copy(m.quaternion);part.scale.copy(m.scale);part.frustumCulled=false;part.userData.noHit=true;m.parent.add(part);part.updateMatrixWorld(true);s2.meshes.push(part);});
   m.parent.remove(m);}
+ /* only keep wheels that really are wheels */
+ for(const sd of seeds)if(sd.meshes.length){const E=extOf();sd.meshes.forEach(m=>cmVerts(m,v=>grow(E,v)));if(!round(E))sd.meshes.length=0;}
  /* hang each wheel on a pivot at its own centre */
  const rigs=[];for(const s of seeds){if(!s.meshes.length)continue;const b=new THREE.Box3();s.meshes.forEach(m=>{m.updateMatrixWorld(true);cmVerts(m,v=>b.expandByPoint(v));});const cen=b.getCenter(new THREE.Vector3());
   const pv=new THREE.Group();pv.rotation.order='YXZ';wrap.add(pv);wrap.updateMatrixWorld(true);pv.position.copy(wrap.worldToLocal(cen.clone()));pv.updateMatrixWorld(true);s.meshes.forEach(m=>pv.attach(m));rigs.push({pv,w:s.w});}
